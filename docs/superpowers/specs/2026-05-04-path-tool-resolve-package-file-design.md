@@ -62,11 +62,14 @@ try {
 Uses `createRequire` from `node:module` to resolve from `process.cwd()`:
 
 ```ts
+import { join } from "node:path";
 import { createRequire } from "node:module";
 
-const require = createRequire(process.cwd() + "/index.js");
+const require = createRequire(join(process.cwd(), "index.js"));
 // createRequire uses dirname(filename) as the resolution base,
 // so this resolves from the project root's node_modules.
+// join() is used instead of string concatenation to produce a
+// cross-platform path (backslash on Windows, forward slash elsewhere).
 try {
   return require.resolve(specifier);
 } catch {

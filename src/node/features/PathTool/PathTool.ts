@@ -21,7 +21,7 @@ class PathToolImpl implements PathToolAbstraction.Interface {
     }
 
     public resolvePackageFile(specifier: string): string {
-        const require = createRequire(process.cwd() + "/index.js");
+        const require = createRequire(join(process.cwd(), "index.js"));
         try {
             return require.resolve(specifier);
         } catch {
