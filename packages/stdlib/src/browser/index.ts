@@ -1,2 +1,7 @@
-// populated in Task 4
-export {};
+export {
+    LocalStorageCacheFeature,
+    createLocalStorageCache,
+    LocalStorageParseError,
+    LocalStorageQuotaExceededError,
+    LocalStorageUnavailableError
+} from "./features/LocalStorageCache/index.js";
