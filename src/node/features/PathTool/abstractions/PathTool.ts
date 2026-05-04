@@ -9,6 +9,14 @@ export interface IPathTool {
     dirname(path: string): string;
     /** Returns the last segment of a path. Strips `ext` when provided. */
     basename(path: string, ext?: string): string;
+    /**
+     * Resolves a package-relative file specifier to an absolute filesystem path.
+     * Resolution starts from `process.cwd()`, matching Node's standard module
+     * lookup (hoisted node_modules at the project root).
+     *
+     * @throws PackageNotFoundError when the specifier cannot be resolved.
+     */
+    resolvePackageFile(specifier: string): string;
 }
 
 export const PathTool = createAbstraction<IPathTool>("Node/PathTool");

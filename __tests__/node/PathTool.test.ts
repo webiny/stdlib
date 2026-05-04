@@ -60,6 +60,30 @@ describe("PathTool", () => {
             expect(tool.basename("/a/b/c.ts", ".ts")).toBe("c");
         });
     });
+
+    describe("resolvePackageFile", () => {
+        it("returns an absolute path for an installed package file", () => {
+            const result = tool.resolvePackageFile("vitest/package.json");
+            expect(result).toMatch(/node_modules\/vitest\/package\.json$/);
+            expect(result.startsWith("/")).toBe(true);
+        });
+
+        it("throws PackageNotFoundError when the package is not installed", () => {
+            expect(() => tool.resolvePackageFile("@definitely/not-installed/file.json")).toThrow(
+                PackageNotFoundError
+            );
+        });
+
+        it("includes the specifier in PackageNotFoundError.data", () => {
+            let caught: PackageNotFoundError | undefined;
+            try {
+                tool.resolvePackageFile("@definitely/not-installed/file.json");
+            } catch (e) {
+                if (e instanceof PackageNotFoundError) caught = e;
+            }
+            expect(caught?.data.specifier).toBe("@definitely/not-installed/file.json");
+        });
+    });
 });
 
 describe("createPathTool", () => {
