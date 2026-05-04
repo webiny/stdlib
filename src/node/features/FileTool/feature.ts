@@ -1,4 +1,4 @@
-import { createFeature } from "../../../index.js";
+import { createFeature } from "~/common/index.js";
 import { FileTool } from "./FileTool.js";
 
 export const FileToolFeature = createFeature({

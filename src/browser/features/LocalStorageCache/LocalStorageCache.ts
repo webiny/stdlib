@@ -1,5 +1,5 @@
-import { Result } from "../../../index.js";
-import { Cache as CacheAbstraction } from "../../../index.js";
+import { Result } from "~/common/index.js";
+import { Cache as CacheAbstraction } from "~/common/index.js";
 import {
     LocalStorageParseError,
     LocalStorageQuotaExceededError,

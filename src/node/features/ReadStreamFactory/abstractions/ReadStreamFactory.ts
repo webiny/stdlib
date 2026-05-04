@@ -1,4 +1,4 @@
-import { createAbstraction } from "../../../../index.js";
+import { createAbstraction } from "~/common/index.js";
 import type { Readable } from "node:stream";
 import type { PathLike, ReadStreamOptions } from "node:fs";
 

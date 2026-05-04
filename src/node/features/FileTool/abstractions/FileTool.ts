@@ -1,4 +1,4 @@
-import { createAbstraction } from "../../../../index.js";
+import { createAbstraction } from "~/common/index.js";
 
 export interface IFileTool {
     exists(path: string): boolean;

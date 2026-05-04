@@ -1,4 +1,4 @@
-import { createFeature } from "../../../index.js";
+import { createFeature } from "~/common/index.js";
 import { ReadStreamFactory } from "./ReadStreamFactory.js";
 
 export const ReadStreamFactoryFeature = createFeature({

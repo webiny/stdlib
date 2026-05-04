@@ -1,4 +1,4 @@
-import { createFeature } from "../../../index.js";
+import { createFeature } from "~/common/index.js";
 import { DirectoryTool } from "./DirectoryTool.js";
 
 export const DirectoryToolFeature = createFeature({

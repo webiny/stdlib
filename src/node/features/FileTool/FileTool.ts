@@ -3,7 +3,7 @@ import { dirname } from "node:path";
 import { FileTool as FileToolAbstraction } from "./abstractions/FileTool.js";
 import { DirectoryTool } from "../DirectoryTool/abstractions/DirectoryTool.js";
 import { createDirectoryTool } from "../DirectoryTool/DirectoryTool.js";
-import { Logger, ConsoleLogger } from "../../../index.js";
+import { Logger, ConsoleLogger } from "~/common/index.js";
 
 class FileToolImpl implements FileToolAbstraction.Interface {
     public constructor(
