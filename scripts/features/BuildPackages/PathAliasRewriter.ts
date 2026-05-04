@@ -20,9 +20,11 @@ class PathAliasRewriterImpl implements PathAliasRewriterAbstraction.Interface {
 
     private rewriteFile(distDir: string, filePath: string): void {
         const content = readFileSync(filePath, "utf-8");
-        if (!content.includes("~/")) {return;}
+        if (!content.includes("~/")) {
+            return;
+        }
 
-        const depth = relative(distDir, dirname(filePath)).split("/").filter(Boolean).length;
+        const depth = relative(distDir, dirname(filePath)).split(/[\\/]/).filter(Boolean).length;
         const prefix = depth === 0 ? "./" : "../".repeat(depth);
         const rewritten = content.replace(/(["'])~\//g, `$1${prefix}`);
         writeFileSync(filePath, rewritten, "utf-8");
