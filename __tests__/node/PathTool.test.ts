@@ -6,6 +6,7 @@ import {
     PathToolFeature,
     createPathTool
 } from "../../src/node/features/PathTool/index.js";
+import { PackageNotFoundError } from "../../src/node/features/PathTool/errors.js";
 
 function makeContainer(): Container {
     const container = new Container();
@@ -65,5 +66,25 @@ describe("createPathTool", () => {
     it("creates a working tool without arguments", () => {
         const tool = createPathTool();
         expect(tool.join("a", "b")).toBe(join("a", "b"));
+    });
+});
+
+describe("PackageNotFoundError", () => {
+    it("has code PACKAGE_NOT_FOUND", () => {
+        const err = new PackageNotFoundError({
+            message: "test",
+            data: { specifier: "@foo/bar" },
+            stack: new Error().stack ?? ""
+        });
+        expect(err.code).toBe("PACKAGE_NOT_FOUND");
+    });
+
+    it("exposes specifier in data", () => {
+        const err = new PackageNotFoundError({
+            message: "test",
+            data: { specifier: "@foo/bar/file.json" },
+            stack: new Error().stack ?? ""
+        });
+        expect(err.data.specifier).toBe("@foo/bar/file.json");
     });
 });
