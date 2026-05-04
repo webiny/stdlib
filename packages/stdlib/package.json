@@ -19,7 +19,10 @@
     }
   },
   "imports": {
-    "#common": "./dist/index.js"
+    "#common": {
+      "source": "./src/index.js",
+      "default": "./dist/index.js"
+    }
   },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",

@@ -2,7 +2,7 @@
 import { Container } from "@webiny/di";
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { LocalStorageCache } from "../../src/browser/features/LocalStorageCache/LocalStorageCache.js";
-import { Cache } from "../../src/index.js";
+import { Cache } from "#common";
 import {
     LocalStorageParseError,
     LocalStorageQuotaExceededError,
