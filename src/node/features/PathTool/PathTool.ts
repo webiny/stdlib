@@ -1,5 +1,7 @@
 import { join, resolve, dirname, basename } from "node:path";
+import { createRequire } from "node:module";
 import { PathTool as PathToolAbstraction } from "./abstractions/PathTool.js";
+import { PackageNotFoundError } from "./errors.js";
 
 class PathToolImpl implements PathToolAbstraction.Interface {
     public join(...paths: string[]): string {
@@ -16,6 +18,19 @@ class PathToolImpl implements PathToolAbstraction.Interface {
 
     public basename(path: string, ext?: string): string {
         return basename(path, ext);
+    }
+
+    public resolvePackageFile(specifier: string): string {
+        const require = createRequire(process.cwd() + "/index.js");
+        try {
+            return require.resolve(specifier);
+        } catch {
+            throw new PackageNotFoundError({
+                message: `Cannot resolve package file: ${specifier}`,
+                data: { specifier },
+                stack: new Error().stack ?? ""
+            });
+        }
     }
 }
 
