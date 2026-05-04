@@ -1,4 +1,4 @@
-import { createAbstraction } from "~/common";
+import { createAbstraction } from "#common";
 
 export interface IPathTool {
     /** Joins path segments using the OS-native separator. */

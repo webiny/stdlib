@@ -1,4 +1,4 @@
-import { createFeature } from "~/common";
+import { createFeature } from "#common";
 import { PathTool } from "./PathTool.js";
 
 export const PathToolFeature = createFeature({

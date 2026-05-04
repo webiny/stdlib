@@ -1,4 +1,4 @@
-import { createFeature } from "~/common";
+import { createFeature } from "#common";
 import { NdJsonReaderTool } from "./NdJsonReaderTool.js";
 
 export const NdJsonReaderToolFeature = createFeature({

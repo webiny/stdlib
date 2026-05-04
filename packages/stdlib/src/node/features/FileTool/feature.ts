@@ -1,4 +1,4 @@
-import { createFeature } from "~/common";
+import { createFeature } from "#common";
 import { FileTool } from "./FileTool.js";
 
 export const FileToolFeature = createFeature({

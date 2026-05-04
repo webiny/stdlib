@@ -1,6 +1,6 @@
 import { createInterface } from "node:readline";
 import type { Readable } from "node:stream";
-import { Logger, ConsoleLogger } from "~/common";
+import { Logger, ConsoleLogger } from "#common";
 import {
     NdJsonReaderTool as NdJsonReaderToolAbstraction,
     type NdJsonRow,

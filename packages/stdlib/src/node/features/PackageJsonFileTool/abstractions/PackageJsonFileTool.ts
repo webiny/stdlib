@@ -1,4 +1,4 @@
-import { createAbstraction } from "~/common";
+import { createAbstraction } from "#common";
 import type { PackageJson } from "type-fest";
 import type { PackageJsonFile } from "../PackageJsonFile.js";
 

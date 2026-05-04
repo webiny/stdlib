@@ -1,4 +1,4 @@
-import { createAbstraction } from "~/common";
+import { createAbstraction } from "#common";
 
 export interface GlobOptions {
     /** Include dotfiles (default: false). */

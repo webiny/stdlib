@@ -1,4 +1,4 @@
-import { createAbstraction } from "~/common";
+import { createAbstraction } from "#common";
 import type { Readable } from "node:stream";
 import type { PathLike, ReadStreamOptions } from "node:fs";
 

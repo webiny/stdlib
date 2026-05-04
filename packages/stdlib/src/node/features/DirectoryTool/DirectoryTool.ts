@@ -12,7 +12,7 @@ import { dirname } from "node:path";
 import fg from "fast-glob";
 import { DirectoryTool as DirectoryToolAbstraction } from "./abstractions/DirectoryTool.js";
 import type { GlobOptions } from "./abstractions/DirectoryTool.js";
-import { Logger, ConsoleLogger } from "~/common";
+import { Logger, ConsoleLogger } from "#common";
 
 class DirectoryToolImpl implements DirectoryToolAbstraction.Interface {
     public constructor(private readonly logger: Logger.Interface) {}

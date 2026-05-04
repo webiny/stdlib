@@ -1,4 +1,4 @@
-import { Logger } from "~/common";
+import { Logger } from "#common";
 
 export class LineAccumulator {
     private pending: string[] = [];

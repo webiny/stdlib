@@ -1,5 +1,5 @@
-import { Result } from "~/common";
-import { Cache as CacheAbstraction } from "~/common";
+import { Result } from "#common";
+import { Cache as CacheAbstraction } from "#common";
 import {
     LocalStorageParseError,
     LocalStorageQuotaExceededError,

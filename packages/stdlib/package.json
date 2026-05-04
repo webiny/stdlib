@@ -18,6 +18,9 @@
       "types": "./dist/browser/index.d.ts"
     }
   },
+  "imports": {
+    "#common": "./dist/index.js"
+  },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "files": [
