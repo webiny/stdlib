@@ -1,12 +1,13 @@
 {
-  "extends": "./tsconfig.base.json",
+  "extends": "./tsconfig.json",
   "compilerOptions": {
     "composite": true,
     "rootDir": "./src",
     "outDir": "./dist",
     "module": "nodenext",
     "moduleResolution": "nodenext",
-    "lib": ["esnext", "dom"]
+    "lib": ["esnext", "dom"],
+    "paths": { "~/*": ["./src/*"] }
   },
   "include": ["src"],
   "exclude": ["src/node", "src/browser"]

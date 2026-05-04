@@ -1,9 +1,7 @@
 {
-  "extends": "./tsconfig.node.json",
+  "extends": ["./tsconfig.node.json", "./tsconfig.checkmode.json"],
   "compilerOptions": {
-    "composite": false,
-    "noEmit": true,
-    "rootDir": "."
+    "allowImportingTsExtensions": true
   },
-  "include": ["src/node", "__tests__/node"]
+  "include": ["src/node", "__tests__/node", "scripts"]
 }
