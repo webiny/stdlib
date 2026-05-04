@@ -155,7 +155,7 @@ Most projects add two thin wrappers for ergonomics. These aren't part of `@webin
 ### `createAbstraction<T>(name)`
 
 ```ts
-// src/base/createAbstraction.ts
+// packages/tools-common/src/core/createAbstraction.ts
 import { Abstraction } from "@webiny/di";
 
 export function createAbstraction<T>(name: string): Abstraction<T> {
@@ -172,7 +172,7 @@ Same as `new Abstraction<T>(name)` — exists mostly so you can import one symbo
 A "feature" is a bundle of related registrations grouped behind one name. Feature = composition root for a slice of the system.
 
 ```ts
-// src/base/createFeature.ts
+// packages/tools-common/src/core/createFeature.ts
 import type { Container } from "@webiny/di";
 
 export type FeatureDefinition<TRegister = void> = [TRegister] extends [void]
@@ -204,7 +204,7 @@ export function createFeature<TRegister = void>(
 
 ```ts
 // src/features/Logger/feature.ts
-import { createFeature } from "~/base/createFeature.ts";
+import { createFeature } from "@webiny/tools-common";
 import { Logger } from "./abstractions/Logger.ts";
 import { PinoLogger } from "./PinoLogger.ts";
 
@@ -290,9 +290,9 @@ Logger.createImplementation({
 If a service legitimately needs the container (e.g., a dispatcher that resolves handlers dynamically), use:
 
 ```ts
-// src/base/Container.ts
+// packages/tools-common/src/core/Container.ts
 import { Container } from "@webiny/di";
-import { createAbstraction } from "./createAbstraction.ts";
+import { createAbstraction } from "@webiny/tools-common";
 
 export const ContainerToken = createAbstraction<Container>("Core/Container");
 ```
@@ -344,7 +344,7 @@ Variants:
 #### `abstractions/FeatureName.ts`
 
 ```ts
-import { createAbstraction } from "~/base/createAbstraction.ts";
+import { createAbstraction } from "@webiny/tools-common";
 
 interface IFeatureName {
     doThing(x: string): Promise<void>;
@@ -408,7 +408,7 @@ export const FeatureName = FeatureNameAbstraction.createImplementation({
 #### `feature.ts`
 
 ```ts
-import { createFeature } from "~/base/createFeature.ts";
+import { createFeature } from "@webiny/tools-common";
 import { FeatureName } from "./FeatureName.ts";  // the createImplementation export
 
 export const FeatureNameFeature = createFeature({
@@ -451,6 +451,12 @@ import { Logger } from "../../../tools/Logger/abstractions/Logger.ts";
 import { Logger } from "~/tools/Logger/abstractions/Logger.ts";
 ```
 
+**Note:** The `~/base/` path alias no longer exists. The helpers that used to live there (`createAbstraction`, `createFeature`, `ContainerToken`) are now published in the `@webiny/tools-common` package and imported as:
+
+```ts
+import { createAbstraction, createFeature, ContainerToken } from "@webiny/tools-common";
+```
+
 ---
 
 ## 7. Bootstrap pattern
@@ -460,7 +466,7 @@ Typical composition root:
 ```ts
 // src/bootstrap.ts
 import { Container } from "@webiny/di";
-import { ContainerToken } from "~/base/Container.ts";
+import { ContainerToken } from "@webiny/tools-common";
 import { LoggerFeature } from "~/tools/Logger/index.ts";
 import { CacheFeature } from "~/tools/Cache/index.ts";
 import { ConfigFeature } from "~/features/Config/index.ts";

@@ -1,0 +1,18 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "composite": true,
+    "rootDir": "./src",
+    "outDir": "./dist",
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "lib": ["esnext", "dom", "dom.iterable"],
+    "paths": {
+      "~/*": ["./src/*"],
+      "@webiny/utils-common/*": ["../common/src/*"],
+      "@webiny/utils-common": ["../common/src/index.js"]
+    }
+  },
+  "include": ["src"],
+  "references": [{ "path": "../common" }]
+}

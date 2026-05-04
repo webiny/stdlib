@@ -1,0 +1,10 @@
+packages/
+node_modules/
+coverage/
+docs/
+.yarn/
+.github/
+*.log
+.claude
+.idea
+.agents

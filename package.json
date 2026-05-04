@@ -1,15 +1,38 @@
 {
-  "name": "@webiny/node-tools",
-  "version": "0.0.1",
-    "type": "module",
-  "description": "Common node tools used by Webiny, dependency injection based",
-  "main": "index.js",
+  "name": "webiny-node-utils",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "type": "module",
+  "description": "Monorepo for utils used by Webiny",
   "license": "MIT",
   "packageManager": "yarn@4.14.1",
+  "dependencies": {
+    "@webiny/di": "^0.2.3"
+  },
   "devDependencies": {
+    "@types/node": ">=24",
+    "@typescript/native-preview": "beta",
+    "@vitest/coverage-v8": "^4.1.5",
     "adio": "^3.0.0",
+    "get-yarn-workspaces": "^1.0.2",
     "oxfmt": "^0.47.0",
     "oxlint": "^1.62.0",
-    "typescript": "^6.0.3"
+    "vitest": "^4.1.5"
+  },
+  "scripts": {
+    "clean": "node scripts/cleanPackages.ts",
+    "build": "node scripts/buildPackages.ts",
+    "pack:packages": "node scripts/packPackages.ts",
+    "publish:packages": "node scripts/publishPackages.ts",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "format": "oxfmt",
+    "format:fix": "oxfmt",
+    "format:check": "oxfmt --check",
+    "lint": "oxlint --deny-warnings",
+    "lint:fix": "oxlint --fix",
+    "typecheck": "tsgo -p tsconfig.check.json && tsgo -p packages/common/tsconfig.check.json && tsgo -p packages/node/tsconfig.check.json && tsgo -p packages/browser/tsconfig.check.json"
   }
 }

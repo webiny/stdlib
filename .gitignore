@@ -10,6 +10,7 @@ lerna-debug.log
 npm-debug.log
 node_modules
 .DS_Store
+package.tgz
 coverage
 npm-debug.log*
 yarn-debug.log*
