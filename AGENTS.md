@@ -143,7 +143,7 @@ Root `tsconfig.json` is a solution file (`files: []`, `references` only). Build 
 
 `tsconfig.base.json` holds the strict flags shared by all packages. It does **not** set `module`, `moduleResolution`, or `lib` — those are per-package overrides.
 
-### Build tsconfigs (three per stdlib package)
+### Build tsconfigs
 
 `@webiny/stdlib` uses three build tsconfigs — one per source slice — all emitting into `dist/`. Each is independently compilable via `tsgo -b`.
 
@@ -248,7 +248,7 @@ The `source` condition (`"./src/index.js"`) is used by Vite/Vitest during develo
 }
 ```
 
-### Check tsconfigs (three per stdlib package)
+### Check tsconfigs
 
 Used by `yarn typecheck` for static type checking only — no emit. There are four check configs:
 
