@@ -18,13 +18,14 @@ The package provides platform-specific utility services (file system, directory 
 
 ```
 /
-├── src/                  # platform-agnostic source (Result, Logger, Cache, …)
-├── src/node/             # Node.js-specific source (FileTool, DirectoryTool, …)
-├── src/browser/          # browser-specific source (LocalStorageCacheFeature, …)
+├── src/                  # common slice root (barrel at src/index.ts)
+│   ├── common/           # platform-agnostic source (core/ + features/)
+│   ├── node/             # Node.js-specific source (FileTool, DirectoryTool, …)
+│   └── browser/          # browser-specific source (LocalStorageCacheFeature, …)
 ├── __tests__/            # tests — __tests__/node/, __tests__/browser/
 ├── scripts/              # build and publish automation (Node 24 strip-only)
 ├── dist/                 # compiled output (gitignored)
-├── package.json          # @webiny/stdlib — imports, exports, scripts
+├── package.json          # @webiny/stdlib — exports, scripts
 ├── tsconfig.json         # solution file (references only, no files)
 ├── tsconfig.base.json    # shared compiler options
 ├── tsconfig.common.json  # build config for src/
@@ -41,7 +42,7 @@ The package provides platform-specific utility services (file system, directory 
 
 The repo is a single package (`@webiny/stdlib`) with three source slices:
 
-- `src/` — common (platform-agnostic), barrel at `src/index.ts`
+- `src/common/` — platform-agnostic source (`core/` + `features/`), re-exported via `src/index.ts`
 - `src/node/` — Node.js-specific, barrel at `src/node/index.ts`
 - `src/browser/` — browser-specific, barrel at `src/browser/index.ts`
 
@@ -216,24 +217,16 @@ Each slice sets platform-specific options:
 - **node**: `types: ["node"]`
 - **browser**: `lib: ["esnext", "dom", "dom.iterable"]`
 
-**Cross-slice imports with `#common`:** The `src/node/` and `src/browser/` slices import common utilities using the Node.js package import convention. Write imports as:
+**Cross-slice imports:** The `src/node/` and `src/browser/` slices import common utilities using relative paths to the common barrel (`src/index.ts`). The correct relative path depends on the file's depth:
+
+- From `src/node/features/<Name>/*.ts` or `src/browser/features/<Name>/*.ts` → `../../../index.js`
+- From `src/node/features/<Name>/abstractions/*.ts` → `../../../../index.js`
 
 ```ts
-import { Logger } from "#common";
+import { Logger } from "../../../index.js";
 ```
 
-TypeScript with `moduleResolution: nodenext` reads `package.json#imports` automatically. The `package.json` defines:
-
-```json
-"imports": {
-  "#common": {
-    "source": "./src/index.js",
-    "default": "./dist/index.js"
-  }
-}
-```
-
-The `source` condition (`"./src/index.js"`) is used by Vite/Vitest during development; the `default` condition (`"./dist/index.js"`) is used at runtime.
+TypeScript resolves this through project references to the compiled `dist/index.js` at typecheck time; relative paths are preserved as-is in emitted JS and resolve correctly because tsgo mirrors the source directory structure under `dist/`.
 
 **`tsconfig.json`** (solution file):
 
@@ -406,7 +399,7 @@ The `namespace FileTool { export type Interface }` pattern lets consumers write 
 Implements the abstraction interface. Constructor injects other abstractions.
 
 ```ts
-import { Logger } from "#common";
+import { Logger } from "../../../index.js";
 import { FileTool as FileToolAbstraction } from "./abstractions/FileTool.js";
 import { DirectoryTool } from "../DirectoryTool/abstractions/DirectoryTool.js";
 
@@ -427,7 +420,7 @@ export const FileTool = FileToolAbstraction.createImplementation({
 
 Note the local alias `FileTool as FileToolAbstraction`. This avoids a name collision between the imported token and the exported implementation constant.
 
-Cross-slice imports (like `Logger`) use `import { Logger } from "#common"` in `src/node/` and `src/browser/` files.
+Cross-slice imports (like `Logger`) use relative paths to `src/index.ts` in `src/node/` and `src/browser/` files (see TypeScript Config section for depth rules).
 
 ### 3. Feature (`feature.ts`)
 
@@ -704,7 +697,7 @@ Example: adding `HttpTool` to `@webiny/stdlib/node`.
 
 3. **Create the implementation** at `src/node/features/HttpTool/HttpTool.ts`:
    - Rename the token import: `import { HttpTool as HttpToolAbstraction } from "./abstractions/HttpTool.js";`
-   - Import cross-slice dependencies via `#common`: `import { Logger } from "#common";`
+   - Import cross-slice dependencies via the common barrel: `import { Logger } from "../../../index.js";`
    - `class HttpToolImpl implements HttpToolAbstraction.Interface { ... }`
    - `export const HttpTool = HttpToolAbstraction.createImplementation({ implementation: HttpToolImpl, dependencies: [...] })`
    - Dependencies array order must match constructor param order
@@ -932,18 +925,17 @@ The `type(scope): ` prefix is stripped; only the description appears in the entr
 
 ## Internal Slice Dependencies
 
-Within `@webiny/stdlib`, the `src/node/` and `src/browser/` slices depend on `src/` (common).
-Import common utilities using the Node.js package import:
+Within `@webiny/stdlib`, the `src/node/` and `src/browser/` slices depend on `src/common/` (common), accessed via the `src/index.ts` barrel. Use relative paths:
 
 ```ts
-import { Logger } from "#common";
+// from src/node/features/<Name>/*.ts
+import { Logger } from "../../../index.js";
+
+// from src/node/features/<Name>/abstractions/*.ts
+import { createAbstraction } from "../../../../index.js";
 ```
 
-TypeScript resolves `#common` via `package.json#imports` when `moduleResolution` is `nodenext`.
-The `source` condition (`"./src/index.js"`) is used by Vite/Vitest during development; the `default`
-condition (`"./dist/index.js"`) is used at runtime.
-
-The slices must NOT import from each other.
+The same depth rules apply to `src/browser/`. The slices must NOT import from each other.
 
 ---
 
@@ -954,12 +946,6 @@ The slices must NOT import from each other.
   "name": "@webiny/stdlib",
   "version": "0.0.0",
   "type": "module",
-  "imports": {
-    "#common": {
-      "source": "./src/index.js",
-      "default": "./dist/index.js"
-    }
-  },
   "exports": {
     ".": { "import": "./dist/index.js", "types": "./dist/index.d.ts" },
     "./node": { "import": "./dist/node/index.js", "types": "./dist/node/index.d.ts" },
@@ -978,8 +964,6 @@ The slices must NOT import from each other.
 ```
 
 **Version**: Always `0.0.0`. The real version is injected at publish time.
-
-The `imports` field defines the `#common` package import used by `src/node/` and `src/browser/` to reference the common slice without relative paths crossing slice boundaries.
 
 ---
 
