@@ -110,8 +110,8 @@ The captured-reference pattern (`this.localStorage = window?.localStorage ?? nul
 
 When adding a new tool, choose the package based on its runtime dependencies:
 
-| Uses only JS built-ins / standard lib        | → `@webiny/stdlib` root (`src/`)            |
-| Uses `node:*` APIs or Node-only npm packages | → `@webiny/stdlib/node` (`src/node/`)       |
+| Uses only JS built-ins / standard lib | → `@webiny/stdlib` root (`src/`) |
+| Uses `node:*` APIs or Node-only npm packages | → `@webiny/stdlib/node` (`src/node/`) |
 | Uses `window`, `document`, React, browser APIs | → `@webiny/stdlib/browser` (`src/browser/`) |
 
 The `src/node/` and `src/browser/` slices must NOT import from each other.
@@ -209,6 +209,7 @@ Root `tsconfig.json` is a solution file (`files: []`, `references` only). Each p
 `dom.iterable` is required for `HTMLCollectionOf<T>` and similar DOM iterable types.
 
 Each slice sets platform-specific options:
+
 - **common**: `lib: ["esnext", "dom"]`
 - **node**: `types: ["node"]`
 - **browser**: `lib: ["esnext", "dom", "dom.iterable"]`
@@ -646,10 +647,10 @@ afterEach(() => {
 import { defineConfig } from "vitest/config";
 
 export default defineConfig({
-    test: {
-        globals: true,
-        include: ["__tests__/**/*.{test,spec}.{ts,tsx}"]
-    }
+  test: {
+    globals: true,
+    include: ["__tests__/**/*.{test,spec}.{ts,tsx}"]
+  }
 });
 ```
 
@@ -672,9 +673,7 @@ Node tests do not need any environment directive — Vitest defaults to the Node
 ```ts
 import { defineProject } from "vitest/config";
 
-export default [
-  defineProject({ test: { name: "utils-stdlib", root: "./packages/stdlib" } })
-];
+export default [defineProject({ test: { name: "utils-stdlib", root: "./packages/stdlib" } })];
 ```
 
 Coverage is configured in the root `vitest.config.ts` with v8 provider:

@@ -22,7 +22,9 @@ function stripDist(path: string): string {
 function stripSourceCondition(value: PackageJsonExports): PackageJsonExports {
     const result: PackageJsonExports = {};
     for (const [k, v] of Object.entries(value)) {
-        if (k === "source") {continue;}
+        if (k === "source") {
+            continue;
+        }
         result[k] = typeof v === "string" ? v : stripSourceCondition(v);
     }
     return result;

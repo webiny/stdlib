@@ -35,12 +35,9 @@ class PublishOrchestratorImpl implements PublishOrchestratorAbstraction.Interfac
     }
 
     public run(): void {
-        const firstPackage = this.config.packages[0];
-        if (!firstPackage) {
-            throw new Error("No packages configured.");
-        }
+        const { rootDir, packageName } = this.config;
 
-        const published = this.npm.getLatestVersion(firstPackage.name) ?? "0.0.0";
+        const published = this.npm.getLatestVersion(packageName) ?? "0.0.0";
         console.log(`Latest published: ${published}`);
 
         const releaseTag = `v${published}`;
@@ -67,9 +64,7 @@ class PublishOrchestratorImpl implements PublishOrchestratorAbstraction.Interfac
 
         if (this.config.dryRun) {
             console.log("[dry run] would update CHANGELOG.md");
-            for (const pkg of this.config.packages) {
-                console.log(`[dry run] would publish ${pkg.name}@${newVersion}`);
-            }
+            console.log(`[dry run] would publish ${packageName}@${newVersion}`);
             console.log(`[dry run] would tag v${newVersion}`);
             return;
         }
@@ -77,23 +72,21 @@ class PublishOrchestratorImpl implements PublishOrchestratorAbstraction.Interfac
         this.changelogWriter.write(newVersion, commits);
         console.log("Updated CHANGELOG.md");
 
-        for (const pkg of this.config.packages) {
-            const distDir = join(this.config.rootDir, "packages", pkg.dir, "dist");
-            const pkgJsonPath = join(distDir, "package.json");
-            const pkgJson = JSON.parse(readFileSync(pkgJsonPath, "utf8")) as DistPackageJson;
-            pkgJson.version = newVersion;
-            if (pkgJson.dependencies !== undefined) {
-                for (const dep of Object.keys(pkgJson.dependencies)) {
-                    if (pkgJson.dependencies[dep] === "0.0.0") {
-                        pkgJson.dependencies[dep] = newVersion;
-                    }
+        const distDir = join(rootDir, "dist");
+        const pkgJsonPath = join(distDir, "package.json");
+        const pkgJson = JSON.parse(readFileSync(pkgJsonPath, "utf8")) as DistPackageJson;
+        pkgJson.version = newVersion;
+        if (pkgJson.dependencies !== undefined) {
+            for (const dep of Object.keys(pkgJson.dependencies)) {
+                if (pkgJson.dependencies[dep] === "0.0.0") {
+                    pkgJson.dependencies[dep] = newVersion;
                 }
             }
-            writeFileSync(pkgJsonPath, JSON.stringify(pkgJson, null, 2) + "\n");
-
-            console.log(`Publishing ${pkg.name}@${newVersion}...`);
-            this.npm.publish(distDir);
         }
+        writeFileSync(pkgJsonPath, JSON.stringify(pkgJson, null, 2) + "\n");
+
+        console.log(`Publishing ${packageName}@${newVersion}...`);
+        this.npm.publish(distDir);
 
         this.git.createTag(`v${newVersion}`);
         console.log(`Tagged v${newVersion}`);

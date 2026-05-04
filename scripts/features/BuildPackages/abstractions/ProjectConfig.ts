@@ -2,7 +2,7 @@ import { Abstraction } from "@webiny/di";
 
 export interface IProjectConfig {
     rootDir: string;
-    packages: ReadonlyArray<{ dir: string; name: string; slices?: string[] }>;
+    slices: string[];
 }
 
 export const ProjectConfig = new Abstraction<IProjectConfig>("Scripts/Build/ProjectConfig");

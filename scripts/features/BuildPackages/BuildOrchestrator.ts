@@ -1,9 +1,9 @@
-import { join } from "node:path";
 import { BuildOrchestrator as BuildOrchestratorAbstraction } from "./abstractions/BuildOrchestrator.ts";
 import { ProjectConfig } from "./abstractions/ProjectConfig.ts";
 import { Cleaner } from "./abstractions/Cleaner.ts";
 import { Compiler } from "./abstractions/Compiler.ts";
 import { ArtifactCopier } from "./abstractions/ArtifactCopier.ts";
+import { join } from "node:path";
 
 class BuildOrchestratorImpl implements BuildOrchestratorAbstraction.Interface {
     private readonly config: ProjectConfig.Interface;
@@ -24,29 +24,18 @@ class BuildOrchestratorImpl implements BuildOrchestratorAbstraction.Interface {
     }
 
     public run(): void {
-        const { rootDir, packages } = this.config;
+        const { rootDir, slices } = this.config;
+        const distDir = join(rootDir, "dist");
 
-        for (const pkg of packages) {
-            this.cleaner.clean(join(rootDir, "packages", pkg.dir, "dist"));
+        this.cleaner.clean(distDir);
+
+        for (const slice of slices) {
+            this.compiler.compile(slice);
         }
 
-        for (const pkg of packages) {
-            if (pkg.slices !== undefined) {
-                for (const slice of pkg.slices) {
-                    this.compiler.compile(join("packages", pkg.dir, slice));
-                }
-            } else {
-                this.compiler.compile(join("packages", pkg.dir));
-            }
-        }
-
-        for (const pkg of packages) {
-            const packageAbsDir = join(rootDir, "packages", pkg.dir);
-            const distAbsDir = join(packageAbsDir, "dist");
-            this.artifactCopier.copyPackageJson(packageAbsDir, distAbsDir);
-            this.artifactCopier.copyReadme(packageAbsDir, distAbsDir);
-            this.artifactCopier.copyLicense(rootDir, distAbsDir);
-        }
+        this.artifactCopier.copyPackageJson(rootDir, distDir);
+        this.artifactCopier.copyReadme(rootDir, distDir);
+        this.artifactCopier.copyLicense(rootDir, distDir);
     }
 }
 
