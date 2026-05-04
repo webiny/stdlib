@@ -3,6 +3,7 @@ import { ProjectConfig } from "./abstractions/ProjectConfig.ts";
 import { Cleaner } from "./abstractions/Cleaner.ts";
 import { Compiler } from "./abstractions/Compiler.ts";
 import { ArtifactCopier } from "./abstractions/ArtifactCopier.ts";
+import { PathAliasRewriter } from "./abstractions/PathAliasRewriter.ts";
 import { join } from "node:path";
 
 class BuildOrchestratorImpl implements BuildOrchestratorAbstraction.Interface {
@@ -10,17 +11,20 @@ class BuildOrchestratorImpl implements BuildOrchestratorAbstraction.Interface {
     private readonly cleaner: Cleaner.Interface;
     private readonly compiler: Compiler.Interface;
     private readonly artifactCopier: ArtifactCopier.Interface;
+    private readonly pathAliasRewriter: PathAliasRewriter.Interface;
 
     public constructor(
         config: ProjectConfig.Interface,
         cleaner: Cleaner.Interface,
         compiler: Compiler.Interface,
-        artifactCopier: ArtifactCopier.Interface
+        artifactCopier: ArtifactCopier.Interface,
+        pathAliasRewriter: PathAliasRewriter.Interface
     ) {
         this.config = config;
         this.cleaner = cleaner;
         this.compiler = compiler;
         this.artifactCopier = artifactCopier;
+        this.pathAliasRewriter = pathAliasRewriter;
     }
 
     public run(): void {
@@ -33,6 +37,8 @@ class BuildOrchestratorImpl implements BuildOrchestratorAbstraction.Interface {
             this.compiler.compile(slice);
         }
 
+        this.pathAliasRewriter.rewrite(distDir);
+
         this.artifactCopier.copyPackageJson(rootDir, distDir);
         this.artifactCopier.copyReadme(rootDir, distDir);
         this.artifactCopier.copyLicense(rootDir, distDir);
@@ -41,5 +47,5 @@ class BuildOrchestratorImpl implements BuildOrchestratorAbstraction.Interface {
 
 export const BuildOrchestrator = BuildOrchestratorAbstraction.createImplementation({
     implementation: BuildOrchestratorImpl,
-    dependencies: [ProjectConfig, Cleaner, Compiler, ArtifactCopier]
+    dependencies: [ProjectConfig, Cleaner, Compiler, ArtifactCopier, PathAliasRewriter]
 });
