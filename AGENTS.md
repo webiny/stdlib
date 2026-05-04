@@ -6,44 +6,46 @@ This is the authoritative project guide for all AI agents working in this reposi
 
 ## Project Overview
 
-This is a **Yarn 4 monorepo** of TypeScript utility packages published to an npm registry under the `@webiny/` scope. All packages share the same version number (synchronized versioning).
+This is a **flat single-package TypeScript repo** publishing `@webiny/stdlib` to npm.
 
-The packages provide platform-specific utility services (file system, directory management, logging, HTTP fetching, etc.) built on a dependency injection system (`@webiny/di`). Every service follows the same abstraction → implementation → feature pattern described in detail below.
+The package provides platform-specific utility services (file system, directory management, logging, HTTP fetching, etc.) built on a dependency injection system (`@webiny/di`). Every service follows the same abstraction → implementation → feature pattern described in detail below.
 
-All utilities are published as a single package `@webiny/stdlib` with three subpath exports: `@webiny/stdlib` (common), `@webiny/stdlib/node` (Node.js), and `@webiny/stdlib/browser` (browser).
+`@webiny/stdlib` has three subpath exports: `@webiny/stdlib` (common), `@webiny/stdlib/node` (Node.js), and `@webiny/stdlib/browser` (browser).
 
 ---
 
-## Monorepo Structure
+## Repository Structure
 
 ```
 /
-├── packages/
-│   └── stdlib/          # @webiny/stdlib — common, node, and browser utilities
-│       ├── src/         # platform-agnostic (Result, Logger, Cache, …)
-│       ├── src/node/    # Node.js-specific (FileTool, DirectoryTool, …)
-│       └── src/browser/ # browser-specific (LocalStorageCacheFeature, …)
-├── package.json          # root workspace config
-├── tsconfig.json         # root solution file (references only, no files)
+├── src/                  # platform-agnostic source (Result, Logger, Cache, …)
+├── src/node/             # Node.js-specific source (FileTool, DirectoryTool, …)
+├── src/browser/          # browser-specific source (LocalStorageCacheFeature, …)
+├── __tests__/            # tests — __tests__/node/, __tests__/browser/
+├── scripts/              # build and publish automation (Node 24 strip-only)
+├── dist/                 # compiled output (gitignored)
+├── package.json          # @webiny/stdlib — imports, exports, scripts
+├── tsconfig.json         # solution file (references only, no files)
 ├── tsconfig.base.json    # shared compiler options
-├── tsconfig.check.json   # root type-check config (covers vitest root files)
-├── vitest.config.ts      # root coverage config
-├── vitest.workspace.ts   # workspace project list
+├── tsconfig.common.json  # build config for src/
+├── tsconfig.node.json    # build config for src/node/
+├── tsconfig.browser.json # build config for src/browser/
+├── tsconfig.check.json   # type-check config for scripts/ only
+├── tsconfig.check.common.json  # type-check config for src/ + __tests__/ (common)
+├── tsconfig.check.node.json    # type-check config for src/node/ + __tests__/node/
+├── tsconfig.check.browser.json # type-check config for src/browser/ + __tests__/browser/
+├── vitest.config.ts      # test + coverage config
 ├── CLAUDE.md
 └── AGENTS.md
 ```
 
-`packages/stdlib/` is the single package. It has:
+The repo is a single package (`@webiny/stdlib`) with three source slices:
 
-- `package.json` — with `imports` field for `#common` and `exports` for three subpath exports
-- Three build tsconfigs: `tsconfig.common.json`, `tsconfig.node.json`, `tsconfig.browser.json`
-- Three check tsconfigs: `tsconfig.check.json`, `tsconfig.check.node.json`, `tsconfig.check.browser.json`
-- `tsconfig.json` — solution file referencing the three build configs
-- `vitest.config.ts`
-- `src/` — common source (platform-agnostic), with `src/index.ts` as public barrel
-- `src/node/` — Node.js-specific source, with `src/node/index.ts` as barrel
-- `src/browser/` — browser-specific source, with `src/browser/index.ts` as barrel
-- `__tests__/` — tests at the package root (outside `src/`), organised into `__tests__/node/` and `__tests__/browser/`
+- `src/` — common (platform-agnostic), barrel at `src/index.ts`
+- `src/node/` — Node.js-specific, barrel at `src/node/index.ts`
+- `src/browser/` — browser-specific, barrel at `src/browser/index.ts`
+
+Tests live in `__tests__/` at the repo root (outside `src/`), organised into `__tests__/node/` and `__tests__/browser/`.
 
 ---
 
@@ -122,22 +124,22 @@ The `src/node/` and `src/browser/` slices must NOT import from each other.
 
 | Tool                                | Purpose                                                                                                                         |
 | ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| Yarn 4 (`node-modules` linker)      | Package manager + workspaces                                                                                                    |
+| Yarn (no workspaces)                | Package manager — single package, no workspace file                                                                             |
 | `@typescript/native-preview` (tsgo) | TypeScript compiler — handles type-checking AND emit (JS + `.d.ts`). Do NOT add tsup, esbuild, or tsc as a separate build tool. |
-| Vitest + coverage                   | Testing. Each package has its own `vitest.config.ts`. Root has a workspace config that runs all packages.                       |
+| Vitest + coverage                   | Testing. Single `vitest.config.ts` at repo root covers all tests and coverage.                                                  |
 | oxlint                              | Linting                                                                                                                         |
 | oxfmt                               | Formatting                                                                                                                      |
 | adio                                | Import dependency checks                                                                                                        |
 
 **Build**: `tsgo` (the Go-based TypeScript 7 compiler from `@typescript/native-preview`) builds each package. It is ~10x faster than classic `tsc`. Use it for both type-checking and emit.
 
-**Testing**: Vitest with coverage. Tests live in `<package>/__tests__/` as `*.test.ts`. Each package is tested independently; the root workspace config lets you run all tests at once.
+**Testing**: Vitest with coverage. Tests live in `__tests__/` as `*.test.ts`. A single `vitest.config.ts` at the repo root runs all tests and coverage in one invocation.
 
 ---
 
 ## TypeScript Config
 
-Root `tsconfig.json` is a solution file (`files: []`, `references` only). Each package `tsconfig.json` extends `tsconfig.base.json`.
+Root `tsconfig.json` is a solution file (`files: []`, `references` only). Build tsconfigs extend `tsconfig.base.json`.
 
 `tsconfig.base.json` holds the strict flags shared by all packages. It does **not** set `module`, `moduleResolution`, or `lib` — those are per-package overrides.
 
@@ -147,11 +149,11 @@ Root `tsconfig.json` is a solution file (`files: []`, `references` only). Each p
 
 `tsconfig.base.json` provides strict flags but does **not** set `module`, `moduleResolution`, or `lib` — each slice defines its own platform-appropriate values.
 
-**`packages/stdlib/tsconfig.common.json`** (common slice):
+**`tsconfig.common.json`** (common slice):
 
 ```json
 {
-  "extends": "../../tsconfig.base.json",
+  "extends": "./tsconfig.base.json",
   "compilerOptions": {
     "composite": true,
     "rootDir": "./src",
@@ -168,11 +170,11 @@ Root `tsconfig.json` is a solution file (`files: []`, `references` only). Each p
 
 `dom` is required even in common because TypeScript's `console` type comes from the DOM lib, not esnext.
 
-**`packages/stdlib/tsconfig.node.json`** (node slice):
+**`tsconfig.node.json`** (node slice):
 
 ```json
 {
-  "extends": "../../tsconfig.base.json",
+  "extends": "./tsconfig.base.json",
   "compilerOptions": {
     "composite": true,
     "rootDir": "./src/node",
@@ -187,11 +189,11 @@ Root `tsconfig.json` is a solution file (`files: []`, `references` only). Each p
 }
 ```
 
-**`packages/stdlib/tsconfig.browser.json`** (browser slice):
+**`tsconfig.browser.json`** (browser slice):
 
 ```json
 {
-  "extends": "../../tsconfig.base.json",
+  "extends": "./tsconfig.base.json",
   "compilerOptions": {
     "composite": true,
     "rootDir": "./src/browser",
@@ -233,7 +235,7 @@ TypeScript with `moduleResolution: nodenext` reads `package.json#imports` automa
 
 The `source` condition (`"./src/index.js"`) is used by Vite/Vitest during development; the `default` condition (`"./dist/index.js"`) is used at runtime.
 
-**`packages/stdlib/tsconfig.json`** (solution file):
+**`tsconfig.json`** (solution file):
 
 ```json
 {
@@ -248,9 +250,9 @@ The `source` condition (`"./src/index.js"`) is used by Vite/Vitest during develo
 
 ### Check tsconfigs (three per stdlib package)
 
-Used by `yarn typecheck` for static type checking only — no emit. There are three check configs — one per slice — each extending the corresponding build config and adding tests and `vitest.config.ts`.
+Used by `yarn typecheck` for static type checking only — no emit. There are four check configs:
 
-**`tsconfig.check.json`** (common slice check):
+**`tsconfig.check.common.json`** (common slice check):
 
 ```json
 {
@@ -281,9 +283,7 @@ Used by `yarn typecheck` for static type checking only — no emit. There are th
 }
 ```
 
-A root `tsconfig.check.json` covers the root `vitest.config.ts`, `vitest.workspace.ts`, and all files under `scripts/`. Package check configs are run separately: `tsgo -p packages/stdlib/tsconfig.check.json`, `tsgo -p packages/stdlib/tsconfig.check.node.json`, `tsgo -p packages/stdlib/tsconfig.check.browser.json`.
-
-The root `tsconfig.check.json`:
+**`tsconfig.check.json`** (scripts check — covers only `scripts/`):
 
 ```json
 {
@@ -295,13 +295,15 @@ The root `tsconfig.check.json`:
     "types": ["node"],
     "allowImportingTsExtensions": true
   },
-  "include": ["vitest.config.ts", "vitest.workspace.ts", "scripts/**/*.ts"]
+  "include": ["scripts/**/*.ts"]
 }
 ```
 
 `allowImportingTsExtensions` is required because scripts use `.ts` extensions in their relative imports (see Scripts section below). It is only valid in combination with `noEmit: true`.
 
-Tests live in `__tests__/` at the package root (outside `src/`), so they are naturally excluded from the build by the `include: ["src"]` directive. They are type-checked by `yarn typecheck` via `tsconfig.check.json`.
+`yarn typecheck` runs all four configs: `tsgo -p tsconfig.check.json && tsgo -p tsconfig.check.common.json && tsgo -p tsconfig.check.node.json && tsgo -p tsconfig.check.browser.json`.
+
+Tests live in `__tests__/` at the repo root (outside `src/`), so they are naturally excluded from the build by the `include: ["src"]` directive. They are type-checked by `yarn typecheck` via the slice check configs.
 
 ---
 
@@ -666,27 +668,21 @@ Node tests do not need any environment directive — Vitest defaults to the Node
 
 **happy-dom spy cleanup:** `vi.restoreAllMocks()` does not reliably clean up `vi.spyOn` calls on happy-dom objects (e.g. `localStorage.setItem`). Always call `spy.mockRestore()` explicitly in a `finally` block when spying on happy-dom storage.
 
-### Root workspace and coverage
+### Single vitest.config.ts
 
-`vitest.workspace.ts` lists all packages using `defineProject` (not `defineWorkspace` — removed in Vitest 4):
-
-```ts
-import { defineProject } from "vitest/config";
-
-export default [defineProject({ test: { name: "utils-stdlib", root: "./packages/stdlib" } })];
-```
-
-Coverage is configured in the root `vitest.config.ts` with v8 provider:
+There is no workspace file — a single `vitest.config.ts` at the repo root handles both test discovery and coverage:
 
 ```ts
 import { defineConfig } from "vitest/config";
 
 export default defineConfig({
   test: {
+    globals: true,
+    include: ["__tests__/**/*.{test,spec}.{ts,tsx}"],
     coverage: {
       provider: "v8",
-      include: ["packages/*/src/**/*.ts"],
-      exclude: ["packages/*/__tests__/**", "**/index.ts", "**/abstractions/**"]
+      include: ["src/**/*.ts"],
+      exclude: ["**/__tests__/**", "**/index.ts", "**/abstractions/**"]
     }
   }
 });
@@ -698,38 +694,38 @@ export default defineConfig({
 
 Example: adding `HttpTool` to `@webiny/stdlib/node`.
 
-1. **Create the abstraction** at `packages/stdlib/src/node/features/HttpTool/abstractions/HttpTool.ts`:
+1. **Create the abstraction** at `src/node/features/HttpTool/abstractions/HttpTool.ts`:
    - Define `interface IHttpTool` with JSDoc on each method
    - Export `const HttpTool = createAbstraction<IHttpTool>("Core/HttpTool")`
    - Export `namespace HttpTool { export type Interface = IHttpTool }`
 
-2. **Create the abstraction barrel** at `packages/stdlib/src/node/features/HttpTool/abstractions/index.ts`:
+2. **Create the abstraction barrel** at `src/node/features/HttpTool/abstractions/index.ts`:
    - `export { HttpTool } from "./HttpTool.js";`
 
-3. **Create the implementation** at `packages/stdlib/src/node/features/HttpTool/HttpTool.ts`:
+3. **Create the implementation** at `src/node/features/HttpTool/HttpTool.ts`:
    - Rename the token import: `import { HttpTool as HttpToolAbstraction } from "./abstractions/HttpTool.js";`
    - Import cross-slice dependencies via `#common`: `import { Logger } from "#common";`
    - `class HttpToolImpl implements HttpToolAbstraction.Interface { ... }`
    - `export const HttpTool = HttpToolAbstraction.createImplementation({ implementation: HttpToolImpl, dependencies: [...] })`
    - Dependencies array order must match constructor param order
 
-4. **Create the feature** at `packages/stdlib/src/node/features/HttpTool/feature.ts`:
+4. **Create the feature** at `src/node/features/HttpTool/feature.ts`:
    - `export const HttpToolFeature = createFeature({ name: "Core/HttpToolFeature", register(container) { container.register(HttpTool).inSingletonScope(); } })`
 
-5. **Create the feature index** at `packages/stdlib/src/node/features/HttpTool/index.ts`:
+5. **Create the feature index** at `src/node/features/HttpTool/index.ts`:
    - `export { HttpTool } from "./abstractions/index.js";`
    - `export { HttpToolFeature } from "./feature.js";`
 
-6. **Create the feature README** at `packages/stdlib/src/node/features/HttpTool/README.md`:
+6. **Create the feature README** at `src/node/features/HttpTool/README.md`:
    - One paragraph description — what it does and when to reach for it
    - Interface section — the public methods with JSDoc (copy from abstraction file)
    - Usage section — two code snippets: DI container wiring + `createXxx()` factory function
-   - Update the package `README.md` table to add a row pointing to the new feature README
+   - Update the repo `README.md` table to add a row pointing to the new feature README
 
-7. **Add to the node slice barrel** `packages/stdlib/src/node/index.ts`:
+7. **Add to the node slice barrel** `src/node/index.ts`:
    - `export { HttpTool, HttpToolFeature } from "./features/HttpTool/index.js";`
 
-8. **Write tests** at `packages/stdlib/__tests__/node/HttpTool.test.ts`:
+8. **Write tests** at `__tests__/node/HttpTool.test.ts`:
    - Create a `makeContainer()` helper (see Testing section)
    - Cover the happy path and error paths
    - Node tests do not need a `// @vitest-environment` directive (only browser tests do)
@@ -744,19 +740,19 @@ The repo now publishes a single package (`@webiny/stdlib`). New runtime environm
 
 Example: adding a `cli` slice.
 
-1. **Create `packages/stdlib/src/cli/`** with `index.ts` as the public barrel export.
+1. **Create `src/cli/`** with `index.ts` as the public barrel export.
 
-2. **Create `packages/stdlib/tsconfig.cli.json`** following the pattern of `tsconfig.node.json` or `tsconfig.browser.json` — set platform-specific `module`, `moduleResolution`, `lib`/`types`, and `paths`. Add a reference to `tsconfig.common.json`.
+2. **Create `tsconfig.cli.json`** following the pattern of `tsconfig.node.json` or `tsconfig.browser.json` — set platform-specific `module`, `moduleResolution`, `lib`/`types`, and `paths`. Add a reference to `tsconfig.common.json`.
 
-3. **Create `packages/stdlib/tsconfig.check.cli.json`** extending `tsconfig.cli.json` with `composite: false`, `noEmit: true`, `rootDir: "."`, and `include: ["src/cli", "__tests__/cli"]`.
+3. **Create `tsconfig.check.cli.json`** extending `tsconfig.cli.json` with `composite: false`, `noEmit: true`, `rootDir: "."`, and `include: ["src/cli", "__tests__/cli"]`.
 
-4. **Add to `packages/stdlib/tsconfig.json` references**:
+4. **Add to `tsconfig.json` references**:
 
    ```json
    { "path": "./tsconfig.cli.json" }
    ```
 
-5. **Add a subpath export in `packages/stdlib/package.json`**:
+5. **Add a subpath export in `package.json`**:
 
    ```json
    "./cli": { "import": "./dist/cli/index.js", "types": "./dist/cli/index.d.ts" }
@@ -764,7 +760,7 @@ Example: adding a `cli` slice.
 
 6. **Add to `scripts/features/BuildPackages/index.ts` slices array** so the build script compiles the new slice.
 
-7. **Add `tsgo -p packages/stdlib/tsconfig.check.cli.json`** to the root typecheck script in `package.json`.
+7. **Add `tsgo -p tsconfig.check.cli.json`** to the `typecheck` script in `package.json`.
 
 8. **Run `yarn install`** to ensure Yarn picks up any package.json changes.
 
@@ -873,11 +869,11 @@ Node's module loader resolves specifiers literally. A `.js` specifier looks for 
 import { run } from "./features/BuildPackages/index.ts";
 import { Cleaner as CleanerAbstraction } from "./abstractions/Cleaner.ts";
 
-// WRONG — scripts/ (only valid in compiled packages/src/)
+// WRONG — scripts/ (only valid in compiled src/)
 import { run } from "./features/BuildPackages/index.js";
 ```
 
-Package source files under `packages/*/src/` continue to use `.js` extensions as before.
+Package source files under `src/` continue to use `.js` extensions as before.
 
 **2. No TypeScript parameter properties in script classes.**
 
@@ -973,9 +969,10 @@ The slices must NOT import from each other.
   "types": "./dist/index.d.ts",
   "files": ["dist"],
   "scripts": {
-    "build": "tsgo -b --force",
+    "build": "node scripts/buildPackages.ts",
     "test": "vitest run",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "typecheck": "tsgo -p tsconfig.check.json && tsgo -p tsconfig.check.common.json && tsgo -p tsconfig.check.node.json && tsgo -p tsconfig.check.browser.json"
   }
 }
 ```
@@ -993,7 +990,7 @@ Run a full build from the repo root:
 ```sh
 yarn build
 # expands to: node scripts/buildPackages.ts
-# which runs: tsgo -b --force packages/stdlib/tsconfig.common.json, then tsconfig.node.json, then tsconfig.browser.json
+# which runs: tsgo -b --force tsconfig.common.json, then tsconfig.node.json, then tsconfig.browser.json
 ```
 
 `yarn build` always cleans `dist/` first — it wipes all `dist/` directories so there are never stale compiled artifacts. Always use `--force` — builds must be complete rebuilds, not incremental. tsgo's project-reference ordering is unreliable in the current beta, so the build script sequences each slice explicitly.
@@ -1001,8 +998,7 @@ yarn build
 Run tests:
 
 ```sh
-yarn test               # all tests via vitest workspace
-yarn test --project utils-stdlib   # single package
+yarn test               # all tests
 yarn test:coverage      # with v8 coverage
 ```
 
@@ -1058,7 +1054,7 @@ Never use `--no-verify` or skip hooks.
 - **JSDoc comments are preferred** on interface methods, abstraction types, and public class methods. See JSDoc Comments section above.
 - **No inline comments that explain what the code does.** Only comment the non-obvious why (hidden constraints, subtle invariants, workarounds).
 - **Strict TypeScript.** All strict flags listed in `tsconfig.base.json` must pass.
-- **`.js` extensions in package source imports.** Under `packages/*/src/`, use `import { Foo } from "./Foo.js"` (not `.ts`). The `nodenext` module resolution requires explicit extensions; tsgo resolves `.js` to `.ts` source files at compile time. **Exception: `scripts/`** — scripts are run directly by Node 24 (not compiled), so use `.ts` extensions there (see Scripts section).
+- **`.js` extensions in package source imports.** Under `src/`, use `import { Foo } from "./Foo.js"` (not `.ts`). The `nodenext` module resolution requires explicit extensions; tsgo resolves `.js` to `.ts` source files at compile time. **Exception: `scripts/`** — scripts are run directly by Node 24 (not compiled), so use `.ts` extensions there (see Scripts section).
 - **`node:` prefix for Node built-ins.** Always `import { readFileSync } from "node:fs"`, never `"fs"`.
 - **Singletons via DI.** Register utils as `.inSingletonScope()` unless there's a reason not to.
 - **No barrel re-exports of types only.** If something is exported, it should be usable, not just a type alias.
