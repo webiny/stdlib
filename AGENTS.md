@@ -26,15 +26,15 @@ The package provides platform-specific utility services (file system, directory 
 ├── scripts/              # build and publish automation (Node 24 strip-only)
 ├── dist/                 # compiled output (gitignored)
 ├── package.json          # @webiny/stdlib — exports, scripts
-├── tsconfig.json         # solution file (references only, no files)
-├── tsconfig.base.json    # shared compiler options
-├── tsconfig.common.json  # build config for src/
-├── tsconfig.node.json    # build config for src/node/
-├── tsconfig.browser.json # build config for src/browser/
-├── tsconfig.check.json   # type-check config for scripts/ only
+├── tsconfig.json              # solution file + shared compiler options (no separate base)
+├── tsconfig.checkmode.json    # shared check overrides (composite:false, noEmit:true, rootDir:.)
+├── tsconfig.common.json       # build config for src/
+├── tsconfig.node.json         # build config for src/node/
+├── tsconfig.browser.json      # build config for src/browser/
 ├── tsconfig.check.common.json  # type-check config for src/ + __tests__/ (common)
 ├── tsconfig.check.node.json    # type-check config for src/node/ + __tests__/node/
 ├── tsconfig.check.browser.json # type-check config for src/browser/ + __tests__/browser/
+├── tsconfig.check.scripts.json # type-check config for scripts/ only
 ├── vitest.config.ts      # test + coverage config
 ├── CLAUDE.md
 └── AGENTS.md
@@ -140,21 +140,19 @@ The `src/node/` and `src/browser/` slices must NOT import from each other.
 
 ## TypeScript Config
 
-Root `tsconfig.json` is a solution file (`files: []`, `references` only). Build tsconfigs extend `tsconfig.base.json`.
+Root `tsconfig.json` is both the solution file (`files: []`, `references` only) and the carrier for all shared strict `compilerOptions`. There is no separate `tsconfig.base.json`. Build tsconfigs extend `tsconfig.json` directly.
 
-`tsconfig.base.json` holds the strict flags shared by all packages. It does **not** set `module`, `moduleResolution`, or `lib` — those are per-package overrides.
+`tsconfig.json` holds the strict flags shared by all slices but does **not** set `module`, `moduleResolution`, or `lib` — those are per-slice overrides.
 
 ### Build tsconfigs
 
 `@webiny/stdlib` uses three build tsconfigs — one per source slice — all emitting into `dist/`. Each is independently compilable via `tsgo -b`.
 
-`tsconfig.base.json` provides strict flags but does **not** set `module`, `moduleResolution`, or `lib` — each slice defines its own platform-appropriate values.
-
 **`tsconfig.common.json`** (common slice):
 
 ```json
 {
-  "extends": "./tsconfig.base.json",
+  "extends": "./tsconfig.json",
   "compilerOptions": {
     "composite": true,
     "rootDir": "./src",
@@ -175,7 +173,7 @@ Root `tsconfig.json` is a solution file (`files: []`, `references` only). Build 
 
 ```json
 {
-  "extends": "./tsconfig.base.json",
+  "extends": "./tsconfig.json",
   "compilerOptions": {
     "composite": true,
     "rootDir": "./src/node",
@@ -183,7 +181,7 @@ Root `tsconfig.json` is a solution file (`files: []`, `references` only). Build 
     "module": "nodenext",
     "moduleResolution": "nodenext",
     "types": ["node"],
-    "paths": { "~/node": ["./src/node/index.js"], "~/*": ["./src/*"] }
+    "paths": { "~/*": ["./src/*"] }
   },
   "include": ["src/node"],
   "references": [{ "path": "./tsconfig.common.json" }]
@@ -194,7 +192,7 @@ Root `tsconfig.json` is a solution file (`files: []`, `references` only). Build 
 
 ```json
 {
-  "extends": "./tsconfig.base.json",
+  "extends": "./tsconfig.json",
   "compilerOptions": {
     "composite": true,
     "rootDir": "./src/browser",
@@ -202,7 +200,7 @@ Root `tsconfig.json` is a solution file (`files: []`, `references` only). Build 
     "module": "nodenext",
     "moduleResolution": "nodenext",
     "lib": ["esnext", "dom", "dom.iterable"],
-    "paths": { "~/browser": ["./src/browser/index.js"], "~/*": ["./src/*"] }
+    "paths": { "~/*": ["./src/*"] }
   },
   "include": ["src/browser"],
   "references": [{ "path": "./tsconfig.common.json" }]
@@ -217,21 +215,25 @@ Each slice sets platform-specific options:
 - **node**: `types: ["node"]`
 - **browser**: `lib: ["esnext", "dom", "dom.iterable"]`
 
-**Cross-slice imports:** The `src/node/` and `src/browser/` slices import common utilities using relative paths to the common barrel (`src/index.ts`). The correct relative path depends on the file's depth:
-
-- From `src/node/features/<Name>/*.ts` or `src/browser/features/<Name>/*.ts` → `../../../index.js`
-- From `src/node/features/<Name>/abstractions/*.ts` → `../../../../index.js`
+**Cross-slice imports:** The `src/node/` and `src/browser/` slices import common utilities using the `~/common/index.js` path alias, which TypeScript resolves via `paths` at compile time. The build script's `PathAliasRewriter` rewrites `~/` to the correct depth-relative prefix in emitted JS after `tsgo -b` runs.
 
 ```ts
-import { Logger } from "../../../index.js";
+import { Logger } from "~/common/index.js";
 ```
 
-TypeScript resolves this through project references to the compiled `dist/index.js` at typecheck time; relative paths are preserved as-is in emitted JS and resolve correctly because tsgo mirrors the source directory structure under `dist/`.
+The `~/*` alias maps to `./src/*` (relative to the tsconfig file, i.e. the repo root), so `~/common/index.js` always resolves to `./src/common/index.ts` regardless of which slice file is importing it.
 
-**`tsconfig.json`** (solution file):
+**`tsconfig.json`** (solution file + shared options):
 
 ```json
 {
+  "compilerOptions": {
+    "target": "esnext",
+    "strict": true,
+    "verbatimModuleSyntax": true,
+    "skipLibCheck": true
+    // ... all shared strict flags
+  },
   "files": [],
   "references": [
     { "path": "./tsconfig.common.json" },
@@ -243,14 +245,20 @@ TypeScript resolves this through project references to the compiled `dist/index.
 
 ### Check tsconfigs
 
-Used by `yarn typecheck` for static type checking only — no emit. There are four check configs:
+Used by `yarn typecheck` for static type checking only — no emit. There are four check configs, all using TypeScript 5 extends arrays. A shared `tsconfig.checkmode.json` provides the common overrides:
+
+```json
+// tsconfig.checkmode.json
+{
+  "compilerOptions": { "composite": false, "noEmit": true, "rootDir": "." }
+}
+```
 
 **`tsconfig.check.common.json`** (common slice check):
 
 ```json
 {
-  "extends": "./tsconfig.common.json",
-  "compilerOptions": { "composite": false, "noEmit": true, "rootDir": "." },
+  "extends": ["./tsconfig.common.json", "./tsconfig.checkmode.json"],
   "include": ["src", "__tests__", "vitest.config.ts"],
   "exclude": ["src/node", "src/browser", "__tests__/node", "__tests__/browser"]
 }
@@ -260,8 +268,7 @@ Used by `yarn typecheck` for static type checking only — no emit. There are fo
 
 ```json
 {
-  "extends": "./tsconfig.node.json",
-  "compilerOptions": { "composite": false, "noEmit": true, "rootDir": "." },
+  "extends": ["./tsconfig.node.json", "./tsconfig.checkmode.json"],
   "include": ["src/node", "__tests__/node"]
 }
 ```
@@ -270,31 +277,24 @@ Used by `yarn typecheck` for static type checking only — no emit. There are fo
 
 ```json
 {
-  "extends": "./tsconfig.browser.json",
-  "compilerOptions": { "composite": false, "noEmit": true, "rootDir": "." },
+  "extends": ["./tsconfig.browser.json", "./tsconfig.checkmode.json"],
   "include": ["src/browser", "__tests__/browser"]
 }
 ```
 
-**`tsconfig.check.json`** (scripts check — covers only `scripts/`):
+**`tsconfig.check.scripts.json`** (scripts check — covers only `scripts/`):
 
 ```json
 {
-  "extends": "./tsconfig.base.json",
-  "compilerOptions": {
-    "noEmit": true,
-    "module": "nodenext",
-    "moduleResolution": "nodenext",
-    "types": ["node"],
-    "allowImportingTsExtensions": true
-  },
-  "include": ["scripts/**/*.ts"]
+  "extends": ["./tsconfig.node.json", "./tsconfig.checkmode.json"],
+  "compilerOptions": { "allowImportingTsExtensions": true },
+  "include": ["scripts"]
 }
 ```
 
-`allowImportingTsExtensions` is required because scripts use `.ts` extensions in their relative imports (see Scripts section below). It is only valid in combination with `noEmit: true`.
+`allowImportingTsExtensions` is scoped to the scripts config only, which prevents it from silencing `.ts`-extension import errors in `src/node/` source (where `.js` extensions are mandatory).
 
-`yarn typecheck` runs all four configs: `tsgo -p tsconfig.check.json && tsgo -p tsconfig.check.common.json && tsgo -p tsconfig.check.node.json && tsgo -p tsconfig.check.browser.json`.
+`yarn typecheck` runs all four configs: `tsgo -p tsconfig.check.common.json && tsgo -p tsconfig.check.node.json && tsgo -p tsconfig.check.browser.json && tsgo -p tsconfig.check.scripts.json`.
 
 Tests live in `__tests__/` at the repo root (outside `src/`), so they are naturally excluded from the build by the `include: ["src"]` directive. They are type-checked by `yarn typecheck` via the slice check configs.
 
@@ -399,7 +399,7 @@ The `namespace FileTool { export type Interface }` pattern lets consumers write 
 Implements the abstraction interface. Constructor injects other abstractions.
 
 ```ts
-import { Logger } from "../../../index.js";
+import { Logger } from "~/common/index.js";
 import { FileTool as FileToolAbstraction } from "./abstractions/FileTool.js";
 import { DirectoryTool } from "../DirectoryTool/abstractions/DirectoryTool.js";
 
@@ -420,7 +420,7 @@ export const FileTool = FileToolAbstraction.createImplementation({
 
 Note the local alias `FileTool as FileToolAbstraction`. This avoids a name collision between the imported token and the exported implementation constant.
 
-Cross-slice imports (like `Logger`) use relative paths to `src/index.ts` in `src/node/` and `src/browser/` files (see TypeScript Config section for depth rules).
+Cross-slice imports (like `Logger`) use `~/common/index.js` in `src/node/` and `src/browser/` files (see TypeScript Config section).
 
 ### 3. Feature (`feature.ts`)
 
@@ -632,7 +632,7 @@ afterEach(() => {
 
 ### Type-checking tests
 
-**Test files must be type-correct.** `yarn typecheck` covers `__tests__/` via each package's `tsconfig.check.json`. Type errors in tests are caught before any code runs.
+**Test files must be type-correct.** `yarn typecheck` covers `__tests__/` via each slice's check config. Type errors in tests are caught before any code runs.
 
 ### Vitest config per package
 
@@ -697,7 +697,7 @@ Example: adding `HttpTool` to `@webiny/stdlib/node`.
 
 3. **Create the implementation** at `src/node/features/HttpTool/HttpTool.ts`:
    - Rename the token import: `import { HttpTool as HttpToolAbstraction } from "./abstractions/HttpTool.js";`
-   - Import cross-slice dependencies via the common barrel: `import { Logger } from "../../../index.js";`
+   - Import cross-slice dependencies via the common barrel: `import { Logger } from "~/common/index.js";`
    - `class HttpToolImpl implements HttpToolAbstraction.Interface { ... }`
    - `export const HttpTool = HttpToolAbstraction.createImplementation({ implementation: HttpToolImpl, dependencies: [...] })`
    - Dependencies array order must match constructor param order
@@ -737,7 +737,7 @@ Example: adding a `cli` slice.
 
 2. **Create `tsconfig.cli.json`** following the pattern of `tsconfig.node.json` or `tsconfig.browser.json` — set platform-specific `module`, `moduleResolution`, `lib`/`types`, and `paths`. Add a reference to `tsconfig.common.json`.
 
-3. **Create `tsconfig.check.cli.json`** extending `tsconfig.cli.json` with `composite: false`, `noEmit: true`, `rootDir: "."`, and `include: ["src/cli", "__tests__/cli"]`.
+3. **Create `tsconfig.check.cli.json`** as a TS5 extends array `["./tsconfig.cli.json", "./tsconfig.checkmode.json"]` with `include: ["src/cli", "__tests__/cli"]`.
 
 4. **Add to `tsconfig.json` references**:
 
@@ -925,17 +925,14 @@ The `type(scope): ` prefix is stripped; only the description appears in the entr
 
 ## Internal Slice Dependencies
 
-Within `@webiny/stdlib`, the `src/node/` and `src/browser/` slices depend on `src/common/` (common), accessed via the `src/index.ts` barrel. Use relative paths:
+Within `@webiny/stdlib`, the `src/node/` and `src/browser/` slices depend on `src/common/` (common), accessed via the stable path alias:
 
 ```ts
-// from src/node/features/<Name>/*.ts
-import { Logger } from "../../../index.js";
-
-// from src/node/features/<Name>/abstractions/*.ts
-import { createAbstraction } from "../../../../index.js";
+import { Logger } from "~/common/index.js";
+import { createAbstraction } from "~/common/index.js";
 ```
 
-The same depth rules apply to `src/browser/`. The slices must NOT import from each other.
+`~/*` maps to `./src/*` (relative to repo root), so `~/common/index.js` always resolves to `./src/common/index.ts` regardless of file depth. The alias is rewritten to the correct depth-relative prefix in emitted JS by `PathAliasRewriter`. The slices must NOT import from each other.
 
 ---
 
@@ -958,7 +955,7 @@ The same depth rules apply to `src/browser/`. The slices must NOT import from ea
     "build": "node scripts/buildPackages.ts",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
-    "typecheck": "tsgo -p tsconfig.check.json && tsgo -p tsconfig.check.common.json && tsgo -p tsconfig.check.node.json && tsgo -p tsconfig.check.browser.json"
+    "typecheck": "tsgo -p tsconfig.check.common.json && tsgo -p tsconfig.check.node.json && tsgo -p tsconfig.check.browser.json && tsgo -p tsconfig.check.scripts.json"
   }
 }
 ```
@@ -1037,7 +1034,7 @@ Never use `--no-verify` or skip hooks.
 - **Every feature folder has a `README.md`.** Format: (1) one-paragraph description, (2) Interface section with JSDoc excerpts from the abstraction file, (3) Usage section with two snippets — DI container wiring and direct factory instantiation. Keep it current: if you change a method signature, add/remove a method, or change constructor dependencies, update the feature README in the same commit. Also update the package-level `README.md` table if you add or rename a feature.
 - **JSDoc comments are preferred** on interface methods, abstraction types, and public class methods. See JSDoc Comments section above.
 - **No inline comments that explain what the code does.** Only comment the non-obvious why (hidden constraints, subtle invariants, workarounds).
-- **Strict TypeScript.** All strict flags listed in `tsconfig.base.json` must pass.
+- **Strict TypeScript.** All strict flags listed in `tsconfig.json` must pass.
 - **`.js` extensions in package source imports.** Under `src/`, use `import { Foo } from "./Foo.js"` (not `.ts`). The `nodenext` module resolution requires explicit extensions; tsgo resolves `.js` to `.ts` source files at compile time. **Exception: `scripts/`** — scripts are run directly by Node 24 (not compiled), so use `.ts` extensions there (see Scripts section).
 - **`node:` prefix for Node built-ins.** Always `import { readFileSync } from "node:fs"`, never `"fs"`.
 - **Singletons via DI.** Register utils as `.inSingletonScope()` unless there's a reason not to.

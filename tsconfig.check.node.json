@@ -1,7 +1,4 @@
 {
   "extends": ["./tsconfig.node.json", "./tsconfig.checkmode.json"],
-  "compilerOptions": {
-    "allowImportingTsExtensions": true
-  },
-  "include": ["src/node", "__tests__/node", "scripts"]
+  "include": ["src/node", "__tests__/node"]
 }
