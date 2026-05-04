@@ -1,6 +1,4 @@
 {
-    "files": [],
-    "references": [
-        { "path": "./packages/stdlib" }
-    ]
+  "files": [],
+  "references": [{ "path": "./packages/stdlib" }]
 }

@@ -11,11 +11,7 @@ export function run(rootDir: string): void {
         ws.name === "@webiny/stdlib"
             ? {
                   ...ws,
-                  slices: [
-                      "tsconfig.common.json",
-                      "tsconfig.node.json",
-                      "tsconfig.browser.json"
-                  ]
+                  slices: ["tsconfig.common.json", "tsconfig.node.json", "tsconfig.browser.json"]
               }
             : ws
     );

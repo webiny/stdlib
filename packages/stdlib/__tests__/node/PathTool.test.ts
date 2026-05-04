@@ -1,7 +1,11 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { dirname, join, resolve } from "node:path";
 import { Container } from "@webiny/di";
-import { PathTool, PathToolFeature, createPathTool } from "../../src/node/features/PathTool/index.js";
+import {
+    PathTool,
+    PathToolFeature,
+    createPathTool
+} from "../../src/node/features/PathTool/index.js";
 
 function makeContainer(): Container {
     const container = new Container();

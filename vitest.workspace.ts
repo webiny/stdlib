@@ -1,5 +1,3 @@
 import { defineProject } from "vitest/config";
 
-export default [
-    defineProject({ test: { name: "utils-stdlib", root: "./packages/stdlib" } })
-];
+export default [defineProject({ test: { name: "utils-stdlib", root: "./packages/stdlib" } })];

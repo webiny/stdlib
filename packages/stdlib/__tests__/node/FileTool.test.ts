@@ -3,8 +3,15 @@ import { existsSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { Container } from "@webiny/di";
-import { FileTool, FileToolFeature, createFileTool } from "../../src/node/features/FileTool/index.js";
-import { DirectoryToolFeature, createDirectoryTool } from "../../src/node/features/DirectoryTool/index.js";
+import {
+    FileTool,
+    FileToolFeature,
+    createFileTool
+} from "../../src/node/features/FileTool/index.js";
+import {
+    DirectoryToolFeature,
+    createDirectoryTool
+} from "../../src/node/features/DirectoryTool/index.js";
 import { PinoLoggerConfig, PinoLoggerFeature } from "../../src/node/features/PinoLogger/index.js";
 
 function makeContainer(): Container {
