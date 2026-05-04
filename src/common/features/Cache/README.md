@@ -40,12 +40,7 @@ interface IAsyncCache {
 
 ```ts
 import { Container } from "@webiny/di";
-import {
-  Cache,
-  AsyncCache,
-  MemoryCacheFeature,
-  AsyncMemoryCacheFeature
-} from "@webiny/stdlib";
+import { Cache, AsyncCache, MemoryCacheFeature, AsyncMemoryCacheFeature } from "@webiny/stdlib";
 
 const container = new Container();
 MemoryCacheFeature.register(container);

@@ -79,7 +79,9 @@ describe("PathTool", () => {
             try {
                 tool.resolvePackageFile("@definitely/not-installed/file.json");
             } catch (e) {
-                if (e instanceof PackageNotFoundError) caught = e;
+                if (e instanceof PackageNotFoundError) {
+                    caught = e;
+                }
             }
             expect(caught?.data.specifier).toBe("@definitely/not-installed/file.json");
         });

@@ -49,11 +49,7 @@ logger.child("MyModule").debug("child logger");
 
 ```ts
 import { Container } from "@webiny/di";
-import {
-  Logger,
-  ConsoleLoggerConfig,
-  ConsoleLoggerFeature
-} from "@webiny/stdlib";
+import { Logger, ConsoleLoggerConfig, ConsoleLoggerFeature } from "@webiny/stdlib";
 
 const container = new Container();
 container.registerInstance(ConsoleLoggerConfig, {
