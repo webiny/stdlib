@@ -82,7 +82,7 @@ Current features (each has a `README.md` in its feature folder):
 - `FileTool` — read, write, copy, remove files
 - `DirectoryTool` — create, read, remove, copy directories; `glob(cwd, pattern, options?)` lists files matching a fast-glob pattern relative to `cwd`. Returns `[]` when `cwd` does not exist. `GlobOptions`: `dot`, `ignore`, `deep`, `absolute`, `onlyFiles`.
 - `JsonFileTool` — read and write JSON files; optionally validates the parsed value with any schema object that has a `.parse(unknown): T` method (Zod-compatible)
-- `PathTool` — injectable wrapper around `node:path` (`join`, `resolve`, `dirname`, `basename`)
+- `PathTool` — injectable wrapper around `node:path` (`join`, `resolve`, `dirname`, `basename`). Also provides `resolvePackageFile(specifier)` to resolve a package-relative file specifier (e.g. `@webiny/cli/files/references.json`) to an absolute filesystem path from `process.cwd()`; throws `PackageNotFoundError` when the package cannot be found.
 - `PinoLoggerConfig` — optional config abstraction (token `"Node/PinoLoggerConfig"`). `Config` type has: `logLevel`, `transport` — both optional. Default behaviour (no config): `logLevel: "info"`, `transport: "pretty"`.
 - `PinoLogger` — pino-based Logger implementation. Registered under the `Logger` abstraction from `@webiny/stdlib`. Optional `PinoLoggerConfig` dependency.
 - `PinoLoggerFeature` — registers `PinoLogger` in singleton scope.

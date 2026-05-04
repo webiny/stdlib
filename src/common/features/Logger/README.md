@@ -1,6 +1,6 @@
 # Logger / ConsoleLogger
 
-`Logger` is the shared DI token for logging across all packages. `ConsoleLoggerFeature` registers a `console`-based implementation that supports log levels, optional prefix, and optional timestamps. Any package that injects `Logger` works with any registered implementation — swap `ConsoleLogger` for `PinoLogger` from `@webiny/utils-node` without changing call sites.
+`Logger` is the shared DI token for logging across all packages. `ConsoleLoggerFeature` registers a `console`-based implementation that supports log levels, optional prefix, and optional timestamps. Any package that injects `Logger` works with any registered implementation — swap `ConsoleLogger` for `PinoLogger` from `@webiny/stdlib/node` without changing call sites.
 
 ## Interface
 
@@ -19,7 +19,7 @@ interface ILogger {
 `ConsoleLoggerConfig` is an optional DI dependency for `ConsoleLoggerFeature`:
 
 ```ts
-interface ConsoleLoggerConfig {
+interface IConsoleLoggerConfig {
   getConfig(): {
     logLevel?: "debug" | "info" | "warn" | "error" | "fatal";
     prefix?: string;
@@ -35,7 +35,7 @@ interface ConsoleLoggerConfig {
 
 ```ts
 import { Container } from "@webiny/di";
-import { Logger, ConsoleLoggerFeature } from "@webiny/utils-common";
+import { Logger, ConsoleLoggerFeature } from "@webiny/stdlib";
 
 const container = new Container();
 ConsoleLoggerFeature.register(container);
@@ -51,10 +51,9 @@ logger.child("MyModule").debug("child logger");
 import { Container } from "@webiny/di";
 import {
   Logger,
-  ConsoleLogger,
   ConsoleLoggerConfig,
   ConsoleLoggerFeature
-} from "@webiny/utils-common";
+} from "@webiny/stdlib";
 
 const container = new Container();
 container.registerInstance(ConsoleLoggerConfig, {
@@ -64,13 +63,4 @@ ConsoleLoggerFeature.register(container);
 
 const logger = container.resolve(Logger);
 logger.warn("only warnings and above");
-```
-
-### Without DI
-
-```ts
-import { ConsoleLogger } from "@webiny/utils-common";
-
-const logger = new ConsoleLogger();
-logger.info("direct use");
 ```

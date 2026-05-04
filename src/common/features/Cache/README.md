@@ -45,7 +45,7 @@ import {
   AsyncCache,
   MemoryCacheFeature,
   AsyncMemoryCacheFeature
-} from "@webiny/utils-common";
+} from "@webiny/stdlib";
 
 const container = new Container();
 MemoryCacheFeature.register(container);
@@ -64,13 +64,4 @@ const asyncCache = container.resolve(AsyncCache);
 await asyncCache.set("k", 42);
 const result = await asyncCache.get<number>("k");
 if (result.isOk()) console.log(result.value); // 42
-```
-
-### Without DI
-
-```ts
-import { MemoryCache } from "@webiny/utils-common";
-
-const cache = new MemoryCache();
-cache.set("x", 1);
 ```
