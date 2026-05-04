@@ -1,4 +1,4 @@
-import { createAbstraction } from "#common";
+import { createAbstraction } from "../../../../index.js";
 
 export interface JsonSchema<T> {
     parse(data: unknown): T;

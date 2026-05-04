@@ -1,7 +1,7 @@
 import { Container } from "@webiny/di";
 import { describe, it, expect } from "vitest";
 import { PinoLogger } from "../../src/node/features/PinoLogger/PinoLogger.js";
-import { Logger } from "#common";
+import { Logger } from "../../src/index.js";
 import { PinoLoggerConfig } from "../../src/node/features/PinoLogger/abstractions/PinoLoggerConfig.js";
 
 function makeContainer(config?: PinoLoggerConfig.Config): Logger.Interface {

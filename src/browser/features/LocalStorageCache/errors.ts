@@ -1,4 +1,4 @@
-import { CacheError } from "#common";
+import { CacheError } from "../../../index.js";
 
 /** Thrown when JSON.parse fails on a stored cache entry. */
 export class LocalStorageParseError extends CacheError<{ key: string }> {

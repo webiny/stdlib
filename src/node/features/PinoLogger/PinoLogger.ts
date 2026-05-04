@@ -1,7 +1,7 @@
 import pino from "pino";
 import pretty from "pino-pretty";
 import { Writable } from "node:stream";
-import { Logger } from "#common";
+import { Logger } from "../../../index.js";
 import { PinoLoggerConfig } from "./abstractions/PinoLoggerConfig.js";
 
 type JsonLogType = "debug" | "info" | "warn" | "error" | "fatal";

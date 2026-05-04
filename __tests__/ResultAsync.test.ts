@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { Result } from "../src/core/Result.js";
-import { ResultAsync } from "../src/core/ResultAsync.js";
+import { Result } from "../src/common/core/Result.js";
+import { ResultAsync } from "../src/common/core/ResultAsync.js";
 
 describe("ResultAsync", () => {
     describe("ok", () => {

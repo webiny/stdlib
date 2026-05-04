@@ -1,4 +1,4 @@
-import { createAbstraction } from "#common";
+import { createAbstraction } from "../../../../index.js";
 
 /**
  * Configuration shape for PinoLogger.

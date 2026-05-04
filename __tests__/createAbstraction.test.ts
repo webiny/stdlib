@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { Abstraction } from "@webiny/di";
-import { createAbstraction } from "../src/core/createAbstraction.js";
+import { createAbstraction } from "../src/common/core/createAbstraction.js";
 
 describe("createAbstraction", () => {
     it("returns an Abstraction instance", () => {

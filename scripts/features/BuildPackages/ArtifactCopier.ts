@@ -10,24 +10,12 @@ interface PackageJson {
     main?: string;
     types?: string;
     exports?: string | PackageJsonExports;
-    imports?: PackageJsonExports;
     files?: string[];
     [key: string]: unknown;
 }
 
 function stripDist(path: string): string {
     return path.startsWith("./dist/") ? `./${path.slice("./dist/".length)}` : path;
-}
-
-function stripSourceCondition(value: PackageJsonExports): PackageJsonExports {
-    const result: PackageJsonExports = {};
-    for (const [k, v] of Object.entries(value)) {
-        if (k === "source") {
-            continue;
-        }
-        result[k] = typeof v === "string" ? v : stripSourceCondition(v);
-    }
-    return result;
 }
 
 function rewriteExports(value: string | PackageJsonExports): string | PackageJsonExports {
@@ -56,11 +44,6 @@ class ArtifactCopierImpl implements ArtifactCopierAbstraction.Interface {
         }
         if (pkgJson.exports !== undefined) {
             pkgJson.exports = rewriteExports(pkgJson.exports);
-        }
-        if (pkgJson.imports !== undefined) {
-            pkgJson.imports = rewriteExports(
-                stripSourceCondition(pkgJson.imports)
-            ) as PackageJsonExports;
         }
         delete pkgJson.files;
 

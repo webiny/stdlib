@@ -1,4 +1,4 @@
-import { Logger } from "#common";
+import { Logger } from "../../../index.js";
 
 export class LineAccumulator {
     private pending: string[] = [];

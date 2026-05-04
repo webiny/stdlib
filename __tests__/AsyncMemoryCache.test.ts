@@ -1,7 +1,7 @@
 import { Container } from "@webiny/di";
 import { describe, it, expect, beforeEach } from "vitest";
-import { AsyncMemoryCache } from "../src/features/Cache/AsyncMemoryCache.js";
-import { AsyncCache } from "../src/features/Cache/abstractions/AsyncCache.js";
+import { AsyncMemoryCache } from "../src/common/features/Cache/AsyncMemoryCache.js";
+import { AsyncCache } from "../src/common/features/Cache/abstractions/AsyncCache.js";
 
 function makeCache(): AsyncCache.Interface {
     const container = new Container();

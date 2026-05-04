@@ -6,10 +6,7 @@
     "outDir": "./dist",
     "module": "nodenext",
     "moduleResolution": "nodenext",
-    "lib": ["esnext", "dom"],
-    "paths": {
-      "~/*": ["./src/*"]
-    }
+    "lib": ["esnext", "dom"]
   },
   "include": ["src"],
   "exclude": ["src/node", "src/browser"]

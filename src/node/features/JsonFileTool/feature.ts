@@ -1,4 +1,4 @@
-import { createFeature } from "#common";
+import { createFeature } from "../../../index.js";
 import { JsonFileTool } from "./JsonFileTool.js";
 
 export const JsonFileToolFeature = createFeature({

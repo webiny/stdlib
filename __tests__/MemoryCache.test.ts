@@ -1,7 +1,7 @@
 import { Container } from "@webiny/di";
 import { describe, it, expect, beforeEach } from "vitest";
-import { MemoryCache } from "../src/features/Cache/MemoryCache.js";
-import { Cache } from "../src/features/Cache/abstractions/Cache.js";
+import { MemoryCache } from "../src/common/features/Cache/MemoryCache.js";
+import { Cache } from "../src/common/features/Cache/abstractions/Cache.js";
 
 function makeCache(): Cache.Interface {
     const container = new Container();

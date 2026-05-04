@@ -1,8 +1,8 @@
 import { Container } from "@webiny/di";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { ConsoleLogger } from "../src/features/Logger/ConsoleLogger.js";
-import { Logger } from "../src/features/Logger/abstractions/Logger.js";
-import { ConsoleLoggerConfig } from "../src/features/Logger/abstractions/ConsoleLoggerConfig.js";
+import { ConsoleLogger } from "../src/common/features/Logger/ConsoleLogger.js";
+import { Logger } from "../src/common/features/Logger/abstractions/Logger.js";
+import { ConsoleLoggerConfig } from "../src/common/features/Logger/abstractions/ConsoleLoggerConfig.js";
 
 function makeContainer(config?: ConsoleLoggerConfig.Config): {
     logger: Logger.Interface;

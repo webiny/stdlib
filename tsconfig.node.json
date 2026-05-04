@@ -6,11 +6,7 @@
     "outDir": "./dist/node",
     "module": "nodenext",
     "moduleResolution": "nodenext",
-    "types": ["node"],
-    "paths": {
-      "~/node": ["./src/node/index.js"],
-      "~/*": ["./src/*"]
-    }
+    "types": ["node"]
   },
   "include": ["src/node"],
   "references": [{ "path": "./tsconfig.common.json" }]

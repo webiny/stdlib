@@ -1,4 +1,4 @@
-import { createAbstraction } from "#common";
+import { createAbstraction } from "../../../../index.js";
 import type { Readable } from "node:stream";
 
 export interface NdJsonRow {

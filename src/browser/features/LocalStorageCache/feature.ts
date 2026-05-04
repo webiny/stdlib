@@ -1,4 +1,4 @@
-import { createFeature } from "#common";
+import { createFeature } from "../../../index.js";
 import { LocalStorageCache } from "./LocalStorageCache.js";
 
 /** Registers LocalStorageCache as the Cache implementation. */

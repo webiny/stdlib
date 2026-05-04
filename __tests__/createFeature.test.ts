@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import "@webiny/di"; // loads reflect-metadata side-effect
-import { createFeature } from "../src/core/createFeature.js";
+import { createFeature } from "../src/common/core/createFeature.js";
 import type { Container } from "@webiny/di";
 
 describe("createFeature", () => {
