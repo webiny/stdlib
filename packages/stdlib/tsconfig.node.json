@@ -1,0 +1,18 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "composite": true,
+    "rootDir": "./src/node",
+    "outDir": "./dist/node",
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "types": ["node"],
+    "paths": {
+      "~/common": ["./src/index.js"],
+      "~/node": ["./src/node/index.js"],
+      "~/*": ["./src/*"]
+    }
+  },
+  "include": ["src/node"],
+  "references": [{ "path": "./tsconfig.common.json" }]
+}
