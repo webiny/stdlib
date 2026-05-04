@@ -25,7 +25,12 @@ export {
     createPinoLogger,
     type CreatePinoLoggerParams
 } from "./features/PinoLogger/index.js";
-export { PathTool, PathToolFeature, createPathTool } from "./features/PathTool/index.js";
+export {
+    PathTool,
+    PathToolFeature,
+    createPathTool,
+    PackageNotFoundError
+} from "./features/PathTool/index.js";
 export {
     NdJsonReaderTool,
     NdJsonReaderToolFeature,
