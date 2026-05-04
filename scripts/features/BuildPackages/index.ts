@@ -7,7 +7,18 @@ import { BuildOrchestrator as BuildOrchestratorImpl } from "./BuildOrchestrator.
 import { getWorkspaces } from "../../getWorkspaces.ts";
 
 export function run(rootDir: string): void {
-    const packages = getWorkspaces(rootDir);
+    const packages = getWorkspaces(rootDir).map(ws =>
+        ws.name === "@webiny/stdlib"
+            ? {
+                  ...ws,
+                  slices: [
+                      "tsconfig.common.json",
+                      "tsconfig.node.json",
+                      "tsconfig.browser.json"
+                  ]
+              }
+            : ws
+    );
     const container = new Container();
     container.registerInstance(ProjectConfig, { rootDir, packages });
     container.register(CleanerImpl).inSingletonScope();

@@ -31,7 +31,13 @@ class BuildOrchestratorImpl implements BuildOrchestratorAbstraction.Interface {
         }
 
         for (const pkg of packages) {
-            this.compiler.compile(join("packages", pkg.dir));
+            if (pkg.slices !== undefined) {
+                for (const slice of pkg.slices) {
+                    this.compiler.compile(join("packages", pkg.dir, slice));
+                }
+            } else {
+                this.compiler.compile(join("packages", pkg.dir));
+            }
         }
 
         for (const pkg of packages) {
