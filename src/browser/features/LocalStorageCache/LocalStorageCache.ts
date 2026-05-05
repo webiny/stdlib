@@ -34,8 +34,7 @@ class LocalStorageCacheImpl implements CacheAbstraction.Interface {
     private unavailable(): Result<never, LocalStorageUnavailableError> {
         return Result.fail(
             new LocalStorageUnavailableError({
-                message: "localStorage is not available",
-                stack: new Error().stack ?? ""
+                message: "localStorage is not available"
             })
         );
     }
@@ -54,8 +53,7 @@ class LocalStorageCacheImpl implements CacheAbstraction.Interface {
             return Result.fail(
                 new LocalStorageParseError({
                     message: `Failed to parse cache entry for key "${key}"`,
-                    data: { key },
-                    stack: new Error().stack ?? ""
+                    data: { key }
                 })
             );
         }
@@ -73,8 +71,7 @@ class LocalStorageCacheImpl implements CacheAbstraction.Interface {
             return Result.fail(
                 new LocalStorageQuotaExceededError({
                     message: `Storage quota exceeded for key "${key}"`,
-                    data: { key, valueSize: serialised.length },
-                    stack: new Error().stack ?? ""
+                    data: { key, valueSize: serialised.length }
                 })
             );
         }
@@ -155,8 +152,7 @@ class LocalStorageCacheImpl implements CacheAbstraction.Interface {
                 return Result.fail(
                     new LocalStorageParseError({
                         message: `Failed to parse cache entry for key "${key}"`,
-                        data: { key },
-                        stack: new Error().stack ?? ""
+                        data: { key }
                     })
                 );
             }
@@ -169,8 +165,7 @@ class LocalStorageCacheImpl implements CacheAbstraction.Interface {
             return Result.fail(
                 new LocalStorageQuotaExceededError({
                     message: `Storage quota exceeded for key "${key}"`,
-                    data: { key, valueSize: serialised.length },
-                    stack: new Error().stack ?? ""
+                    data: { key, valueSize: serialised.length }
                 })
             );
         }

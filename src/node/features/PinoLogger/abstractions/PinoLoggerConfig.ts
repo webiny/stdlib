@@ -4,7 +4,7 @@ import { createAbstraction } from "~/common/index.js";
  * Configuration shape for PinoLogger.
  * All fields are optional — PinoLogger defaults to info level + pretty transport.
  */
-export type PinoLoggerConfigData = {
+export interface PinoLoggerConfigData {
     /** Minimum log level. Default: "info". */
     logLevel?: "debug" | "info" | "warn" | "error" | "fatal";
     /**
@@ -13,7 +13,7 @@ export type PinoLoggerConfigData = {
      * - "json": compact JSON line per message (good for structured log pipelines)
      */
     transport?: "pretty" | "json";
-};
+}
 
 interface IPinoLoggerConfig {
     getConfig(): PinoLoggerConfigData;

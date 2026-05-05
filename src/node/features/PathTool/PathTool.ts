@@ -27,8 +27,7 @@ class PathToolImpl implements PathToolAbstraction.Interface {
         } catch {
             throw new PackageNotFoundError({
                 message: `Cannot resolve package file: ${specifier}`,
-                data: { specifier },
-                stack: new Error().stack ?? ""
+                data: { specifier }
             });
         }
     }

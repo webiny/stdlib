@@ -1,4 +1,5 @@
 export { Result, ResultAsync, BaseError, createAbstraction, createFeature } from "./core/index.js";
+export type { ErrorInput } from "./core/index.js";
 export { Logger, type ILogger } from "./features/Logger/abstractions/Logger.js";
 export { ConsoleLoggerConfig } from "./features/Logger/abstractions/ConsoleLoggerConfig.js";
 export { ConsoleLoggerFeature } from "./features/Logger/feature.js";

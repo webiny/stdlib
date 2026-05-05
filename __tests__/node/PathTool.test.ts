@@ -99,8 +99,7 @@ describe("PackageNotFoundError", () => {
     it("has code PACKAGE_NOT_FOUND", () => {
         const err = new PackageNotFoundError({
             message: "test",
-            data: { specifier: "@foo/bar" },
-            stack: new Error().stack ?? ""
+            data: { specifier: "@foo/bar" }
         });
         expect(err.code).toBe("PACKAGE_NOT_FOUND");
     });
@@ -108,8 +107,7 @@ describe("PackageNotFoundError", () => {
     it("exposes specifier in data", () => {
         const err = new PackageNotFoundError({
             message: "test",
-            data: { specifier: "@foo/bar/file.json" },
-            stack: new Error().stack ?? ""
+            data: { specifier: "@foo/bar/file.json" }
         });
         expect(err.data.specifier).toBe("@foo/bar/file.json");
     });

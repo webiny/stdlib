@@ -5,7 +5,7 @@ class TestError extends BaseError<{ detail: string }> {
     public readonly code = "TEST_ERROR";
 
     public constructor(message: string, detail: string) {
-        super({ message, data: { detail }, stack: new Error().stack ?? "" });
+        super({ message, data: { detail } });
     }
 }
 
@@ -13,7 +13,7 @@ class SimpleError extends BaseError {
     public readonly code = "SIMPLE_ERROR";
 
     public constructor(message: string) {
-        super({ message, stack: new Error().stack ?? "" });
+        super({ message });
     }
 }
 
