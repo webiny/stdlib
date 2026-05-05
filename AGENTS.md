@@ -6,47 +6,55 @@ This is the authoritative project guide for all AI agents working in this reposi
 
 ## Project Overview
 
-This is a **Yarn 4 monorepo** of TypeScript utility packages published to an npm registry under the `@webiny/` scope. All packages share the same version number (synchronized versioning).
+This is a **flat single-package TypeScript repo** publishing `@webiny/stdlib` to npm.
 
-The packages provide platform-specific utility services (file system, directory management, logging, HTTP fetching, etc.) built on a dependency injection system (`@webiny/di`). Every service follows the same abstraction → implementation → feature pattern described in detail below.
+The package provides platform-specific utility services (file system, directory management, logging, HTTP fetching, etc.) built on a dependency injection system (`@webiny/di`). Every service follows the same abstraction → implementation → feature pattern described in detail below.
+
+`@webiny/stdlib` has three subpath exports: `@webiny/stdlib` (common), `@webiny/stdlib/node` (Node.js), and `@webiny/stdlib/browser` (browser).
 
 ---
 
-## Monorepo Structure
+## Repository Structure
 
 ```
 /
-├── packages/
-│   ├── common/      # @webiny/utils-common — platform-agnostic utilities
-│   ├── node/        # @webiny/utils-node — Node.js-specific utils
-│   └── browser/     # @webiny/utils-browser — browser-specific utils
-├── package.json          # root workspace config
-├── tsconfig.json         # root solution file (references only, no files)
-├── tsconfig.base.json    # shared compiler options
-├── tsconfig.check.json   # root type-check config (covers vitest root files)
-├── vitest.config.ts      # root coverage config
-├── vitest.workspace.ts   # workspace project list
+├── src/                  # common slice root (barrel at src/index.ts)
+│   ├── common/           # platform-agnostic source (core/ + features/)
+│   ├── node/             # Node.js-specific source (FileTool, DirectoryTool, …)
+│   └── browser/          # browser-specific source (LocalStorageCacheFeature, …)
+├── __tests__/            # tests — __tests__/node/, __tests__/browser/
+├── scripts/              # build and publish automation (Node 24 strip-only)
+├── dist/                 # compiled output (gitignored)
+├── package.json          # @webiny/stdlib — exports, scripts
+├── tsconfig.json              # solution file + shared compiler options (no separate base)
+├── tsconfig.checkmode.json    # shared check overrides (composite:false, noEmit:true, rootDir:.)
+├── tsconfig.common.json       # build config for src/
+├── tsconfig.node.json         # build config for src/node/
+├── tsconfig.browser.json      # build config for src/browser/
+├── tsconfig.check.common.json  # type-check config for src/ + __tests__/ (common)
+├── tsconfig.check.node.json    # type-check config for src/node/ + __tests__/node/
+├── tsconfig.check.browser.json # type-check config for src/browser/ + __tests__/browser/
+├── tsconfig.check.scripts.json # type-check config for scripts/ only
+├── vitest.config.ts      # test + coverage config
 ├── CLAUDE.md
 └── AGENTS.md
 ```
 
-Each package lives in `packages/<name>/` and has its own:
+The repo is a single package (`@webiny/stdlib`) with three source slices:
 
-- `package.json`
-- `tsconfig.json` — extends `../../tsconfig.base.json`, sets platform-specific `module`, `moduleResolution`, `lib`, and `paths`
-- `tsconfig.check.json` — extends `tsconfig.json`, adds `__tests__/` and `vitest.config.ts` to the include set
-- `vitest.config.ts`
-- `src/` directory
-- `src/index.ts` — public barrel export
-- `__tests__/` directory at the package root (outside `src/`)
+- `src/common/` — platform-agnostic source (`core/` + `features/`), re-exported via `src/index.ts`
+- `src/node/` — Node.js-specific, barrel at `src/node/index.ts`
+- `src/browser/` — browser-specific, barrel at `src/browser/index.ts`
+
+Tests live in `__tests__/` at the repo root (outside `src/`), organised into `__tests__/node/` and `__tests__/browser/`.
 
 ---
 
 ## Packages
 
-### `@webiny/utils-common`
+### `@webiny/stdlib`
 
-Platform-agnostic. No Node.js or browser APIs. Safe to use in any environment (Node, browser, edge workers).
+Import from `@webiny/stdlib`. Platform-agnostic. No Node.js or browser APIs. Safe to use in any environment (Node, browser, edge workers).
 
 Contains:
 
@@ -65,30 +73,30 @@ Contains:
 - `MemoryCacheFeature` — registers an in-memory `Cache` implementation in singleton scope.
 - `AsyncMemoryCacheFeature` — registers an in-memory `AsyncCache` implementation in singleton scope.
 
-### `@webiny/utils-node`
+### `@webiny/stdlib/node`
 
-Node.js-specific. May use `node:fs`, `node:path`, `node:child_process`, and any other Node built-ins. Depends on `@webiny/utils-common`.
+Import from `@webiny/stdlib/node`. Node.js-specific. May use `node:fs`, `node:path`, `node:child_process`, and any other Node built-ins.
 
 Current features (each has a `README.md` in its feature folder):
 
 - `FileTool` — read, write, copy, remove files
 - `DirectoryTool` — create, read, remove, copy directories; `glob(cwd, pattern, options?)` lists files matching a fast-glob pattern relative to `cwd`. Returns `[]` when `cwd` does not exist. `GlobOptions`: `dot`, `ignore`, `deep`, `absolute`, `onlyFiles`.
 - `JsonFileTool` — read and write JSON files; optionally validates the parsed value with any schema object that has a `.parse(unknown): T` method (Zod-compatible)
-- `PathTool` — injectable wrapper around `node:path` (`join`, `resolve`, `dirname`, `basename`)
+- `PathTool` — injectable wrapper around `node:path` (`join`, `resolve`, `dirname`, `basename`). Also provides `resolvePackageFile(specifier)` to resolve a package-relative file specifier (e.g. `@webiny/cli/files/references.json`) to an absolute filesystem path from `process.cwd()`; throws `PackageNotFoundError` when the package cannot be found.
 - `PinoLoggerConfig` — optional config abstraction (token `"Node/PinoLoggerConfig"`). `Config` type has: `logLevel`, `transport` — both optional. Default behaviour (no config): `logLevel: "info"`, `transport: "pretty"`.
-- `PinoLogger` — pino-based Logger implementation. Registered under the `Logger` abstraction from `utils-common`. Optional `PinoLoggerConfig` dependency.
+- `PinoLogger` — pino-based Logger implementation. Registered under the `Logger` abstraction from `@webiny/stdlib`. Optional `PinoLoggerConfig` dependency.
 - `PinoLoggerFeature` — registers `PinoLogger` in singleton scope.
 - `NdJsonReaderTool` — parses NDJSON from a file path, a `Readable` stream, or an in-memory line iterable. Handles multi-line JSON via a `LineAccumulator` that tries newline-join and concatenation before discarding. `parseFile` uses `ReadStreamFactory` for guaranteed stream cleanup. Every yielded row is `{ data, line }` where `line` is the 1-based physical line number; pass `{ fromLine }` to any parse method to skip lines and resume from a checkpoint.
 - `ReadStreamFactory` — creates disposable `node:fs` read streams. `create(path, options?)` returns an `IReadStream` that implements `AsyncDisposable`. Use `await using` to guarantee the underlying file handle is released on scope exit (including early generator break or thrown errors). DI token: `"Node/ReadStreamFactory"`.
 - `PackageJsonFileTool` — reads, validates, and writes `package.json` files. `read`/`readOrThrow` return a `PackageJsonFile` value object with `readonly path`, `readonly raw` (typed as `PackageJson` from type-fest), and mutation helpers for `dependencies`, `devDependencies`, `peerDependencies`, and `resolutions`. Write methods accept either `(path, data)` or `(file)` — the latter uses the file's own path. Root-level well-known fields are validated with Zod (`.passthrough()` lets unknown fields through).
 
-Note: The `Logger` abstraction lives in `utils-common`, not `utils-node`. Both `ConsoleLogger` (common) and `PinoLogger` (node) register under the same `Logger` token.
+Note: The `Logger` abstraction lives in `@webiny/stdlib`, not `@webiny/stdlib/node`. Both `ConsoleLogger` and `PinoLogger` register under the same `Logger` token.
 
-### `@webiny/utils-browser`
+### `@webiny/stdlib/browser`
 
-Browser-specific. May use `window`, `document`, `localStorage`, `fetch`, React, and any other browser-only APIs. Depends on `@webiny/utils-common`.
+Import from `@webiny/stdlib/browser`. Browser-specific. May use `window`, `document`, `localStorage`, `fetch`, React, and any other browser-only APIs.
 
-If a tool/service works in both environments (e.g. a plain `fetch` call with no Node-specific APIs), it belongs in `utils-common` and can be re-exported from `utils-browser` if needed.
+If a tool/service works in both environments (e.g. a plain `fetch` call with no Node-specific APIs), it belongs in `@webiny/stdlib` (common) and can be re-exported from `@webiny/stdlib/browser` if needed.
 
 Contains:
 
@@ -105,11 +113,11 @@ The captured-reference pattern (`this.localStorage = window?.localStorage ?? nul
 
 When adding a new tool, choose the package based on its runtime dependencies:
 
-| Uses only JS built-ins / standard lib | → `utils-common` |
-| Uses `node:*` APIs or Node-only npm packages | → `utils-node` |
-| Uses `window`, `document`, React, browser APIs | → `utils-browser` |
+| Uses only JS built-ins / standard lib | → `@webiny/stdlib` root (`src/`) |
+| Uses `node:*` APIs or Node-only npm packages | → `@webiny/stdlib/node` (`src/node/`) |
+| Uses `window`, `document`, React, browser APIs | → `@webiny/stdlib/browser` (`src/browser/`) |
 
-`utils-node` and `utils-browser` must NOT depend on each other.
+The `src/node/` and `src/browser/` slices must NOT import from each other.
 
 ---
 
@@ -117,150 +125,191 @@ When adding a new tool, choose the package based on its runtime dependencies:
 
 | Tool                                | Purpose                                                                                                                         |
 | ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| Yarn 4 (`node-modules` linker)      | Package manager + workspaces                                                                                                    |
+| Yarn (no workspaces)                | Package manager — single package, no workspace file                                                                             |
 | `@typescript/native-preview` (tsgo) | TypeScript compiler — handles type-checking AND emit (JS + `.d.ts`). Do NOT add tsup, esbuild, or tsc as a separate build tool. |
-| Vitest + coverage                   | Testing. Each package has its own `vitest.config.ts`. Root has a workspace config that runs all packages.                       |
+| Vitest + coverage                   | Testing. Single `vitest.config.ts` at repo root covers all tests and coverage.                                                  |
 | oxlint                              | Linting                                                                                                                         |
 | oxfmt                               | Formatting                                                                                                                      |
 | adio                                | Import dependency checks                                                                                                        |
 
 **Build**: `tsgo` (the Go-based TypeScript 7 compiler from `@typescript/native-preview`) builds each package. It is ~10x faster than classic `tsc`. Use it for both type-checking and emit.
 
-**Testing**: Vitest with coverage. Tests live in `<package>/__tests__/` as `*.test.ts`. Each package is tested independently; the root workspace config lets you run all tests at once.
+**Testing**: Vitest with coverage. Tests live in `__tests__/` as `*.test.ts`. A single `vitest.config.ts` at the repo root runs all tests and coverage in one invocation.
 
 ---
 
 ## TypeScript Config
 
-Root `tsconfig.json` is a solution file (`files: []`, `references` only). Each package `tsconfig.json` extends `tsconfig.base.json`.
+Root `tsconfig.json` is both the solution file (`files: []`, `references` only) and the carrier for all shared strict `compilerOptions`. There is no separate `tsconfig.base.json`. Build tsconfigs extend `tsconfig.json` directly.
 
-`tsconfig.base.json` holds the strict flags shared by all packages. It does **not** set `module`, `moduleResolution`, or `lib` — those are per-package overrides.
+`tsconfig.json` holds the strict flags shared by all slices but does **not** set `module`, `moduleResolution`, or `lib` — those are per-slice overrides.
 
-### Build tsconfigs (`tsconfig.json` per package)
+### Build tsconfigs
 
-Used by `tsgo -b` to emit JS + `.d.ts` into `dist/`. Only covers `src/`.
+`@webiny/stdlib` uses three build tsconfigs — one per source slice — all emitting into `dist/`. Each is independently compilable via `tsgo -b`.
 
-`tsconfig.base.json` provides strict flags but does **not** set `module`, `moduleResolution`, or `lib` — each package defines its own platform-appropriate values.
-
-**packages/common (`@webiny/utils-common`):**
-
-```json
-{
-  "extends": "../../tsconfig.base.json",
-  "compilerOptions": {
-    "composite": true,
-    "rootDir": "./src",
-    "outDir": "./dist",
-    "module": "nodenext",
-    "moduleResolution": "nodenext",
-    "lib": ["esnext", "dom"]
-  },
-  "include": ["src"]
-}
-```
-
-`dom` is required even in common because TypeScript's `console` type comes from the DOM lib, not esnext.
-
-**packages/node (`@webiny/utils-node`):**
-
-```json
-{
-  "extends": "../../tsconfig.base.json",
-  "compilerOptions": {
-    "composite": true,
-    "rootDir": "./src",
-    "outDir": "./dist",
-    "module": "nodenext",
-    "moduleResolution": "nodenext",
-    "types": ["node"],
-    "paths": {
-      "~/*": ["./src/*"],
-      "@webiny/utils-common/*": ["../common/src/*"],
-      "@webiny/utils-common": ["../common/src/index.js"]
-    }
-  },
-  "include": ["src"],
-  "references": [{ "path": "../common" }]
-}
-```
-
-**packages/browser (`@webiny/utils-browser`):**
-
-```json
-{
-  "extends": "../../tsconfig.base.json",
-  "compilerOptions": {
-    "composite": true,
-    "rootDir": "./src",
-    "outDir": "./dist",
-    "module": "nodenext",
-    "moduleResolution": "nodenext",
-    "lib": ["esnext", "dom", "dom.iterable"],
-    "paths": {
-      "~/*": ["./src/*"],
-      "@webiny/utils-common/*": ["../common/src/*"],
-      "@webiny/utils-common": ["../common/src/index.js"]
-    }
-  },
-  "include": ["src"],
-  "references": [{ "path": "../common" }]
-}
-```
-
-`dom.iterable` is required for `HTMLCollectionOf<T>` and similar DOM iterable types.
-
-**Why `paths` in node and browser?** The `paths` entries map `@webiny/utils-common` directly to the source in `../common/src/`, so `yarn typecheck` can resolve cross-package imports without pre-building `common` first. With `moduleResolution: "nodenext"`, the path must point to an explicit file — `../common/src/index.js` — not a directory; tsgo maps `.js` → `.ts` at compile time.
-
-### Check tsconfigs (`tsconfig.check.json` per package)
-
-Used by `yarn typecheck` for static type checking only — no emit. Extends the build tsconfig and adds `__tests__/` and `vitest.config.ts` to the include set.
+**`tsconfig.common.json`** (common slice):
 
 ```json
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "composite": false,
-    "noEmit": true,
-    "rootDir": "."
+    "composite": true,
+    "rootDir": "./src",
+    "outDir": "./dist",
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "lib": ["esnext", "dom"],
+    "paths": { "~/*": ["./src/*"] }
   },
-  "include": ["src", "__tests__", "vitest.config.ts"]
+  "include": ["src"],
+  "exclude": ["src/node", "src/browser"]
 }
 ```
 
-Each package's check tsconfig inherits its platform-specific `paths`, `lib`, and `types` from the build tsconfig via `extends`. No extra configuration needed.
+`dom` is required even in common because TypeScript's `console` type comes from the DOM lib, not esnext.
 
-A root `tsconfig.check.json` covers the root `vitest.config.ts`, `vitest.workspace.ts`, and all files under `scripts/`:
+**`tsconfig.node.json`** (node slice):
 
 ```json
 {
-  "extends": "./tsconfig.base.json",
+  "extends": "./tsconfig.json",
   "compilerOptions": {
-    "noEmit": true,
+    "composite": true,
+    "rootDir": "./src/node",
+    "outDir": "./dist/node",
     "module": "nodenext",
     "moduleResolution": "nodenext",
     "types": ["node"],
-    "allowImportingTsExtensions": true
+    "paths": { "~/*": ["./src/*"] }
   },
-  "include": ["vitest.config.ts", "vitest.workspace.ts", "scripts/**/*.ts"]
+  "include": ["src/node"],
+  "references": [{ "path": "./tsconfig.common.json" }]
 }
 ```
 
-`allowImportingTsExtensions` is required because scripts use `.ts` extensions in their relative imports (see Scripts section below). It is only valid in combination with `noEmit: true`.
+**`tsconfig.browser.json`** (browser slice):
 
-Tests live in `__tests__/` at the package root (outside `src/`), so they are naturally excluded from the build by the `include: ["src"]` directive. They are type-checked by `yarn typecheck` via `tsconfig.check.json`.
+```json
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "composite": true,
+    "rootDir": "./src/browser",
+    "outDir": "./dist/browser",
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "lib": ["esnext", "dom", "dom.iterable"],
+    "paths": { "~/*": ["./src/*"] }
+  },
+  "include": ["src/browser"],
+  "references": [{ "path": "./tsconfig.common.json" }]
+}
+```
+
+`dom.iterable` is required for `HTMLCollectionOf<T>` and similar DOM iterable types.
+
+Each slice sets platform-specific options:
+
+- **common**: `lib: ["esnext", "dom"]`
+- **node**: `types: ["node"]`
+- **browser**: `lib: ["esnext", "dom", "dom.iterable"]`
+
+**Cross-slice imports:** The `src/node/` and `src/browser/` slices import common utilities using the `~/common/index.js` path alias, which TypeScript resolves via `paths` at compile time. The build script's `PathAliasRewriter` rewrites `~/` to the correct depth-relative prefix in emitted JS after `tsgo -b` runs.
+
+```ts
+import { Logger } from "~/common/index.js";
+```
+
+The `~/*` alias maps to `./src/*` (relative to the tsconfig file, i.e. the repo root), so `~/common/index.js` always resolves to `./src/common/index.ts` regardless of which slice file is importing it.
+
+**`tsconfig.json`** (solution file + shared options):
+
+```json
+{
+  "compilerOptions": {
+    "target": "esnext",
+    "strict": true,
+    "verbatimModuleSyntax": true,
+    "skipLibCheck": true
+    // ... all shared strict flags
+  },
+  "files": [],
+  "references": [
+    { "path": "./tsconfig.common.json" },
+    { "path": "./tsconfig.node.json" },
+    { "path": "./tsconfig.browser.json" }
+  ]
+}
+```
+
+### Check tsconfigs
+
+Used by `yarn typecheck` for static type checking only — no emit. There are four check configs, all using TypeScript 5 extends arrays. A shared `tsconfig.checkmode.json` provides the common overrides:
+
+```json
+// tsconfig.checkmode.json
+{
+  "compilerOptions": { "composite": false, "noEmit": true, "rootDir": "." }
+}
+```
+
+**`tsconfig.check.common.json`** (common slice check):
+
+```json
+{
+  "extends": ["./tsconfig.common.json", "./tsconfig.checkmode.json"],
+  "include": ["src", "__tests__", "vitest.config.ts"],
+  "exclude": ["src/node", "src/browser", "__tests__/node", "__tests__/browser"]
+}
+```
+
+**`tsconfig.check.node.json`** (node slice check):
+
+```json
+{
+  "extends": ["./tsconfig.node.json", "./tsconfig.checkmode.json"],
+  "include": ["src/node", "__tests__/node"]
+}
+```
+
+**`tsconfig.check.browser.json`** (browser slice check):
+
+```json
+{
+  "extends": ["./tsconfig.browser.json", "./tsconfig.checkmode.json"],
+  "include": ["src/browser", "__tests__/browser"]
+}
+```
+
+**`tsconfig.check.scripts.json`** (scripts check — covers only `scripts/`):
+
+```json
+{
+  "extends": ["./tsconfig.node.json", "./tsconfig.checkmode.json"],
+  "compilerOptions": { "allowImportingTsExtensions": true },
+  "include": ["scripts"]
+}
+```
+
+`allowImportingTsExtensions` is scoped to the scripts config only, which prevents it from silencing `.ts`-extension import errors in `src/node/` source (where `.js` extensions are mandatory).
+
+`yarn typecheck` runs all four configs: `tsgo -p tsconfig.check.common.json && tsgo -p tsconfig.check.node.json && tsgo -p tsconfig.check.browser.json && tsgo -p tsconfig.check.scripts.json`.
+
+Tests live in `__tests__/` at the repo root (outside `src/`), so they are naturally excluded from the build by the `include: ["src"]` directive. They are type-checked by `yarn typecheck` via the slice check configs.
 
 ---
 
 ## DI System (`@webiny/di`)
 
-Everything is built on constructor injection via `@webiny/di`. You never use this package directly in tool code — always through the wrappers in `utils-common`.
+Everything is built on constructor injection via `@webiny/di`. You never use this package directly in tool code — always through the wrappers in `@webiny/stdlib`.
 
 ### Abstraction token
 
 An `Abstraction<T>` is an opaque DI key that binds an interface type to a name:
 
 ```ts
-import { createAbstraction } from "@webiny/utils-common";
+import { createAbstraction } from "@webiny/stdlib";
 
 const FileTool = createAbstraction<IFileTool>("Core/FileTool");
 ```
@@ -319,7 +368,7 @@ Every tool/service follows this four-file layout:
 Defines the interface, the DI token, and the namespace type alias.
 
 ```ts
-import { createAbstraction } from "@webiny/utils-common";
+import { createAbstraction } from "@webiny/stdlib";
 
 /**
  * Reads, writes, copies and removes files.
@@ -350,7 +399,7 @@ The `namespace FileTool { export type Interface }` pattern lets consumers write 
 Implements the abstraction interface. Constructor injects other abstractions.
 
 ```ts
-import { Logger } from "@webiny/utils-common";
+import { Logger } from "~/common/index.js";
 import { FileTool as FileToolAbstraction } from "./abstractions/FileTool.js";
 import { DirectoryTool } from "../DirectoryTool/abstractions/DirectoryTool.js";
 
@@ -371,14 +420,14 @@ export const FileTool = FileToolAbstraction.createImplementation({
 
 Note the local alias `FileTool as FileToolAbstraction`. This avoids a name collision between the imported token and the exported implementation constant.
 
-Cross-package abstractions (like `Logger`) are imported from their package (`@webiny/utils-common`), never via relative paths from another package.
+Cross-slice imports (like `Logger`) use `~/common/index.js` in `src/node/` and `src/browser/` files (see TypeScript Config section).
 
 ### 3. Feature (`feature.ts`)
 
 Registers the implementation in the DI container. Most features have no parameters:
 
 ```ts
-import { createFeature } from "@webiny/utils-common";
+import { createFeature } from "@webiny/stdlib";
 import { FileTool } from "./FileTool.js";
 
 export const FileToolFeature = createFeature({
@@ -392,7 +441,7 @@ export const FileToolFeature = createFeature({
 When a feature needs runtime configuration, use the typed parameter form:
 
 ```ts
-import { createFeature } from "@webiny/utils-common";
+import { createFeature } from "@webiny/stdlib";
 import { Logger } from "./abstractions/Logger.js";
 
 interface MyFeatureParams {
@@ -428,12 +477,12 @@ export { FileToolFeature } from "./feature.js";
 Re-exports everything public:
 
 ```ts
-// utils-node example
+// stdlib/node example (src/node/index.ts)
 export { FileTool, FileToolFeature } from "./features/FileTool/index.js";
 export { DirectoryTool, DirectoryToolFeature } from "./features/DirectoryTool/index.js";
 export { PinoLogger, PinoLoggerConfig, PinoLoggerFeature } from "./features/PinoLogger/index.js";
 
-// utils-common example
+// stdlib example (src/index.ts)
 export {
   Logger,
   ConsoleLogger,
@@ -460,10 +509,10 @@ Do not write comments that just restate what the method name already says.
 
 ## Result and ResultAsync
 
-Use `Result<TValue, TError>` for synchronous operations that can fail, and `ResultAsync<TValue, TError>` for async ones. Both are in `@webiny/utils-common`.
+Use `Result<TValue, TError>` for synchronous operations that can fail, and `ResultAsync<TValue, TError>` for async ones. Both are in `@webiny/stdlib`.
 
 ```ts
-import { Result, ResultAsync } from "@webiny/utils-common";
+import { Result, ResultAsync } from "@webiny/stdlib";
 
 // Synchronous
 function divide(a: number, b: number): Result<number, string> {
@@ -499,7 +548,7 @@ const final = await processed.unwrap(); // Result<string, string>
 Subclass `BaseError` for domain-specific typed errors. The `code` property is abstract — always define it as a `readonly` literal string.
 
 ```ts
-import { BaseError } from "@webiny/utils-common";
+import { BaseError } from "@webiny/stdlib";
 
 // Error with no extra data
 class FileNotFoundError extends BaseError {
@@ -528,13 +577,13 @@ Passing `stack: new Error().stack ?? ""` is the correct way to capture the curre
 
 ### Container setup
 
-Every test file that tests a tool creates a `makeContainer()` helper. Silence logs during tests by registering a `PinoLoggerConfig` instance (or `ConsoleLoggerConfig` instance for `utils-common` tests) with `logLevel: "error"` before registering `PinoLoggerFeature`. Then register the features under test.
+Every test file that tests a tool creates a `makeContainer()` helper. Silence logs during tests by registering a `PinoLoggerConfig` instance (or `ConsoleLoggerConfig` instance for stdlib common tests) with `logLevel: "error"` before registering `PinoLoggerFeature`. Then register the features under test.
 
 ```ts
 import { Container } from "@webiny/di";
 import { FileTool, FileToolFeature } from "../features/FileTool/index.js";
 import { DirectoryToolFeature } from "../features/DirectoryTool/index.js";
-import { PinoLoggerConfig, PinoLoggerFeature } from "../features/PinoLogger/index.js";
+import { PinoLoggerConfig, PinoLoggerFeature } from "@webiny/stdlib/node";
 
 function makeContainer(): Container {
   const container = new Container();
@@ -548,7 +597,7 @@ function makeContainer(): Container {
 }
 ```
 
-For `utils-common` tests (e.g. testing with `ConsoleLogger`), use `ConsoleLoggerConfig` and `ConsoleLoggerFeature` from `@webiny/utils-common` instead.
+For stdlib common tests (e.g. testing with `ConsoleLogger`), use `ConsoleLoggerConfig` and `ConsoleLoggerFeature` from `@webiny/stdlib` instead.
 
 Resolve instances in `beforeEach` so each test gets a fresh container:
 
@@ -583,11 +632,11 @@ afterEach(() => {
 
 ### Type-checking tests
 
-**Test files must be type-correct.** `yarn typecheck` covers `__tests__/` via each package's `tsconfig.check.json`. Type errors in tests are caught before any code runs.
+**Test files must be type-correct.** `yarn typecheck` covers `__tests__/` via each slice's check config. Type errors in tests are caught before any code runs.
 
 ### Vitest config per package
 
-Node and common packages:
+`@webiny/stdlib` uses a single `vitest.config.ts` that does NOT set a global `environment`:
 
 ```ts
 import { defineConfig } from "vitest/config";
@@ -600,47 +649,33 @@ export default defineConfig({
 });
 ```
 
-Browser package — set `environment: "happy-dom"` to simulate `window`, `localStorage`, and other browser globals:
+Browser tests select the happy-dom environment on a per-file basis using a directive at the top of the test file:
 
 ```ts
-import { defineConfig } from "vitest/config";
-
-export default defineConfig({
-  test: {
-    globals: true,
-    environment: "happy-dom",
-    include: ["__tests__/**/*.{test,spec}.{ts,tsx}"]
-  }
-});
+// __tests__/browser/LocalStorageCache.test.ts
+// @vitest-environment happy-dom
+import { ... } from "@webiny/stdlib/browser";
 ```
+
+Node tests do not need any environment directive — Vitest defaults to the Node environment.
 
 **happy-dom spy cleanup:** `vi.restoreAllMocks()` does not reliably clean up `vi.spyOn` calls on happy-dom objects (e.g. `localStorage.setItem`). Always call `spy.mockRestore()` explicitly in a `finally` block when spying on happy-dom storage.
 
-### Root workspace and coverage
+### Single vitest.config.ts
 
-`vitest.workspace.ts` lists all packages using `defineProject` (not `defineWorkspace` — removed in Vitest 4). Use the actual directory names:
-
-```ts
-import { defineProject } from "vitest/config";
-
-export default [
-  defineProject({ test: { name: "utils-common", root: "./packages/common" } }),
-  defineProject({ test: { name: "utils-node", root: "./packages/node" } }),
-  defineProject({ test: { name: "utils-browser", root: "./packages/browser" } })
-];
-```
-
-Coverage is configured in the root `vitest.config.ts` with v8 provider:
+There is no workspace file — a single `vitest.config.ts` at the repo root handles both test discovery and coverage:
 
 ```ts
 import { defineConfig } from "vitest/config";
 
 export default defineConfig({
   test: {
+    globals: true,
+    include: ["__tests__/**/*.{test,spec}.{ts,tsx}"],
     coverage: {
       provider: "v8",
-      include: ["packages/*/src/**/*.ts"],
-      exclude: ["packages/*/__tests__/**", "**/index.ts", "**/abstractions/**"]
+      include: ["src/**/*.ts"],
+      exclude: ["**/__tests__/**", "**/index.ts", "**/abstractions/**"]
     }
   }
 });
@@ -650,156 +685,79 @@ export default defineConfig({
 
 ## Step-by-step: Adding a New Tool to an Existing Package
 
-Example: adding `HttpTool` to `utils-node`.
+Example: adding `HttpTool` to `@webiny/stdlib/node`.
 
-1. **Create the abstraction** at `packages/utils-node/src/features/HttpTool/abstractions/HttpTool.ts`:
+1. **Create the abstraction** at `src/node/features/HttpTool/abstractions/HttpTool.ts`:
    - Define `interface IHttpTool` with JSDoc on each method
    - Export `const HttpTool = createAbstraction<IHttpTool>("Core/HttpTool")`
    - Export `namespace HttpTool { export type Interface = IHttpTool }`
 
-2. **Create the abstraction barrel** at `packages/utils-node/src/features/HttpTool/abstractions/index.ts`:
+2. **Create the abstraction barrel** at `src/node/features/HttpTool/abstractions/index.ts`:
    - `export { HttpTool } from "./HttpTool.js";`
 
-3. **Create the implementation** at `packages/utils-node/src/features/HttpTool/HttpTool.ts`:
+3. **Create the implementation** at `src/node/features/HttpTool/HttpTool.ts`:
    - Rename the token import: `import { HttpTool as HttpToolAbstraction } from "./abstractions/HttpTool.js";`
+   - Import cross-slice dependencies via the common barrel: `import { Logger } from "~/common/index.js";`
    - `class HttpToolImpl implements HttpToolAbstraction.Interface { ... }`
    - `export const HttpTool = HttpToolAbstraction.createImplementation({ implementation: HttpToolImpl, dependencies: [...] })`
    - Dependencies array order must match constructor param order
 
-4. **Create the feature** at `packages/utils-node/src/features/HttpTool/feature.ts`:
+4. **Create the feature** at `src/node/features/HttpTool/feature.ts`:
    - `export const HttpToolFeature = createFeature({ name: "Core/HttpToolFeature", register(container) { container.register(HttpTool).inSingletonScope(); } })`
 
-5. **Create the feature index** at `packages/utils-node/src/features/HttpTool/index.ts`:
+5. **Create the feature index** at `src/node/features/HttpTool/index.ts`:
    - `export { HttpTool } from "./abstractions/index.js";`
    - `export { HttpToolFeature } from "./feature.js";`
 
-6. **Create the feature README** at `packages/utils-node/src/features/HttpTool/README.md`:
+6. **Create the feature README** at `src/node/features/HttpTool/README.md`:
    - One paragraph description — what it does and when to reach for it
    - Interface section — the public methods with JSDoc (copy from abstraction file)
    - Usage section — two code snippets: DI container wiring + `createXxx()` factory function
-   - Update the package `README.md` table to add a row pointing to the new feature README
+   - Update the repo `README.md` table to add a row pointing to the new feature README
 
-7. **Add to the package barrel** `packages/utils-node/src/index.ts`:
+7. **Add to the node slice barrel** `src/node/index.ts`:
    - `export { HttpTool, HttpToolFeature } from "./features/HttpTool/index.js";`
 
-8. **Write tests** at `packages/node/__tests__/HttpTool.test.ts` (note: `node` is the directory name; `packages/common/__tests__/` and `packages/browser/__tests__/` follow the same pattern):
+8. **Write tests** at `__tests__/node/HttpTool.test.ts`:
    - Create a `makeContainer()` helper (see Testing section)
    - Cover the happy path and error paths
+   - Node tests do not need a `// @vitest-environment` directive (only browser tests do)
 
 9. **Run the pre-commit chain** until fully clean (see Committing).
 
 ---
 
-## Step-by-step: Adding a New Package
+## Step-by-step: Adding a New Slice to `@webiny/stdlib`
 
-Example: adding `@webiny/utils-cli`.
+The repo now publishes a single package (`@webiny/stdlib`). New runtime environments (CLI, edge workers, etc.) should be added as a new source slice within `@webiny/stdlib` rather than a new package.
 
-1. **Create the directory**: `packages/utils-cli/`
+Example: adding a `cli` slice.
 
-2. **Create `packages/utils-cli/package.json`**:
+1. **Create `src/cli/`** with `index.ts` as the public barrel export.
 
-   ```json
-   {
-     "name": "@webiny/utils-cli",
-     "version": "0.0.0",
-     "type": "module",
-     "exports": {
-       ".": {
-         "import": "./dist/index.js",
-         "types": "./dist/index.d.ts"
-       }
-     },
-     "main": "./dist/index.js",
-     "types": "./dist/index.d.ts",
-     "files": ["dist"],
-     "dependencies": {
-       "@webiny/di": "^0.2.3",
-       "@webiny/utils-common": "0.0.0"
-     },
-     "scripts": {
-       "build": "tsgo -b --force",
-       "test": "vitest run",
-       "test:coverage": "vitest run --coverage"
-     }
-   }
-   ```
+2. **Create `tsconfig.cli.json`** following the pattern of `tsconfig.node.json` or `tsconfig.browser.json` — set platform-specific `module`, `moduleResolution`, `lib`/`types`, and `paths`. Add a reference to `tsconfig.common.json`.
 
-   Always version `0.0.0` — the real version is injected at publish time.
+3. **Create `tsconfig.check.cli.json`** as a TS5 extends array `["./tsconfig.cli.json", "./tsconfig.checkmode.json"]` with `include: ["src/cli", "__tests__/cli"]`.
 
-3. **Create `packages/utils-cli/tsconfig.json`** — add platform-specific `module`, `moduleResolution`, `lib`/`types`, and `paths` for cross-package source resolution:
+4. **Add to `tsconfig.json` references**:
 
    ```json
-   {
-     "extends": "../../tsconfig.base.json",
-     "compilerOptions": {
-       "composite": true,
-       "rootDir": "./src",
-       "outDir": "./dist",
-       "module": "nodenext",
-       "moduleResolution": "nodenext",
-       "types": ["node"],
-       "paths": {
-         "~/*": ["./src/*"],
-         "@webiny/utils-common/*": ["../common/src/*"],
-         "@webiny/utils-common": ["../common/src/index.js"]
-       }
-     },
-     "include": ["src"],
-     "references": [{ "path": "../common" }]
-   }
+   { "path": "./tsconfig.cli.json" }
    ```
 
-   Adjust `lib` / `types` for the target platform (see TypeScript Config section).
-
-4. **Create `packages/utils-cli/tsconfig.check.json`**:
+5. **Add a subpath export in `package.json`**:
 
    ```json
-   {
-     "extends": "./tsconfig.json",
-     "compilerOptions": { "composite": false, "noEmit": true, "rootDir": "." },
-     "include": ["src", "__tests__", "vitest.config.ts"]
-   }
+   "./cli": { "import": "./dist/cli/index.js", "types": "./dist/cli/index.d.ts" }
    ```
 
-5. **Create `packages/utils-cli/vitest.config.ts`**:
+6. **Add to `scripts/features/BuildPackages/index.ts` slices array** so the build script compiles the new slice.
 
-   ```ts
-   import { defineConfig } from "vitest/config";
-   export default defineConfig({
-     test: { globals: true, include: ["__tests__/**/*.{test,spec}.{ts,tsx}"] }
-   });
-   ```
+7. **Add `tsgo -p tsconfig.check.cli.json`** to the `typecheck` script in `package.json`.
 
-6. **Create `packages/utils-cli/src/index.ts`** — public barrel export.
+8. **Run `yarn install`** to ensure Yarn picks up any package.json changes.
 
-7. **Add to root `tsconfig.json` references**:
-
-   ```json
-   { "path": "./packages/utils-cli" }
-   ```
-
-8. **Add to root `vitest.workspace.ts`**:
-
-   ```ts
-   defineProject({ test: { name: "utils-cli", root: "./packages/utils-cli" } });
-   ```
-
-9. **Add to root `package.json` scripts**:
-   - `clean`: add `packages/utils-cli/dist`
-   - `build`: add `tsgo -b --force packages/utils-cli`
-   - `typecheck`: add `tsgo -p packages/utils-cli/tsconfig.check.json`
-
-   Full example:
-
-   ```
-   "clean": "rm -rf packages/common/dist packages/node/dist packages/browser/dist packages/utils-cli/dist",
-   "build": "yarn clean && tsgo -b --force packages/common && tsgo -b --force packages/node && tsgo -b --force packages/browser && tsgo -b --force packages/utils-cli",
-   "typecheck": "tsgo -p tsconfig.check.json && tsgo -p packages/common/tsconfig.check.json && tsgo -p packages/node/tsconfig.check.json && tsgo -p packages/browser/tsconfig.check.json && tsgo -p packages/utils-cli/tsconfig.check.json"
-   ```
-
-10. **Run `yarn install`** (Yarn 4 picks up the new workspace automatically).
-
-11. **Run the pre-commit chain** until fully clean.
+9. **Run the pre-commit chain** until fully clean.
 
 ---
 
@@ -825,7 +783,7 @@ node scripts/publishPackages.ts --publish # real release
 
 ### Feature structure
 
-Each script delegates to a DI-based feature under `scripts/features/<FeatureName>/`. The pattern mirrors the package feature pattern but uses `@webiny/di` directly (no `createAbstraction` / `createFeature` wrappers from `utils-common` — scripts are standalone and must not depend on built package output).
+Each script delegates to a DI-based feature under `scripts/features/<FeatureName>/`. The pattern mirrors the package feature pattern but uses `@webiny/di` directly (no `createAbstraction` / `createFeature` wrappers from `@webiny/stdlib` — scripts are standalone and must not depend on built package output).
 
 ```
 scripts/features/BuildPackages/
@@ -904,11 +862,11 @@ Node's module loader resolves specifiers literally. A `.js` specifier looks for 
 import { run } from "./features/BuildPackages/index.ts";
 import { Cleaner as CleanerAbstraction } from "./abstractions/Cleaner.ts";
 
-// WRONG — scripts/ (only valid in compiled packages/src/)
+// WRONG — scripts/ (only valid in compiled src/)
 import { run } from "./features/BuildPackages/index.js";
 ```
 
-Package source files under `packages/*/src/` continue to use `.js` extensions as before.
+Package source files under `src/` continue to use `.js` extensions as before.
 
 **2. No TypeScript parameter properties in script classes.**
 
@@ -965,11 +923,16 @@ The `type(scope): ` prefix is stripped; only the description appears in the entr
 
 ---
 
-## Inter-Package Dependencies
+## Internal Slice Dependencies
 
-- `utils-node` and `utils-browser` both depend on `utils-common`
-- Use the workspace protocol: `"@webiny/utils-common": "0.0.0"`
-- `utils-node` and `utils-browser` must NOT depend on each other
+Within `@webiny/stdlib`, the `src/node/` and `src/browser/` slices depend on `src/common/` (common), accessed via the stable path alias:
+
+```ts
+import { Logger } from "~/common/index.js";
+import { createAbstraction } from "~/common/index.js";
+```
+
+`~/*` maps to `./src/*` (relative to repo root), so `~/common/index.js` always resolves to `./src/common/index.ts` regardless of file depth. The alias is rewritten to the correct depth-relative prefix in emitted JS by `PathAliasRewriter`. The slices must NOT import from each other.
 
 ---
 
@@ -977,22 +940,22 @@ The `type(scope): ` prefix is stripped; only the description appears in the entr
 
 ```json
 {
-  "name": "@webiny/utils-node",
+  "name": "@webiny/stdlib",
   "version": "0.0.0",
   "type": "module",
   "exports": {
-    ".": {
-      "import": "./dist/index.js",
-      "types": "./dist/index.d.ts"
-    }
+    ".": { "import": "./dist/index.js", "types": "./dist/index.d.ts" },
+    "./node": { "import": "./dist/node/index.js", "types": "./dist/node/index.d.ts" },
+    "./browser": { "import": "./dist/browser/index.js", "types": "./dist/browser/index.d.ts" }
   },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "files": ["dist"],
   "scripts": {
-    "build": "tsgo -b --force",
+    "build": "node scripts/buildPackages.ts",
     "test": "vitest run",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "typecheck": "tsgo -p tsconfig.check.common.json && tsgo -p tsconfig.check.node.json && tsgo -p tsconfig.check.browser.json && tsgo -p tsconfig.check.scripts.json"
   }
 }
 ```
@@ -1007,16 +970,16 @@ Run a full build from the repo root:
 
 ```sh
 yarn build
-# expands to: yarn clean && tsgo -b --force packages/common && tsgo -b --force packages/node && tsgo -b --force packages/browser
+# expands to: node scripts/buildPackages.ts
+# which runs: tsgo -b --force tsconfig.common.json, then tsconfig.node.json, then tsconfig.browser.json
 ```
 
-`yarn clean` always runs first — it wipes all `dist/` directories so there are never stale compiled artifacts. Always use `--force` — builds must be complete rebuilds, not incremental. tsgo's project-reference ordering is unreliable in the current beta, so the root build script sequences each package explicitly.
+`yarn build` always cleans `dist/` first — it wipes all `dist/` directories so there are never stale compiled artifacts. Always use `--force` — builds must be complete rebuilds, not incremental. tsgo's project-reference ordering is unreliable in the current beta, so the build script sequences each slice explicitly.
 
 Run tests:
 
 ```sh
-yarn test               # all packages via vitest workspace
-yarn test --project utils-node   # single package
+yarn test               # all tests
 yarn test:coverage      # with v8 coverage
 ```
 
@@ -1044,7 +1007,7 @@ yarn test:coverage      # with v8 coverage
 Example of a good commit on a feature branch:
 
 ```
-feat(utils-node): add FileTool.appendFile
+feat(stdlib): add FileTool.appendFile
 
 Needed for log-rotation helpers that write incrementally.
 writeFile always truncates, so a separate append path avoids
@@ -1071,8 +1034,8 @@ Never use `--no-verify` or skip hooks.
 - **Every feature folder has a `README.md`.** Format: (1) one-paragraph description, (2) Interface section with JSDoc excerpts from the abstraction file, (3) Usage section with two snippets — DI container wiring and direct factory instantiation. Keep it current: if you change a method signature, add/remove a method, or change constructor dependencies, update the feature README in the same commit. Also update the package-level `README.md` table if you add or rename a feature.
 - **JSDoc comments are preferred** on interface methods, abstraction types, and public class methods. See JSDoc Comments section above.
 - **No inline comments that explain what the code does.** Only comment the non-obvious why (hidden constraints, subtle invariants, workarounds).
-- **Strict TypeScript.** All strict flags listed in `tsconfig.base.json` must pass.
-- **`.js` extensions in package source imports.** Under `packages/*/src/`, use `import { Foo } from "./Foo.js"` (not `.ts`). The `nodenext` module resolution requires explicit extensions; tsgo resolves `.js` to `.ts` source files at compile time. **Exception: `scripts/`** — scripts are run directly by Node 24 (not compiled), so use `.ts` extensions there (see Scripts section).
+- **Strict TypeScript.** All strict flags listed in `tsconfig.json` must pass.
+- **`.js` extensions in package source imports.** Under `src/`, use `import { Foo } from "./Foo.js"` (not `.ts`). The `nodenext` module resolution requires explicit extensions; tsgo resolves `.js` to `.ts` source files at compile time. **Exception: `scripts/`** — scripts are run directly by Node 24 (not compiled), so use `.ts` extensions there (see Scripts section).
 - **`node:` prefix for Node built-ins.** Always `import { readFileSync } from "node:fs"`, never `"fs"`.
 - **Singletons via DI.** Register utils as `.inSingletonScope()` unless there's a reason not to.
 - **No barrel re-exports of types only.** If something is exported, it should be usable, not just a type alias.

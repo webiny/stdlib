@@ -1,0 +1,4 @@
+{
+  "extends": ["./tsconfig.browser.json", "./tsconfig.checkmode.json"],
+  "include": ["src/browser", "__tests__/browser"]
+}

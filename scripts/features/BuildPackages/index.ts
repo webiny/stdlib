@@ -4,15 +4,18 @@ import { Cleaner as CleanerImpl } from "./Cleaner.ts";
 import { Compiler as CompilerImpl } from "./Compiler.ts";
 import { ArtifactCopier as ArtifactCopierImpl } from "./ArtifactCopier.ts";
 import { BuildOrchestrator as BuildOrchestratorImpl } from "./BuildOrchestrator.ts";
-import { getWorkspaces } from "../../getWorkspaces.ts";
+import { PathAliasRewriter as PathAliasRewriterImpl } from "./PathAliasRewriter.ts";
 
 export function run(rootDir: string): void {
-    const packages = getWorkspaces(rootDir);
     const container = new Container();
-    container.registerInstance(ProjectConfig, { rootDir, packages });
+    container.registerInstance(ProjectConfig, {
+        rootDir,
+        slices: ["tsconfig.common.json", "tsconfig.node.json", "tsconfig.browser.json"]
+    });
     container.register(CleanerImpl).inSingletonScope();
     container.register(CompilerImpl).inSingletonScope();
     container.register(ArtifactCopierImpl).inSingletonScope();
+    container.register(PathAliasRewriterImpl).inSingletonScope();
     container.register(BuildOrchestratorImpl).inSingletonScope();
     container.resolve(BuildOrchestrator).run();
 }

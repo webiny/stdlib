@@ -1,0 +1,4 @@
+{
+  "extends": ["./tsconfig.node.json", "./tsconfig.checkmode.json"],
+  "include": ["src/node", "__tests__/node"]
+}

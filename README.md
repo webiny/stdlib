@@ -1,30 +1,44 @@
-# webiny-node-utils
+# @webiny/stdlib
 
-A Yarn 4 monorepo of TypeScript utility packages published under the `@webiny/` scope. All packages are built on a constructor-injection DI system and share a single synchronized version.
+Standard library for Webiny applications. Published as three subpath exports:
 
-## Packages
+| Import                   | Environment | Description                 |
+| ------------------------ | ----------- | --------------------------- |
+| `@webiny/stdlib`         | Any         | Platform-agnostic utilities |
+| `@webiny/stdlib/node`    | Node.js     | Node.js-specific tools      |
+| `@webiny/stdlib/browser` | Browser     | Browser-specific tools      |
 
-| Package                                       | Description                                                                                                      |
-| --------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| [`@webiny/utils-common`](./packages/common)   | Platform-agnostic utilities — `Result`, `BaseError`, `Logger`, `Cache`. Safe in Node, browser, and edge workers. |
-| [`@webiny/utils-node`](./packages/node)       | Node.js utils — `FileTool`, `DirectoryTool`, `PinoLogger`.                                                       |
-| [`@webiny/utils-browser`](./packages/browser) | Browser utils — `LocalStorageCacheFeature`.                                                                      |
+---
 
-## Development
+## `@webiny/stdlib` — Common
 
-```sh
-yarn install
-yarn build          # clean + compile all packages
-yarn test           # run all tests
-yarn test:coverage  # with v8 coverage
-yarn typecheck      # type-check all packages + scripts
-```
+| Feature                                             | Description                                                                                 |
+| --------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| `Result` / `ResultAsync`                            | Typed success/failure values — synchronous and async                                        |
+| `BaseError`                                         | Abstract base class for typed domain errors                                                 |
+| `Logger` / `ConsoleLogger` / `ConsoleLoggerFeature` | Logging abstraction + console implementation — [docs](src/common/features/Logger/README.md) |
+| `Cache` / `MemoryCacheFeature`                      | Synchronous key-value cache — [docs](src/common/features/Cache/README.md)                   |
+| `AsyncCache` / `AsyncMemoryCacheFeature`            | Async key-value cache — [docs](src/common/features/Cache/README.md)                         |
 
-## Publishing
+---
 
-```sh
-node scripts/publishPackages.ts           # dry run — logs release plan, no side effects
-node scripts/publishPackages.ts --publish # real release: changelog, npm publish, git tag
-```
+## `@webiny/stdlib/node` — Node.js
 
-All packages are versioned and released together. The version is computed from conventional commits since the last tag and injected into `dist/package.json` at publish time — source `package.json` files always stay at `0.0.0`.
+| Feature                                              | Description                                                                                                                         |
+| ---------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| `FileTool` / `FileToolFeature`                       | Read, write, copy, remove files — [docs](src/node/features/FileTool/README.md)                                                      |
+| `DirectoryTool` / `DirectoryToolFeature`             | Create, read, remove, copy, glob directories — [docs](src/node/features/DirectoryTool/README.md)                                    |
+| `JsonFileTool` / `JsonFileToolFeature`               | Read and write JSON files with optional schema validation — [docs](src/node/features/JsonFileTool/README.md)                        |
+| `PathTool` / `PathToolFeature`                       | `node:path` wrapper + `resolvePackageFile` for package-relative paths — [docs](src/node/features/PathTool/README.md)                |
+| `PinoLogger` / `PinoLoggerFeature`                   | pino-based `Logger` implementation — [docs](src/node/features/PinoLogger/README.md)                                                 |
+| `NdJsonReaderTool` / `NdJsonReaderToolFeature`       | Parse NDJSON from files, streams, or in-memory lines with checkpoint support — [docs](src/node/features/NdJsonReaderTool/README.md) |
+| `ReadStreamFactory` / `ReadStreamFactoryFeature`     | Disposable `node:fs` read streams via `AsyncDisposable` — [docs](src/node/features/ReadStreamFactory/README.md)                     |
+| `PackageJsonFileTool` / `PackageJsonFileToolFeature` | Read, validate, mutate, and write `package.json` files — [docs](src/node/features/PackageJsonFileTool/README.md)                    |
+
+---
+
+## `@webiny/stdlib/browser` — Browser
+
+| Feature                    | Description                                                                                                       |
+| -------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| `LocalStorageCacheFeature` | `Cache` implementation backed by `window.localStorage` — [docs](src/browser/features/LocalStorageCache/README.md) |
