@@ -1,6 +1,14 @@
 # @webiny/stdlib
 
-Standard library for Webiny applications. Published as three subpath exports:
+Opinionated standard library for [Webiny](https://www.webiny.com). This is an internal package — we make breaking changes freely and do not follow semver for external consumers.
+
+## Design
+
+Services are built on a lightweight dependency injection system. Each feature follows the same three-layer pattern: an **abstraction** (DI token + interface), an **implementation** (concrete class), and a **feature** (registers the implementation in the DI container). This keeps code testable and lets different environments (Node.js, browser) swap implementations behind the same interface.
+
+## Subpath exports
+
+The package is ESM-only and ships three subpath exports. Because each is a separate entry point, Node.js-specific code is never bundled into a browser build and vice versa — unless you explicitly import the wrong subpath.
 
 | Import                   | Environment | Description                 |
 | ------------------------ | ----------- | --------------------------- |
@@ -42,3 +50,9 @@ Standard library for Webiny applications. Published as three subpath exports:
 | Feature                    | Description                                                                                                       |
 | -------------------------- | ----------------------------------------------------------------------------------------------------------------- |
 | `LocalStorageCacheFeature` | `Cache` implementation backed by `window.localStorage` — [docs](src/browser/features/LocalStorageCache/README.md) |
+
+---
+
+## Versioning
+
+The package version in `package.json` is always `0.0.0`. The real version is injected at publish time by the release pipeline using conventional commits: `feat` bumps the minor, everything else (`fix`, `chore`, `refactor`, …) bumps the patch. There are no major version bumps — breaking changes may land on minor releases.
