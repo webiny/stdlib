@@ -37,8 +37,8 @@
     "@vitest/coverage-v8": "^4.1.5",
     "adio": "^3.0.0",
     "happy-dom": "^20.9.0",
-    "oxfmt": "^0.47.0",
-    "oxlint": "^1.62.0",
+    "oxfmt": "^0.48.0",
+    "oxlint": "^1.63.0",
     "vitest": "^4.1.5"
   },
   "scripts": {
@@ -53,6 +53,7 @@
     "format:check": "oxfmt --check",
     "lint": "oxlint --deny-warnings",
     "lint:fix": "oxlint --fix",
+    "check:imports": "adio",
     "typecheck": "tsgo -p tsconfig.check.common.json && tsgo -p tsconfig.check.node.json && tsgo -p tsconfig.check.browser.json && tsgo -p tsconfig.check.scripts.json"
   }
 }
