@@ -4,4 +4,4 @@ import { run as publish } from "./features/PublishPackages/index.ts";
 
 const root = fileURLToPath(new URL("..", import.meta.url));
 build(root);
-publish(root);
+await publish(root);
