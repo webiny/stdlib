@@ -7,6 +7,8 @@ export interface IGitRepository {
     commitsSince(ref: string | null): string[];
     /** Creates a lightweight tag at HEAD. */
     createTag(tag: string): void;
+    /** Returns the fetch URL of the named remote. Throws if the remote does not exist. */
+    getRemoteUrl(name: string): string;
 }
 
 export const GitRepository = new Abstraction<IGitRepository>("Scripts/GitRepository");

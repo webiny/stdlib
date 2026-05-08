@@ -32,6 +32,13 @@ class GitRepositoryImpl implements GitRepositoryAbstraction.Interface {
     public createTag(tag: string): void {
         execFileSync("git", ["tag", tag], { cwd: this.config.rootDir });
     }
+
+    public getRemoteUrl(name: string): string {
+        return execFileSync("git", ["remote", "get-url", name], {
+            cwd: this.config.rootDir,
+            encoding: "utf8"
+        }).trim();
+    }
 }
 
 export const GitRepository = GitRepositoryAbstraction.createImplementation({
