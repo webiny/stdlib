@@ -63,9 +63,9 @@ describe("GithubRelease", () => {
         });
 
         it("throws for unrecognised remote URL", () => {
-            expect(() =>
-                makeContainer({ remoteUrl: "https://gitlab.com/acme/repo.git" })
-            ).toThrow("Cannot parse GitHub owner/repo");
+            expect(() => makeContainer({ remoteUrl: "https://gitlab.com/acme/repo.git" })).toThrow(
+                "Cannot parse GitHub owner/repo"
+            );
         });
     });
 
