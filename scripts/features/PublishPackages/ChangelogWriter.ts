@@ -36,10 +36,11 @@ class ChangelogWriterImpl implements ChangelogWriterAbstraction.Interface {
         this.config = config;
     }
 
-    public write(version: string, commits: string[]): void {
+    public write(version: string, commits: string[]): string {
         const sections = this.groupBySection(commits);
         const entry = this.formatEntry(version, sections);
         this.prepend(entry);
+        return entry;
     }
 
     private groupBySection(commits: string[]): Map<string, string[]> {

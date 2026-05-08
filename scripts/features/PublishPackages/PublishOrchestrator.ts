@@ -1,17 +1,19 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
-interface DistPackageJson {
-    version: string;
-    dependencies?: Record<string, string>;
-    [key: string]: unknown;
-}
 import { PublishOrchestrator as PublishOrchestratorAbstraction } from "./abstractions/PublishOrchestrator.ts";
 import { ProjectConfig } from "./abstractions/ProjectConfig.ts";
 import { NpmRegistry } from "./abstractions/NpmRegistry.ts";
 import { GitRepository } from "./abstractions/GitRepository.ts";
 import { VersionStrategy } from "./abstractions/VersionStrategy.ts";
 import { ChangelogWriter } from "./abstractions/ChangelogWriter.ts";
+import { GithubRelease } from "./abstractions/GithubRelease.ts";
+
+interface DistPackageJson {
+    version: string;
+    dependencies?: Record<string, string>;
+    [key: string]: unknown;
+}
 
 class PublishOrchestratorImpl implements PublishOrchestratorAbstraction.Interface {
     private readonly config: ProjectConfig.Interface;
@@ -19,22 +21,25 @@ class PublishOrchestratorImpl implements PublishOrchestratorAbstraction.Interfac
     private readonly git: GitRepository.Interface;
     private readonly versionStrategy: VersionStrategy.Interface;
     private readonly changelogWriter: ChangelogWriter.Interface;
+    private readonly githubRelease: GithubRelease.Interface;
 
     public constructor(
         config: ProjectConfig.Interface,
         npm: NpmRegistry.Interface,
         git: GitRepository.Interface,
         versionStrategy: VersionStrategy.Interface,
-        changelogWriter: ChangelogWriter.Interface
+        changelogWriter: ChangelogWriter.Interface,
+        githubRelease: GithubRelease.Interface
     ) {
         this.config = config;
         this.npm = npm;
         this.git = git;
         this.versionStrategy = versionStrategy;
         this.changelogWriter = changelogWriter;
+        this.githubRelease = githubRelease;
     }
 
-    public run(): void {
+    public async run(): Promise<void> {
         const { rootDir, packageName } = this.config;
 
         const published = this.npm.getLatestVersion(packageName) ?? "0.0.0";
@@ -66,10 +71,11 @@ class PublishOrchestratorImpl implements PublishOrchestratorAbstraction.Interfac
             console.log("[dry run] would update CHANGELOG.md");
             console.log(`[dry run] would publish ${packageName}@${newVersion}`);
             console.log(`[dry run] would tag v${newVersion}`);
+            await this.githubRelease.createRelease(`v${newVersion}`, `v${newVersion}`, "");
             return;
         }
 
-        this.changelogWriter.write(newVersion, commits);
+        const entry = this.changelogWriter.write(newVersion, commits);
         console.log("Updated CHANGELOG.md");
 
         const distDir = join(rootDir, "dist");
@@ -90,10 +96,19 @@ class PublishOrchestratorImpl implements PublishOrchestratorAbstraction.Interfac
 
         this.git.createTag(`v${newVersion}`);
         console.log(`Tagged v${newVersion}`);
+
+        await this.githubRelease.createRelease(`v${newVersion}`, `v${newVersion}`, entry);
     }
 }
 
 export const PublishOrchestrator = PublishOrchestratorAbstraction.createImplementation({
     implementation: PublishOrchestratorImpl,
-    dependencies: [ProjectConfig, NpmRegistry, GitRepository, VersionStrategy, ChangelogWriter]
+    dependencies: [
+        ProjectConfig,
+        NpmRegistry,
+        GitRepository,
+        VersionStrategy,
+        ChangelogWriter,
+        GithubRelease
+    ]
 });

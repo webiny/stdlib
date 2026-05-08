@@ -1,7 +1,7 @@
 import { Abstraction } from "@webiny/di";
 
 export interface IPublishOrchestrator {
-    run(): void;
+    run(): Promise<void>;
 }
 
 export const PublishOrchestrator = new Abstraction<IPublishOrchestrator>(

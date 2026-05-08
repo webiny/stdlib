@@ -32,8 +32,9 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@octokit/rest": "^22.0.1",
     "@types/node": ">=24",
-    "@typescript/native-preview": "beta",
+    "@typescript/native-preview": "^7.0.0-dev.20260508.1",
     "@vitest/coverage-v8": "^4.1.5",
     "adio": "^3.0.0",
     "happy-dom": "^20.9.0",
