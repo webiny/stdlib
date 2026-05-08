@@ -6,3 +6,4 @@ export type { VersionResult } from "./VersionStrategy.ts";
 export { ChangelogWriter } from "./ChangelogWriter.ts";
 export { PublishOrchestrator } from "./PublishOrchestrator.ts";
 export { GithubRelease } from "./GithubRelease.ts";
+export { GithubToken } from "./GithubToken.ts";

@@ -2,6 +2,7 @@ import { Octokit } from "@octokit/rest";
 import { GithubRelease as GithubReleaseAbstraction } from "./abstractions/GithubRelease.ts";
 import { ProjectConfig } from "./abstractions/ProjectConfig.ts";
 import { GitRepository } from "./abstractions/GitRepository.ts";
+import { GithubToken } from "./abstractions/GithubToken.ts";
 
 const HTTPS_RE = /https:\/\/github\.com\/([^/]+)\/([^/.]+?)(?:\.git)?$/;
 const SSH_RE = /git@github\.com:([^/]+)\/([^/.]+?)(?:\.git)?$/;
@@ -24,17 +25,17 @@ class GithubReleaseImpl implements GithubReleaseAbstraction.Interface {
     private readonly repo: string;
     private readonly octokit: Octokit;
 
-    public constructor(config: ProjectConfig.Interface, git: GitRepository.Interface) {
+    public constructor(
+        config: ProjectConfig.Interface,
+        git: GitRepository.Interface,
+        token: GithubToken.Interface
+    ) {
         this.config = config;
         const url = git.getRemoteUrl("origin");
         const { owner, repo } = parseGithubRepo(url);
         this.owner = owner;
         this.repo = repo;
-        const token = process.env["GITHUB_TOKEN"];
-        if (!token) {
-            throw new Error("GITHUB_TOKEN env var is required to create a GitHub release");
-        }
-        this.octokit = new Octokit({ auth: token });
+        this.octokit = new Octokit({ auth: token.getToken() });
     }
 
     public async createRelease(tag: string, title: string, body: string): Promise<void> {
@@ -58,5 +59,5 @@ class GithubReleaseImpl implements GithubReleaseAbstraction.Interface {
 
 export const GithubRelease = GithubReleaseAbstraction.createImplementation({
     implementation: GithubReleaseImpl,
-    dependencies: [ProjectConfig, GitRepository]
+    dependencies: [ProjectConfig, GitRepository, GithubToken]
 });
