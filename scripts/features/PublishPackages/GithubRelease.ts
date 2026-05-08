@@ -39,7 +39,9 @@ class GithubReleaseImpl implements GithubReleaseAbstraction.Interface {
 
     public async createRelease(tag: string, title: string, body: string): Promise<void> {
         if (this.config.dryRun) {
-            console.log(`[dry run] would create GitHub release ${tag} for ${this.owner}/${this.repo}`);
+            console.log(
+                `[dry run] would create GitHub release ${tag} for ${this.owner}/${this.repo}`
+            );
             return;
         }
 
