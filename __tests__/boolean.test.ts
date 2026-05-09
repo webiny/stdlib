@@ -33,7 +33,7 @@ describe("toBoolean", () => {
             expect(toBoolean(1)).toBe(true);
         });
 
-        it.each([0, 2, -1, 100, NaN])("returns false for %s", value => {
+        it.each([0, 2, -1, 100, NaN, Infinity, -Infinity])("returns false for %s", value => {
             expect(toBoolean(value)).toBe(false);
         });
     });

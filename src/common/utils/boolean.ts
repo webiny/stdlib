@@ -1,11 +1,4 @@
-/**
- * Coerces a value to boolean with the same rules as the `boolean` npm package.
- *
- * Truthy strings (case-insensitive, trimmed): "true", "t", "yes", "y", "on", "1".
- * Truthy number: 1 only.
- * Booleans pass through.
- * Everything else returns false.
- */
+/** Exact semantic parity with the `boolean` npm package. */
 export function toBoolean(value: unknown): boolean {
     switch (Object.prototype.toString.call(value)) {
         case "[object String]":
