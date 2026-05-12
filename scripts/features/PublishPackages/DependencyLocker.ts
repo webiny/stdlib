@@ -8,10 +8,7 @@ class DependencyLockerImpl implements DependencyLockerAbstraction.Interface {
         this.config = config;
     }
 
-    public lock(pkgJson: {
-        dependencies?: Record<string, string>;
-        devDependencies?: Record<string, string>;
-    }): void {
+    public lock(pkgJson: DependencyLockerAbstraction.Params): void {
         if (!this.config.exactDependencyVersions) {
             return;
         }
@@ -25,9 +22,20 @@ class DependencyLockerImpl implements DependencyLockerAbstraction.Interface {
         }
     }
 
-    private stripRangeOperators(deps: Record<string, string>): Record<string, string> {
-        const result: Record<string, string> = {};
+    private stripRangeOperators(
+        deps: DependencyLockerAbstraction.Dependency
+    ): DependencyLockerAbstraction.Dependency {
+        const result: DependencyLockerAbstraction.Dependency = {};
+        if (!deps) {
+            return result;
+        }
         for (const [name, version] of Object.entries(deps)) {
+            /**
+             * Impossible but TS doesn't know that. If version is undefined, we skip it and don't include it in the result.
+             */
+            if (!version) {
+                continue;
+            }
             result[name] = version.replace(/^(\^|~|>=|<=|>|<)+/, "");
         }
         return result;
