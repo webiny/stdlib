@@ -10,7 +10,11 @@ export function run(rootDir: string): void {
     const container = new Container();
     container.registerInstance(ProjectConfig, {
         rootDir,
-        slices: ["tsconfig.common.json", "tsconfig.node.json", "tsconfig.browser.json"]
+        slices: [
+            "config/tsconfig.common.json",
+            "config/tsconfig.node.json",
+            "config/tsconfig.browser.json"
+        ]
     });
     container.register(CleanerImpl).inSingletonScope();
     container.register(CompilerImpl).inSingletonScope();

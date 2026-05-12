@@ -1,14 +1,14 @@
 {
-  "extends": "./tsconfig.json",
+  "extends": "../tsconfig.json",
   "compilerOptions": {
     "composite": true,
-    "rootDir": "./src/node",
-    "outDir": "./dist/node",
+    "rootDir": "../src/node",
+    "outDir": "../dist/node",
     "module": "nodenext",
     "moduleResolution": "nodenext",
     "types": ["node"],
-    "paths": { "~/*": ["./src/*"] }
+    "paths": { "~/*": ["../src/*"] }
   },
-  "include": ["src/node"],
+  "include": ["../src/node"],
   "references": [{ "path": "./tsconfig.common.json" }]
 }

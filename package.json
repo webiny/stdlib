@@ -50,14 +50,14 @@
     "build": "node scripts/buildPackages.ts",
     "pack:packages": "node scripts/packPackages.ts",
     "publish:packages": "node scripts/publishPackages.ts",
-    "test": "vitest run",
-    "test:coverage": "vitest run --coverage",
+    "test": "vitest run --config testing/vitest.config.ts",
+    "test:coverage": "vitest run --coverage --config testing/vitest.config.ts",
     "format": "oxfmt",
     "format:fix": "oxfmt",
     "format:check": "oxfmt --check",
     "lint": "oxlint --deny-warnings",
     "lint:fix": "oxlint --fix",
     "check:imports": "adio",
-    "typecheck": "tsgo -p tsconfig.check.common.json && tsgo -p tsconfig.check.node.json && tsgo -p tsconfig.check.browser.json && tsgo -p tsconfig.check.scripts.json"
+    "typecheck": "tsgo -p config/tsconfig.check.common.json && tsgo -p config/tsconfig.check.node.json && tsgo -p config/tsconfig.check.browser.json && tsgo -p config/tsconfig.check.scripts.json"
   }
 }
