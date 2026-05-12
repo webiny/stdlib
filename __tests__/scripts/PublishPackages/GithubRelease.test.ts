@@ -27,7 +27,8 @@ function makeContainer(opts: {
     container.registerInstance(ProjectConfig, {
         rootDir: "/tmp",
         packageName: "@test/pkg",
-        dryRun: opts.dryRun ?? false
+        dryRun: opts.dryRun ?? false,
+        exactDependencyVersions: false
     });
     container.registerInstance(GitRepository, {
         tagExists: vi.fn(),

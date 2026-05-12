@@ -8,10 +8,12 @@ import { GitRepository } from "./abstractions/GitRepository.ts";
 import { VersionStrategy } from "./abstractions/VersionStrategy.ts";
 import { ChangelogWriter } from "./abstractions/ChangelogWriter.ts";
 import { GithubRelease } from "./abstractions/GithubRelease.ts";
+import { DependencyLocker } from "./abstractions/DependencyLocker.ts";
 
 interface DistPackageJson {
     version: string;
     dependencies?: Record<string, string>;
+    devDependencies?: Record<string, string>;
     [key: string]: unknown;
 }
 
@@ -22,6 +24,7 @@ class PublishOrchestratorImpl implements PublishOrchestratorAbstraction.Interfac
     private readonly versionStrategy: VersionStrategy.Interface;
     private readonly changelogWriter: ChangelogWriter.Interface;
     private readonly githubRelease: GithubRelease.Interface;
+    private readonly dependencyLocker: DependencyLocker.Interface;
 
     public constructor(
         config: ProjectConfig.Interface,
@@ -29,7 +32,8 @@ class PublishOrchestratorImpl implements PublishOrchestratorAbstraction.Interfac
         git: GitRepository.Interface,
         versionStrategy: VersionStrategy.Interface,
         changelogWriter: ChangelogWriter.Interface,
-        githubRelease: GithubRelease.Interface
+        githubRelease: GithubRelease.Interface,
+        dependencyLocker: DependencyLocker.Interface
     ) {
         this.config = config;
         this.npm = npm;
@@ -37,6 +41,7 @@ class PublishOrchestratorImpl implements PublishOrchestratorAbstraction.Interfac
         this.versionStrategy = versionStrategy;
         this.changelogWriter = changelogWriter;
         this.githubRelease = githubRelease;
+        this.dependencyLocker = dependencyLocker;
     }
 
     public async run(): Promise<void> {
@@ -89,6 +94,7 @@ class PublishOrchestratorImpl implements PublishOrchestratorAbstraction.Interfac
                 }
             }
         }
+        this.dependencyLocker.lock(pkgJson);
         writeFileSync(pkgJsonPath, JSON.stringify(pkgJson, null, 2) + "\n");
 
         console.log(`Publishing ${packageName}@${newVersion}...`);
@@ -109,6 +115,7 @@ export const PublishOrchestrator = PublishOrchestratorAbstraction.createImplemen
         GitRepository,
         VersionStrategy,
         ChangelogWriter,
-        GithubRelease
+        GithubRelease,
+        DependencyLocker
     ]
 });
