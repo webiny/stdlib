@@ -155,7 +155,8 @@ describe("mutableDelete", () => {
 
     it("returns void", () => {
         const obj = { a: 1 };
-        expect(mutableDelete(obj, "a")).toBeUndefined();
+        const result: void = mutableDelete(obj, "a");
+        expect(result).toBeUndefined();
     });
 
     it("is a no-op when the path does not exist", () => {
