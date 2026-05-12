@@ -28,8 +28,8 @@
   },
   "files": [],
   "references": [
-    { "path": "./tsconfig.common.json" },
-    { "path": "./tsconfig.node.json" },
-    { "path": "./tsconfig.browser.json" }
+    { "path": "./config/tsconfig.common.json" },
+    { "path": "./config/tsconfig.node.json" },
+    { "path": "./config/tsconfig.browser.json" }
   ]
 }

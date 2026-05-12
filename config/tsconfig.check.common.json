@@ -1,0 +1,11 @@
+{
+  "extends": ["./tsconfig.common.json", "./tsconfig.checkmode.json"],
+  "include": ["../src", "../__tests__", "../testing/vitest.config.ts"],
+  "exclude": [
+    "../src/node",
+    "../src/browser",
+    "../__tests__/node",
+    "../__tests__/browser",
+    "../__tests__/scripts"
+  ]
+}

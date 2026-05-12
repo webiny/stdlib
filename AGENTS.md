@@ -26,16 +26,18 @@ The package provides platform-specific utility services (file system, directory 
 ├── scripts/              # build and publish automation (Node 24 strip-only)
 ├── dist/                 # compiled output (gitignored)
 ├── package.json          # @webiny/stdlib — exports, scripts
+├── config/               # tooling configs
+│   ├── tsconfig.common.json       # build config for src/
+│   ├── tsconfig.node.json         # build config for src/node/
+│   ├── tsconfig.browser.json      # build config for src/browser/
+│   ├── tsconfig.checkmode.json    # shared check overrides (composite:false, noEmit:true, rootDir:..)
+│   ├── tsconfig.check.common.json  # type-check config for src/ + __tests__/ (common)
+│   ├── tsconfig.check.node.json    # type-check config for src/node/ + __tests__/node/
+│   ├── tsconfig.check.browser.json # type-check config for src/browser/ + __tests__/browser/
+│   └── tsconfig.check.scripts.json # type-check config for scripts/ only
+├── testing/              # test tooling
+│   └── vitest.config.ts  # test + coverage config
 ├── tsconfig.json              # solution file + shared compiler options (no separate base)
-├── tsconfig.checkmode.json    # shared check overrides (composite:false, noEmit:true, rootDir:.)
-├── tsconfig.common.json       # build config for src/
-├── tsconfig.node.json         # build config for src/node/
-├── tsconfig.browser.json      # build config for src/browser/
-├── tsconfig.check.common.json  # type-check config for src/ + __tests__/ (common)
-├── tsconfig.check.node.json    # type-check config for src/node/ + __tests__/node/
-├── tsconfig.check.browser.json # type-check config for src/browser/ + __tests__/browser/
-├── tsconfig.check.scripts.json # type-check config for scripts/ only
-├── vitest.config.ts      # test + coverage config
 ├── CLAUDE.md
 └── AGENTS.md
 ```
@@ -152,18 +154,18 @@ Root `tsconfig.json` is both the solution file (`files: []`, `references` only) 
 
 ```json
 {
-  "extends": "./tsconfig.json",
+  "extends": "../tsconfig.json",
   "compilerOptions": {
     "composite": true,
-    "rootDir": "./src",
-    "outDir": "./dist",
+    "rootDir": "../src",
+    "outDir": "../dist",
     "module": "nodenext",
     "moduleResolution": "nodenext",
     "lib": ["esnext", "dom"],
-    "paths": { "~/*": ["./src/*"] }
+    "paths": { "~/*": ["../src/*"] }
   },
-  "include": ["src"],
-  "exclude": ["src/node", "src/browser"]
+  "include": ["../src"],
+  "exclude": ["../src/node", "../src/browser"]
 }
 ```
 
@@ -173,17 +175,17 @@ Root `tsconfig.json` is both the solution file (`files: []`, `references` only) 
 
 ```json
 {
-  "extends": "./tsconfig.json",
+  "extends": "../tsconfig.json",
   "compilerOptions": {
     "composite": true,
-    "rootDir": "./src/node",
-    "outDir": "./dist/node",
+    "rootDir": "../src/node",
+    "outDir": "../dist/node",
     "module": "nodenext",
     "moduleResolution": "nodenext",
     "types": ["node"],
-    "paths": { "~/*": ["./src/*"] }
+    "paths": { "~/*": ["../src/*"] }
   },
-  "include": ["src/node"],
+  "include": ["../src/node"],
   "references": [{ "path": "./tsconfig.common.json" }]
 }
 ```
@@ -192,17 +194,17 @@ Root `tsconfig.json` is both the solution file (`files: []`, `references` only) 
 
 ```json
 {
-  "extends": "./tsconfig.json",
+  "extends": "../tsconfig.json",
   "compilerOptions": {
     "composite": true,
-    "rootDir": "./src/browser",
-    "outDir": "./dist/browser",
+    "rootDir": "../src/browser",
+    "outDir": "../dist/browser",
     "module": "nodenext",
     "moduleResolution": "nodenext",
     "lib": ["esnext", "dom", "dom.iterable"],
-    "paths": { "~/*": ["./src/*"] }
+    "paths": { "~/*": ["../src/*"] }
   },
-  "include": ["src/browser"],
+  "include": ["../src/browser"],
   "references": [{ "path": "./tsconfig.common.json" }]
 }
 ```
@@ -236,9 +238,9 @@ The `~/*` alias maps to `./src/*` (relative to the tsconfig file, i.e. the repo 
   },
   "files": [],
   "references": [
-    { "path": "./tsconfig.common.json" },
-    { "path": "./tsconfig.node.json" },
-    { "path": "./tsconfig.browser.json" }
+    { "path": "./config/tsconfig.common.json" },
+    { "path": "./config/tsconfig.node.json" },
+    { "path": "./config/tsconfig.browser.json" }
   ]
 }
 ```
@@ -248,9 +250,9 @@ The `~/*` alias maps to `./src/*` (relative to the tsconfig file, i.e. the repo 
 Used by `yarn typecheck` for static type checking only — no emit. There are four check configs, all using TypeScript 5 extends arrays. A shared `tsconfig.checkmode.json` provides the common overrides:
 
 ```json
-// tsconfig.checkmode.json
+// config/tsconfig.checkmode.json
 {
-  "compilerOptions": { "composite": false, "noEmit": true, "rootDir": "." }
+  "compilerOptions": { "composite": false, "noEmit": true, "rootDir": ".." }
 }
 ```
 
@@ -259,8 +261,8 @@ Used by `yarn typecheck` for static type checking only — no emit. There are fo
 ```json
 {
   "extends": ["./tsconfig.common.json", "./tsconfig.checkmode.json"],
-  "include": ["src", "__tests__", "vitest.config.ts"],
-  "exclude": ["src/node", "src/browser", "__tests__/node", "__tests__/browser"]
+  "include": ["../src", "../__tests__", "../testing/vitest.config.ts"],
+  "exclude": ["../src/node", "../src/browser", "../__tests__/node", "../__tests__/browser"]
 }
 ```
 
@@ -269,7 +271,7 @@ Used by `yarn typecheck` for static type checking only — no emit. There are fo
 ```json
 {
   "extends": ["./tsconfig.node.json", "./tsconfig.checkmode.json"],
-  "include": ["src/node", "__tests__/node"]
+  "include": ["../src/node", "../__tests__/node"]
 }
 ```
 
@@ -278,7 +280,7 @@ Used by `yarn typecheck` for static type checking only — no emit. There are fo
 ```json
 {
   "extends": ["./tsconfig.browser.json", "./tsconfig.checkmode.json"],
-  "include": ["src/browser", "__tests__/browser"]
+  "include": ["../src/browser", "../__tests__/browser"]
 }
 ```
 
@@ -288,13 +290,13 @@ Used by `yarn typecheck` for static type checking only — no emit. There are fo
 {
   "extends": ["./tsconfig.node.json", "./tsconfig.checkmode.json"],
   "compilerOptions": { "allowImportingTsExtensions": true },
-  "include": ["scripts"]
+  "include": ["../scripts", "../__tests__/scripts"]
 }
 ```
 
 `allowImportingTsExtensions` is scoped to the scripts config only, which prevents it from silencing `.ts`-extension import errors in `src/node/` source (where `.js` extensions are mandatory).
 
-`yarn typecheck` runs all four configs: `tsgo -p tsconfig.check.common.json && tsgo -p tsconfig.check.node.json && tsgo -p tsconfig.check.browser.json && tsgo -p tsconfig.check.scripts.json`.
+`yarn typecheck` runs all four configs: `tsgo -p config/tsconfig.check.common.json && tsgo -p config/tsconfig.check.node.json && tsgo -p config/tsconfig.check.browser.json && tsgo -p config/tsconfig.check.scripts.json`.
 
 Tests live in `__tests__/` at the repo root (outside `src/`), so they are naturally excluded from the build by the `include: ["src"]` directive. They are type-checked by `yarn typecheck` via the slice check configs.
 
@@ -953,9 +955,9 @@ import { createAbstraction } from "~/common/index.js";
   "files": ["dist"],
   "scripts": {
     "build": "node scripts/buildPackages.ts",
-    "test": "vitest run",
-    "test:coverage": "vitest run --coverage",
-    "typecheck": "tsgo -p tsconfig.check.common.json && tsgo -p tsconfig.check.node.json && tsgo -p tsconfig.check.browser.json && tsgo -p tsconfig.check.scripts.json"
+    "test": "vitest run --config testing/vitest.config.ts",
+    "test:coverage": "vitest run --coverage --config testing/vitest.config.ts",
+    "typecheck": "tsgo -p config/tsconfig.check.common.json && tsgo -p config/tsconfig.check.node.json && tsgo -p config/tsconfig.check.browser.json && tsgo -p config/tsconfig.check.scripts.json"
   }
 }
 ```

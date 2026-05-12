@@ -20,13 +20,15 @@ The package is ESM-only and ships three subpath exports. Because each is a separ
 
 ## `@webiny/stdlib` — Common
 
-| Feature                                             | Description                                                                                 |
-| --------------------------------------------------- | ------------------------------------------------------------------------------------------- |
-| `Result` / `ResultAsync`                            | Typed success/failure values — synchronous and async                                        |
-| `BaseError`                                         | Abstract base class for typed domain errors                                                 |
-| `Logger` / `ConsoleLogger` / `ConsoleLoggerFeature` | Logging abstraction + console implementation — [docs](src/common/features/Logger/README.md) |
-| `Cache` / `MemoryCacheFeature`                      | Synchronous key-value cache — [docs](src/common/features/Cache/README.md)                   |
-| `AsyncCache` / `AsyncMemoryCacheFeature`            | Async key-value cache — [docs](src/common/features/Cache/README.md)                         |
+| Feature                                                                              | Description                                                                                 |
+| ------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------- |
+| `Result` / `ResultAsync`                                                             | Typed success/failure values — synchronous and async                                        |
+| `BaseError`                                                                          | Abstract base class for typed domain errors                                                 |
+| `Logger` / `ConsoleLogger` / `ConsoleLoggerFeature`                                  | Logging abstraction + console implementation — [docs](src/common/features/Logger/README.md) |
+| `Cache` / `MemoryCacheFeature`                                                       | Synchronous key-value cache — [docs](src/common/features/Cache/README.md)                   |
+| `AsyncCache` / `AsyncMemoryCacheFeature`                                             | Async key-value cache — [docs](src/common/features/Cache/README.md)                         |
+| `immutableGet` / `immutableSet` / `immutableDelete` / `mutableSet` / `mutableDelete` | Dot-notation get/set/delete on nested objects — [docs](src/common/utils/README.md#dotprop)  |
+| `toBoolean` / `isTruthy` / `isFalsy`                                                 | Semantic boolean coercion — [docs](src/common/utils/README.md#boolean)                      |
 
 ---
 
