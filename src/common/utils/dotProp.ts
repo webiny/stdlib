@@ -4,14 +4,16 @@ import { getProperty, setProperty, deleteProperty } from "dot-prop";
  * Get a nested property value by dot-notation path.
  */
 function immutableGet<T = unknown>(
-    object: Record<string, any> | null | undefined,
+    target: Record<string, any> | null | undefined,
     path: string,
     defaultValue?: T
 ): T {
-    if (!object) {
+    if (!target && !defaultValue) {
+        return defaultValue as unknown as T;
+    } else if (!target) {
         return structuredClone(defaultValue) as T;
     }
-    return getProperty(structuredClone(object), path, defaultValue) as T;
+    return getProperty(structuredClone(target), path, defaultValue) as T;
 }
 
 /**
@@ -19,11 +21,11 @@ function immutableGet<T = unknown>(
  * If value is a function, it receives the current value and should return the new value.
  */
 function immutableSet<T extends Record<string, any>>(
-    object: T,
+    target: T,
     path: string,
     value: unknown | ((current: any) => unknown)
 ): T {
-    const clone = structuredClone(object);
+    const clone = structuredClone(target);
     const finalValue = typeof value === "function" ? value(getProperty(clone, path)) : value;
     setProperty(clone, path, finalValue);
     return clone;
@@ -32,25 +34,24 @@ function immutableSet<T extends Record<string, any>>(
 /**
  * Returns a deep clone with the property at the given path removed.
  */
-function immutableDelete<T extends Record<string, any>>(object: T, path: string): T {
-    const clone = structuredClone(object);
+function immutableDelete<T extends Record<string, any>>(target: T, path: string): T {
+    const clone = structuredClone(target);
     deleteProperty(clone, path);
     return clone;
 }
 
 /**
- * Sets the value at the given path on the original object.
+ * Sets the value at the given path on the original target.
  */
-function mutableSet<T extends Record<string, any>>(object: T, path: string, value: unknown): T {
-    setProperty(object, path, value);
-    return object;
+function mutableSet<T extends Record<string, any>>(target: T, path: string, value: unknown): T {
+    return setProperty(target, path, value);
 }
 
 /**
- * Removes the property at the given path from the original object.
+ * Removes the property at the given path from the original target.
  */
-function mutableDelete<T extends Record<string, any>>(object: T, path: string): void {
-    deleteProperty(object, path);
+function mutableDelete<T extends Record<string, any>>(target: T, path: string): boolean {
+    return deleteProperty(target, path);
 }
 
 export { immutableGet, immutableSet, immutableDelete, mutableSet, mutableDelete };
