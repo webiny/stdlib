@@ -34,7 +34,9 @@ describe("immutableGet", () => {
 
     it("does not mutate the source object", () => {
         const obj = { a: { b: 1 } };
-        immutableGet(obj, "a.b");
+        const newObj = immutableGet<any>(obj, "a");
+        newObj.b = 2;
+        expect(newObj).toEqual({ b: 2 });
         expect(obj).toEqual({ a: { b: 1 } });
     });
 });

@@ -25,6 +25,7 @@
   ],
   "dependencies": {
     "@webiny/di": "^0.2.3",
+    "dot-prop": "^10.1.0",
     "fast-glob": "^3.3.3",
     "pino": "^10.3.1",
     "pino-pretty": "^13.1.3",

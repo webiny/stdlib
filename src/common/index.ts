@@ -13,3 +13,10 @@ export {
 } from "./features/Cache/index.js";
 export type { ICache, IAsyncCache } from "./features/Cache/index.js";
 export { toBoolean, isTruthy, isFalsy } from "./utils/boolean.js";
+export {
+    immutableDelete,
+    immutableGet,
+    mutableDelete,
+    mutableSet,
+    immutableSet
+} from "./utils/dotProp.js";

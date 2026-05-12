@@ -1048,6 +1048,7 @@ __metadata:
     "@vitest/coverage-v8": "npm:^4.1.5"
     "@webiny/di": "npm:^0.2.3"
     adio: "npm:^3.0.0"
+    dot-prop: "npm:^10.1.0"
     fast-glob: "npm:^3.3.3"
     happy-dom: "npm:^20.9.0"
     oxfmt: "npm:^0.48.0"
@@ -1216,6 +1217,15 @@ __metadata:
   version: 2.1.2
   resolution: "detect-libc@npm:2.1.2"
   checksum: 10c0/acc675c29a5649fa1fb6e255f993b8ee829e510b6b56b0910666949c80c364738833417d0edb5f90e4e46be17228b0f2b66a010513984e18b15deeeac49369c4
+  languageName: node
+  linkType: hard
+
+"dot-prop@npm:^10.1.0":
+  version: 10.1.0
+  resolution: "dot-prop@npm:10.1.0"
+  dependencies:
+    type-fest: "npm:^5.0.0"
+  checksum: 10c0/b034a06f017909ed55c6c164ddea962ccdce3d88b9b092f7106a9b738116a4cd003db5d47a0c6e140e93adbf1922b5e3a147e3d4a124c8556862940446ba5f75
   languageName: node
   linkType: hard
 
@@ -2442,7 +2452,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"type-fest@npm:^5.6.0":
+"type-fest@npm:^5.0.0, type-fest@npm:^5.6.0":
   version: 5.6.0
   resolution: "type-fest@npm:5.6.0"
   dependencies:
