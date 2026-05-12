@@ -40,12 +40,11 @@ class DependencyLockerImpl implements DependencyLockerAbstraction.Interface {
 
             const newVersion = version.replace(/^(\^|~|>=|<=|>|<)+/, "");
 
-            const valid = semver.valid(result[name]);
+            const valid = semver.valid(newVersion);
             if (!valid) {
-                console.warn(
-                    `Warning: Stripped version for ${name} is not a valid semver version: ${result[name]}. Keeping original version string.`
+                throw new Error(
+                    `Stripped version for ${name} is not a valid semver version: ${newVersion} (original: ${version})`
                 );
-                throw new Error(`Invalid version for ${name}: ${result[name]}`);
             }
             result[name] = newVersion;
         }
