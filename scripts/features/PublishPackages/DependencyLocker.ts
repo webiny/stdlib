@@ -1,5 +1,6 @@
 import { DependencyLocker as DependencyLockerAbstraction } from "./abstractions/DependencyLocker.ts";
 import { ProjectConfig } from "./abstractions/ProjectConfig.ts";
+import semver from "semver";
 
 class DependencyLockerImpl implements DependencyLockerAbstraction.Interface {
     private readonly config: ProjectConfig.Interface;
@@ -36,7 +37,17 @@ class DependencyLockerImpl implements DependencyLockerAbstraction.Interface {
             if (!version) {
                 continue;
             }
-            result[name] = version.replace(/^(\^|~|>=|<=|>|<)+/, "");
+
+            const newVersion = version.replace(/^(\^|~|>=|<=|>|<)+/, "");
+
+            const valid = semver.valid(result[name]);
+            if (!valid) {
+                console.warn(
+                    `Warning: Stripped version for ${name} is not a valid semver version: ${result[name]}. Keeping original version string.`
+                );
+                throw new Error(`Invalid version for ${name}: ${result[name]}`);
+            }
+            result[name] = newVersion;
         }
         return result;
     }
