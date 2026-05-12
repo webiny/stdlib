@@ -7,3 +7,4 @@ export { ChangelogWriter } from "./ChangelogWriter.ts";
 export { PublishOrchestrator } from "./PublishOrchestrator.ts";
 export { GithubRelease } from "./GithubRelease.ts";
 export { GithubToken } from "./GithubToken.ts";
+export { DependencyLocker } from "./DependencyLocker.ts";

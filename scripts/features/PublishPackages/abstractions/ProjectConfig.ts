@@ -5,6 +5,8 @@ export interface IProjectConfig {
     packageName: string;
     /** When true, compute and log the release plan but skip all side effects (npm publish, git tag, CHANGELOG.md). */
     dryRun: boolean;
+    /** When true, strip all version range operators from dependencies and devDependencies before publishing. */
+    exactDependencyVersions: boolean;
 }
 
 export const ProjectConfig = new Abstraction<IProjectConfig>("Scripts/ProjectConfig");

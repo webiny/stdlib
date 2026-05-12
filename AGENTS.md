@@ -1017,10 +1017,10 @@ a read-modify-write cycle on large files.
 **Before every commit, run the full pre-commit chain and loop until it is completely clean:**
 
 ```sh
-yarn format:fix && yarn lint:fix && yarn typecheck && yarn build && yarn test:coverage
+yarn && yarn adio && yarn format:fix && yarn lint:fix && yarn typecheck && yarn build && yarn test:coverage
 ```
 
-All five steps must pass with zero errors and zero warnings before staging and committing. If any step fails, fix the issue and run the full chain again from the start. Do not commit while anything is red.
+All seven steps must pass with zero errors and zero warnings before staging and committing. If any step fails, fix the issue and run the full chain again from the start. Do not commit while anything is red.
 
 Never use `--no-verify` or skip hooks.
 
