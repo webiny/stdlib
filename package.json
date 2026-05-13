@@ -51,6 +51,7 @@
     "build": "node scripts/buildPackages.ts",
     "pack:packages": "node scripts/packPackages.ts",
     "publish:packages": "node scripts/publishPackages.ts",
+    "publish:verdaccio": "node scripts/publishToVerdaccio.ts",
     "test": "vitest run --config testing/vitest.config.ts",
     "test:coverage": "vitest run --coverage --config testing/vitest.config.ts",
     "format": "oxfmt",
