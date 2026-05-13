@@ -769,10 +769,11 @@ Root-level scripts live in `scripts/`. They are run directly by Node 24 (no comp
 
 ### Entry points
 
-| Script                       | Purpose                                                                                                                                          |
-| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `scripts/buildPackages.ts`   | Clean `dist/`, compile with `tsgo -b --force`, copy `package.json` into each `dist/`                                                             |
-| `scripts/publishPackages.ts` | Build first, then check npm for latest versions, compute conventional-commit version bump, write changelog, publish all packages, create git tag |
+| Script                          | Purpose                                                                                                                                          |
+| ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `scripts/buildPackages.ts`      | Clean `dist/`, compile with `tsgo -b --force`, copy `package.json` into each `dist/`                                                             |
+| `scripts/publishPackages.ts`    | Build first, then check npm for latest versions, compute conventional-commit version bump, write changelog, publish all packages, create git tag |
+| `scripts/publishToVerdaccio.ts` | Build and publish to a local Verdaccio registry with an explicit version string; for manual release-candidate testing before the real publish    |
 
 Invoked from root `package.json` scripts as `node scripts/buildPackages.ts` etc.
 
@@ -781,6 +782,29 @@ Invoked from root `package.json` scripts as `node scripts/buildPackages.ts` etc.
 ```sh
 node scripts/publishPackages.ts           # dry run — safe, no side effects
 node scripts/publishPackages.ts --publish # real release
+```
+
+### Verdaccio testing
+
+`publishToVerdaccio.ts` publishes a build to a local [Verdaccio](https://verdaccio.org) registry for release-candidate testing. Verdaccio must be started manually first:
+
+```sh
+yarn verdaccio:start                                         # start registry at http://localhost:4873
+yarn publish:verdaccio --version 1.0.0-beta.abcdefg         # build + publish with explicit version
+```
+
+`--version` is required and must not start with `-`. The `.verdaccio.yaml` at the repo root configures the registry. Storage is written to `.verdaccio/` (gitignored).
+
+The script delegates to `scripts/features/PublishToVerdaccio/`, which follows the same DI feature pattern as `PublishPackages`:
+
+```
+scripts/features/PublishToVerdaccio/
+├── abstractions/
+│   ├── ProjectConfig.ts        # { rootDir, packageName, version }
+│   ├── PublishOrchestrator.ts  # { run(): void }
+│   └── index.ts
+├── PublishOrchestrator.ts      # injects version into dist/package.json, calls npm publish --registry
+└── index.ts                    # run(rootDir, version) — wires container and executes
 ```
 
 ### Feature structure
