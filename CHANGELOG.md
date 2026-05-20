@@ -1,5 +1,11 @@
 # @webiny/stdlib
 
+## 0.0.2
+
+### Patch Changes
+
+- 7b96df9: v0.0.2
+
 ## 0.0.1
 
 ### Patch Changes
