@@ -918,7 +918,7 @@ import { createAbstraction } from "~/common/index.js";
 ```json
 {
   "name": "@webiny/stdlib",
-  "version": "0.0.1",
+  "version": "<managed by changesets>",
   "type": "module",
   "exports": {
     ".": { "import": "./dist/index.js", "types": "./dist/index.d.ts" },

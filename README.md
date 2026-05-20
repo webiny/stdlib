@@ -57,4 +57,4 @@ The package is ESM-only and ships three subpath exports. Because each is a separ
 
 ## Versioning
 
-The package version in `package.json` is always `0.0.0`. The real version is injected at publish time by the release pipeline using conventional commits: `feat` bumps the minor, everything else (`fix`, `chore`, `refactor`, …) bumps the patch. There are no major version bumps — breaking changes may land on minor releases.
+Versioning and publishing are managed by [Changesets](https://github.com/changesets/changesets). The version in `package.json` is the real published version, bumped automatically when a version PR is merged. To record a version bump, run `yarn changeset` before opening a PR. There are no major version bumps — breaking changes may land on minor releases.
