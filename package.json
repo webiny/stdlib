@@ -1,6 +1,6 @@
 {
   "name": "@webiny/stdlib",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "type": "module",
   "description": "Standard library for Webiny — platform-agnostic, Node.js, and browser utilities",
   "license": "MIT",
@@ -24,7 +24,7 @@
     "dist"
   ],
   "dependencies": {
-    "@webiny/di": "^1.0.0",
+    "@webiny/di": "^1.0.1",
     "dot-prop": "^10.1.0",
     "fast-glob": "^3.3.3",
     "pino": "^10.3.1",
@@ -33,25 +33,21 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
-    "@octokit/rest": "^22.0.1",
+    "@changesets/cli": "^2.29.4",
     "@types/node": ">=24",
-    "@types/semver": "^7.7.1",
-    "@typescript/native-preview": "^7.0.0-dev.20260517.1",
+    "@typescript/native-preview": "^7.0.0-dev.20260519.1",
     "@vitest/coverage-v8": "^4.1.6",
     "adio": "^3.0.0",
     "happy-dom": "^20.9.0",
-    "oxfmt": "^0.50.0",
-    "oxlint": "^1.65.0",
-    "semver": "^7.8.0",
-    "verdaccio": "^6.7.1",
+    "oxfmt": "^0.51.0",
+    "oxlint": "^1.66.0",
     "vitest": "^4.1.6"
   },
   "scripts": {
     "clean": "rm -rf dist",
     "build": "node scripts/buildPackages.ts",
     "pack:packages": "node scripts/packPackages.ts",
-    "publish:packages": "node scripts/publishPackages.ts",
-    "publish:verdaccio": "node scripts/publishToVerdaccio.ts",
+    "release": "yarn build && changeset publish",
     "test": "vitest run --config testing/vitest.config.ts",
     "test:coverage": "vitest run --coverage --config testing/vitest.config.ts",
     "format": "oxfmt",
@@ -60,7 +56,6 @@
     "lint": "oxlint --deny-warnings",
     "lint:fix": "oxlint --fix",
     "check:imports": "adio",
-    "typecheck": "tsgo -p config/tsconfig.check.common.json && tsgo -p config/tsconfig.check.node.json && tsgo -p config/tsconfig.check.browser.json && tsgo -p config/tsconfig.check.scripts.json",
-    "verdaccio:start": "yarn verdaccio -c ./.verdaccio.yaml"
+    "typecheck": "tsgo -p config/tsconfig.check.common.json && tsgo -p config/tsconfig.check.node.json && tsgo -p config/tsconfig.check.browser.json && tsgo -p config/tsconfig.check.scripts.json"
   }
 }
