@@ -23,7 +23,8 @@ The package provides platform-specific utility services (file system, directory 
 │   ├── node/             # Node.js-specific source (FileTool, DirectoryTool, …)
 │   └── browser/          # browser-specific source (LocalStorageCacheFeature, …)
 ├── __tests__/            # tests — __tests__/node/, __tests__/browser/
-├── scripts/              # build and publish automation (Node 24 strip-only)
+├── .changeset/           # changesets config and pending changeset files
+├── scripts/              # build automation (Node 24 strip-only)
 ├── dist/                 # compiled output (gitignored)
 ├── package.json          # @webiny/stdlib — exports, scripts
 ├── config/               # tooling configs
@@ -769,43 +770,11 @@ Root-level scripts live in `scripts/`. They are run directly by Node 24 (no comp
 
 ### Entry points
 
-| Script                          | Purpose                                                                                                                                          |
-| ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `scripts/buildPackages.ts`      | Clean `dist/`, compile with `tsgo -b --force`, copy `package.json` into each `dist/`                                                             |
-| `scripts/publishPackages.ts`    | Build first, then check npm for latest versions, compute conventional-commit version bump, write changelog, publish all packages, create git tag |
-| `scripts/publishToVerdaccio.ts` | Build and publish to a local Verdaccio registry with an explicit version string; for manual release-candidate testing before the real publish    |
+| Script                     | Purpose                                                                              |
+| -------------------------- | ------------------------------------------------------------------------------------ |
+| `scripts/buildPackages.ts` | Clean `dist/`, compile with `tsgo -b --force`, copy `package.json` into each `dist/` |
 
-Invoked from root `package.json` scripts as `node scripts/buildPackages.ts` etc.
-
-`publishPackages.ts` is a **dry run by default** — it computes the release plan and logs it without touching npm, `CHANGELOG.md`, or git. Pass `--publish` to execute the real release:
-
-```sh
-node scripts/publishPackages.ts           # dry run — safe, no side effects
-node scripts/publishPackages.ts --publish # real release
-```
-
-### Verdaccio testing
-
-`publishToVerdaccio.ts` publishes a build to a local [Verdaccio](https://verdaccio.org) registry for release-candidate testing. Verdaccio must be started manually first:
-
-```sh
-yarn verdaccio:start                                         # start registry at http://localhost:4873
-yarn publish:verdaccio --version 1.0.0-beta.abcdefg         # build + publish with explicit version
-```
-
-`--version` is required and must not start with `-`. The `.verdaccio.yaml` at the repo root configures the registry. Storage is written to `.verdaccio/` (gitignored).
-
-The script delegates to `scripts/features/PublishToVerdaccio/`, which follows the same DI feature pattern as `PublishPackages`:
-
-```
-scripts/features/PublishToVerdaccio/
-├── abstractions/
-│   ├── ProjectConfig.ts        # { rootDir, packageName, version }
-│   ├── PublishOrchestrator.ts  # { run(): void }
-│   └── index.ts
-├── PublishOrchestrator.ts      # injects version into dist/package.json, calls npm publish --registry
-└── index.ts                    # run(rootDir, version) — wires container and executes
-```
+Invoked from root `package.json` scripts as `node scripts/buildPackages.ts`.
 
 ### Feature structure
 
@@ -916,36 +885,18 @@ class CompilerImpl implements CompilerAbstraction.Interface {
 
 This constraint applies only to files run directly by Node (i.e. everything under `scripts/`). Package source compiled by tsgo has no such restriction.
 
-### Conventional commit version strategy
+### Publishing with Changesets
 
-`scripts/features/PublishPackages/` reads git commit messages since the last published tag and applies these rules:
+Versioning and publishing are handled by [`@changesets/cli`](https://github.com/changesets/changesets). The workflow:
 
-| Commit type                                                                          | Bump                                                                 |
-| ------------------------------------------------------------------------------------ | -------------------------------------------------------------------- |
-| `feat`                                                                               | minor (patch reset to 0)                                             |
-| `fix`, `refactor`, `test`, `chore`, `docs`, `style`, `perf`, `build`, `ci`, `revert` | patch                                                                |
-| anything else                                                                        | **hard failure** (`process.exit(1)`) — unknown types are not allowed |
+1. **Before a PR**: run `yarn changeset` to create a changeset file describing the change and bump type (patch/minor/major). Commit the generated `.changeset/*.md` file with the PR.
+2. **On merge to `main`**: the `publish.yml` GitHub Actions workflow runs `changesets/action@v1`, which either:
+   - Creates a "Version Packages" PR that bumps `package.json` version and updates `CHANGELOG.md`, or
+   - If a version PR is already merged, publishes to npm via `yarn release` (which runs `yarn build && changeset publish`).
 
-If there are no commits since the last tag, publish is skipped. The version is written into `dist/package.json` before publishing; it is never committed back to source.
+Config lives in `.changeset/config.json`. The `NPM_TOKEN` secret must be configured in the GitHub repository settings.
 
-### Changelog generation
-
-`ChangelogWriter` prepends a new entry to `CHANGELOG.md` at the repo root on every real release (not dry run). Format follows [Keep a Changelog](https://keepachangelog.com). Commit types map to sections in this order:
-
-| Commit type                             | Section       |
-| --------------------------------------- | ------------- |
-| `feat`                                  | Added         |
-| `fix`                                   | Fixed         |
-| `refactor`, `perf`                      | Changed       |
-| `revert`                                | Reverted      |
-| `docs`                                  | Documentation |
-| `chore`, `build`, `ci`, `test`, `style` | Maintenance   |
-
-The `type(scope): ` prefix is stripped; only the description appears in the entry. Sections with no commits are omitted. The file is created if it does not exist.
-
-### Dry-run behaviour
-
-`dryRun: boolean` lives on `ProjectConfig` and is set in `scripts/features/PublishPackages/index.ts` based on `process.argv`. In dry-run mode `PublishOrchestrator` exits early after logging the plan — no filesystem writes (`CHANGELOG.md`, `dist/package.json`), no npm publish, no git tag. Git reads (`tagExists`, `commitsSince`) still run because they power the plan output.
+There is no custom version strategy or changelog generation — Changesets handles both.
 
 ---
 
@@ -967,7 +918,7 @@ import { createAbstraction } from "~/common/index.js";
 ```json
 {
   "name": "@webiny/stdlib",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "type": "module",
   "exports": {
     ".": { "import": "./dist/index.js", "types": "./dist/index.d.ts" },
@@ -979,6 +930,7 @@ import { createAbstraction } from "~/common/index.js";
   "files": ["dist"],
   "scripts": {
     "build": "node scripts/buildPackages.ts",
+    "release": "yarn build && changeset publish",
     "test": "vitest run --config testing/vitest.config.ts",
     "test:coverage": "vitest run --coverage --config testing/vitest.config.ts",
     "typecheck": "tsgo -p config/tsconfig.check.common.json && tsgo -p config/tsconfig.check.node.json && tsgo -p config/tsconfig.check.browser.json && tsgo -p config/tsconfig.check.scripts.json"
@@ -986,7 +938,7 @@ import { createAbstraction } from "~/common/index.js";
 }
 ```
 
-**Version**: Always `0.0.0`. The real version is injected at publish time.
+**Version**: Managed by Changesets. Bumped automatically when a version PR is merged.
 
 ---
 
