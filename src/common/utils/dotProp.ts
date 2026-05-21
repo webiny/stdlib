@@ -49,9 +49,19 @@ function mutableSet<T extends Record<string, any>>(target: T, path: string, valu
 
 /**
  * Removes the property at the given path from the original target.
+ * When target is an array, pass a numeric index to splice the element out.
  */
-function mutableDelete<T extends Record<string, any>>(target: T, path: string): boolean {
-    return deleteProperty(target, path);
+function mutableDelete<T>(target: T[], index: number): boolean;
+function mutableDelete<T extends Record<string, any>>(target: T, path: string): boolean;
+function mutableDelete(target: Record<string, any> | unknown[], path: string | number): boolean {
+    if (Array.isArray(target) && typeof path === "number") {
+        if (path < 0 || path >= target.length) {
+            return false;
+        }
+        target.splice(path, 1);
+        return true;
+    }
+    return deleteProperty(target as Record<string, any>, path as string);
 }
 
 export { immutableGet, immutableSet, immutableDelete, mutableSet, mutableDelete };
