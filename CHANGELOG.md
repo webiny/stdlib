@@ -1,5 +1,11 @@
 # @webiny/stdlib
 
+## 0.0.3
+
+### Patch Changes
+
+- fd576ba: refactor: add array index support to immutableDelete and mutableDelete
+
 ## 0.0.2
 
 ### Patch Changes
