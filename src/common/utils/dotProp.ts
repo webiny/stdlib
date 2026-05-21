@@ -33,10 +33,20 @@ function immutableSet<T extends Record<string, any>>(
 
 /**
  * Returns a deep clone with the property at the given path removed.
+ * When target is an array, pass a numeric index to splice the element out of the clone.
  */
-function immutableDelete<T extends Record<string, any>>(target: T, path: string): T {
+function immutableDelete<T>(target: T[], index: number): T[];
+function immutableDelete<T extends Record<string, any>>(target: T, path: string): T;
+function immutableDelete(target: Record<string, any> | unknown[], path: string | number): unknown {
     const clone = structuredClone(target);
-    deleteProperty(clone, path);
+    if (Array.isArray(clone) && typeof path === "number") {
+        if (path < 0 || path >= clone.length) {
+            return clone;
+        }
+        clone.splice(path, 1);
+        return clone;
+    }
+    deleteProperty(clone as Record<string, any>, path as string);
     return clone;
 }
 
