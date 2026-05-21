@@ -32,9 +32,10 @@ Returns a deep clone of `object` with `value` set at `path`. Pass a function as 
 
 ```ts
 function immutableDelete<T extends Record<string, any>>(object: T, path: string): T;
+function immutableDelete<T>(target: T[], index: number): T[];
 ```
 
-Returns a deep clone of `object` with the property at `path` removed.
+Returns a deep clone with the property at `path` removed. When called on an array with a numeric index, splices the element out of the clone (the original array is unchanged).
 
 ```ts
 function mutableSet<T extends Record<string, any>>(object: T, path: string, value: unknown): T;
@@ -43,10 +44,11 @@ function mutableSet<T extends Record<string, any>>(object: T, path: string, valu
 Sets `value` at `path` on `object` in place. Returns `object`.
 
 ```ts
-function mutableDelete<T extends Record<string, any>>(object: T, path: string): void;
+function mutableDelete<T extends Record<string, any>>(object: T, path: string): boolean;
+function mutableDelete<T>(target: T[], index: number): boolean;
 ```
 
-Removes the property at `path` from `object` in place.
+Removes the property at `path` from `object` in place. When called on an array with a numeric index, splices the element out. Returns `true` if the property/element existed, `false` otherwise.
 
 ### Usage
 
@@ -74,6 +76,12 @@ const withoutHost = immutableDelete(config, "server.host");
 
 mutableSet(config, "server.port", 5000); // mutates config
 mutableDelete(config, "server.host"); // mutates config
+
+// Array support — both delete functions accept a numeric index
+const items = ["a", "b", "c"];
+
+const without = immutableDelete(items, 1); // ["a", "c"] — items unchanged
+mutableDelete(items, 0); // items is now ["b", "c"]
 ```
 
 ---
