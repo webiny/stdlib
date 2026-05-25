@@ -16,8 +16,10 @@ export interface HashFolderOptions {
  * then produces a single combined hash.
  */
 export interface IHashFolderTool {
-    /** Returns a hex-encoded SHA-256 hash representing the folder's contents. */
-    hash(folderPath: string, options?: HashFolderOptions): Promise<string>;
+    /** Returns a hex-encoded SHA-256 hash representing the folder's contents (synchronous). */
+    hash(folderPath: string, options?: HashFolderOptions): string;
+    /** Parallel variant — reads files and subdirectories concurrently. */
+    hashAsync(folderPath: string, options?: HashFolderOptions): Promise<string>;
 }
 
 export const HashFolderTool = createAbstraction<IHashFolderTool>("Node/HashFolderTool");
