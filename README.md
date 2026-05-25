@@ -44,6 +44,7 @@ The package is ESM-only and ships three subpath exports. Because each is a separ
 | `NdJsonReaderTool` / `NdJsonReaderToolFeature`       | Parse NDJSON from files, streams, or in-memory lines with checkpoint support — [docs](src/node/features/NdJsonReaderTool/README.md) |
 | `ReadStreamFactory` / `ReadStreamFactoryFeature`     | Disposable `node:fs` read streams via `AsyncDisposable` — [docs](src/node/features/ReadStreamFactory/README.md)                     |
 | `PackageJsonFileTool` / `PackageJsonFileToolFeature` | Read, validate, mutate, and write `package.json` files — [docs](src/node/features/PackageJsonFileTool/README.md)                    |
+| `HashFolderTool` / `HashFolderToolFeature`           | Deterministic SHA-256 hash of a folder's contents — [docs](src/node/features/HashFolderTool/README.md)                              |
 
 ---
 

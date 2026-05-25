@@ -51,3 +51,10 @@ export {
     type CreatePackageJsonFileToolParams,
     PackageJsonFile
 } from "./features/PackageJsonFileTool/index.js";
+export {
+    HashFolderTool,
+    HashFolderToolFeature,
+    createHashFolderTool,
+    hashFolder,
+    type HashFolderOptions
+} from "./features/HashFolderTool/index.js";
