@@ -1,5 +1,11 @@
 # @webiny/stdlib
 
+## 0.0.4
+
+### Patch Changes
+
+- 36d941e: feat: add HashFolderTool — deterministic SHA-256 folder hashing with sync and async (parallel I/O) methods, replacing the unmaintained folder-hash library
+
 ## 0.0.3
 
 ### Patch Changes
