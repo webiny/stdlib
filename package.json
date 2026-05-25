@@ -56,6 +56,7 @@
     "lint": "oxlint --deny-warnings",
     "lint:fix": "oxlint --fix",
     "check:imports": "adio",
-    "typecheck": "tsgo -p config/tsconfig.check.common.json && tsgo -p config/tsconfig.check.node.json && tsgo -p config/tsconfig.check.browser.json && tsgo -p config/tsconfig.check.scripts.json"
+    "typecheck": "tsgo -p config/tsconfig.check.common.json && tsgo -p config/tsconfig.check.node.json && tsgo -p config/tsconfig.check.browser.json && tsgo -p config/tsconfig.check.scripts.json",
+    "full": "yarn check:imports && yarn clean && yarn format:fix && yarn lint:fix && yarn typecheck && yarn build && yarn test:coverage"
   }
 }
