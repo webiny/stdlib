@@ -57,5 +57,6 @@ export {
     createHashFolderTool,
     hashFolder,
     hashFolderAsync,
-    type HashFolderOptions
+    type HashFolderOptions,
+    type HashFolderResult
 } from "./features/HashFolderTool/index.js";

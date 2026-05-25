@@ -11,15 +11,23 @@ export interface HashFolderOptions {
 }
 
 /**
+ * Result of hashing a folder's contents.
+ */
+export interface HashFolderResult {
+    /** Hex-encoded SHA-256 digest. */
+    hash: string;
+}
+
+/**
  * Computes a deterministic SHA-256 hash of a folder's contents.
  * Walks the directory recursively, hashes each file, sorts by relative path,
  * then produces a single combined hash.
  */
 export interface IHashFolderTool {
-    /** Returns a hex-encoded SHA-256 hash representing the folder's contents (synchronous). */
-    hash(folderPath: string, options?: HashFolderOptions): string;
+    /** Returns a result containing the hex-encoded SHA-256 hash (synchronous). */
+    hash(folderPath: string, options?: HashFolderOptions): HashFolderResult;
     /** Parallel variant — reads files and subdirectories concurrently. */
-    hashAsync(folderPath: string, options?: HashFolderOptions): Promise<string>;
+    hashAsync(folderPath: string, options?: HashFolderOptions): Promise<HashFolderResult>;
 }
 
 export const HashFolderTool = createAbstraction<IHashFolderTool>("Node/HashFolderTool");

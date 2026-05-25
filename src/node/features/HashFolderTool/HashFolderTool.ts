@@ -4,7 +4,8 @@ import { readdir, readFile } from "node:fs/promises";
 import { join, relative } from "node:path";
 import {
     HashFolderTool as HashFolderToolAbstraction,
-    type HashFolderOptions
+    type HashFolderOptions,
+    type HashFolderResult
 } from "./abstractions/HashFolderTool.js";
 
 interface FileEntry {
@@ -104,14 +105,17 @@ async function collectFilesAsync(
 }
 
 class HashFolderToolImpl implements HashFolderToolAbstraction.Interface {
-    public hash(folderPath: string, options?: HashFolderOptions): string {
+    public hash(folderPath: string, options?: HashFolderOptions): HashFolderResult {
         const excludeFolders = new Set(options?.excludeFolders ?? []);
         const excludeFiles = new Set(options?.excludeFiles ?? []);
         const entries = collectFilesSync(folderPath, folderPath, excludeFolders, excludeFiles);
-        return combineEntries(entries);
+        return { hash: combineEntries(entries) };
     }
 
-    public async hashAsync(folderPath: string, options?: HashFolderOptions): Promise<string> {
+    public async hashAsync(
+        folderPath: string,
+        options?: HashFolderOptions
+    ): Promise<HashFolderResult> {
         const excludeFolders = new Set(options?.excludeFolders ?? []);
         const excludeFiles = new Set(options?.excludeFiles ?? []);
         const entries = await collectFilesAsync(
@@ -120,7 +124,7 @@ class HashFolderToolImpl implements HashFolderToolAbstraction.Interface {
             excludeFolders,
             excludeFiles
         );
-        return combineEntries(entries);
+        return { hash: combineEntries(entries) };
     }
 }
 
@@ -136,7 +140,7 @@ export function createHashFolderTool(): HashFolderToolAbstraction.Interface {
 /**
  * Standalone sync — computes a SHA-256 hash of a folder's contents.
  */
-export function hashFolder(folderPath: string, options?: HashFolderOptions): string {
+export function hashFolder(folderPath: string, options?: HashFolderOptions): HashFolderResult {
     return new HashFolderToolImpl().hash(folderPath, options);
 }
 
@@ -146,6 +150,6 @@ export function hashFolder(folderPath: string, options?: HashFolderOptions): str
 export async function hashFolderAsync(
     folderPath: string,
     options?: HashFolderOptions
-): Promise<string> {
+): Promise<HashFolderResult> {
     return new HashFolderToolImpl().hashAsync(folderPath, options);
 }

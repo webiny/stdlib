@@ -1,1 +1,1 @@
-export { HashFolderTool, type HashFolderOptions } from "./HashFolderTool.js";
+export { HashFolderTool, type HashFolderOptions, type HashFolderResult } from "./HashFolderTool.js";
