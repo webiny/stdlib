@@ -1,5 +1,11 @@
 # @webiny/stdlib
 
+## 0.0.5
+
+### Patch Changes
+
+- 5fa60fc: feat(common): add uuid v4 generator with native randomUUID and getRandomValues fallback
+
 ## 0.0.4
 
 ### Patch Changes
