@@ -20,3 +20,4 @@ export {
     mutableSet,
     immutableSet
 } from "./utils/dotProp.js";
+export { uuid } from "./utils/uuid.js";

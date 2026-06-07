@@ -29,6 +29,7 @@ The package is ESM-only and ships three subpath exports. Because each is a separ
 | `AsyncCache` / `AsyncMemoryCacheFeature`                                             | Async key-value cache — [docs](src/common/features/Cache/README.md)                         |
 | `immutableGet` / `immutableSet` / `immutableDelete` / `mutableSet` / `mutableDelete` | Dot-notation get/set/delete on nested objects — [docs](src/common/utils/README.md#dotprop)  |
 | `toBoolean` / `isTruthy` / `isFalsy`                                                 | Semantic boolean coercion — [docs](src/common/utils/README.md#boolean)                      |
+| `uuid`                                                                               | RFC 4122 v4 UUID generator (native + fallback) — [docs](src/common/utils/README.md#uuid)    |
 
 ---
 
