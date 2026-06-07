@@ -12,12 +12,12 @@ export {
     AsyncMemoryCacheFeature
 } from "./features/Cache/index.js";
 export type { ICache, IAsyncCache } from "./features/Cache/index.js";
-export { toBoolean, isTruthy, isFalsy } from "./utils/boolean.js";
+export { toBoolean, isTruthy, isFalsy } from "./utils/boolean/index.js";
 export {
     immutableDelete,
     immutableGet,
     mutableDelete,
     mutableSet,
     immutableSet
-} from "./utils/dotProp.js";
-export { uuid } from "./utils/uuid.js";
+} from "./utils/dotProp/index.js";
+export { uuid } from "./utils/uuid/index.js";

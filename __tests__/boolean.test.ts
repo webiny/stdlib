@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { toBoolean, isTruthy, isFalsy } from "../src/common/utils/boolean.js";
+import { toBoolean, isTruthy, isFalsy } from "../src/common/utils/boolean/boolean.js";
 
 describe("toBoolean", () => {
     describe("strings — truthy set", () => {

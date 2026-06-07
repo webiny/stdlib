@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { immutableGet } from "../../src/common/utils/dotProp.js";
+import { immutableGet } from "../../src/common/utils/dotProp/dotProp.js";
 
 describe("immutableGet", () => {
     it("gets a top-level property", () => {

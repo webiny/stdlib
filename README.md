@@ -27,9 +27,9 @@ The package is ESM-only and ships three subpath exports. Because each is a separ
 | `Logger` / `ConsoleLogger` / `ConsoleLoggerFeature`                                  | Logging abstraction + console implementation — [docs](src/common/features/Logger/README.md) |
 | `Cache` / `MemoryCacheFeature`                                                       | Synchronous key-value cache — [docs](src/common/features/Cache/README.md)                   |
 | `AsyncCache` / `AsyncMemoryCacheFeature`                                             | Async key-value cache — [docs](src/common/features/Cache/README.md)                         |
-| `immutableGet` / `immutableSet` / `immutableDelete` / `mutableSet` / `mutableDelete` | Dot-notation get/set/delete on nested objects — [docs](src/common/utils/README.md#dotprop)  |
-| `toBoolean` / `isTruthy` / `isFalsy`                                                 | Semantic boolean coercion — [docs](src/common/utils/README.md#boolean)                      |
-| `uuid`                                                                               | RFC 4122 v4 UUID generator (native + fallback) — [docs](src/common/utils/README.md#uuid)    |
+| `immutableGet` / `immutableSet` / `immutableDelete` / `mutableSet` / `mutableDelete` | Dot-notation get/set/delete on nested objects — [docs](src/common/utils/dotProp/README.md)  |
+| `toBoolean` / `isTruthy` / `isFalsy`                                                 | Semantic boolean coercion — [docs](src/common/utils/boolean/README.md)                      |
+| `uuid`                                                                               | RFC 4122 v4 UUID generator (native + fallback) — [docs](src/common/utils/uuid/README.md)    |
 
 ---
 

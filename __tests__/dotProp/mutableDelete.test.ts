@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { mutableDelete } from "../../src/common/utils/dotProp.js";
+import { mutableDelete } from "../../src/common/utils/dotProp/dotProp.js";
 
 describe("mutableDelete", () => {
     it("removes a top-level property from the original object", () => {

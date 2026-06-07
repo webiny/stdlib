@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { immutableDelete } from "../../src/common/utils/dotProp.js";
+import { immutableDelete } from "../../src/common/utils/dotProp/dotProp.js";
 
 describe("immutableDelete", () => {
     it("returns a new object reference", () => {
