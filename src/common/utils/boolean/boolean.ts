@@ -1,5 +1,9 @@
 /** Exact semantic parity with the `boolean` npm package. */
 export function toBoolean(value: unknown): boolean {
+    if (typeof value === "boolean") {
+        return value;
+    }
+
     switch (Object.prototype.toString.call(value)) {
         case "[object String]":
             return ["true", "t", "yes", "y", "on", "1"].includes(
