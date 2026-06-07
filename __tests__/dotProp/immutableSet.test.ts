@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { immutableSet } from "../../src/common/utils/dotProp.js";
+import { immutableSet } from "../../src/common/utils/dotProp/dotProp.js";
 
 describe("immutableSet", () => {
     it("returns a new object reference", () => {

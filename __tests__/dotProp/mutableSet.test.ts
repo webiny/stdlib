@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { mutableSet } from "../../src/common/utils/dotProp.js";
+import { mutableSet } from "../../src/common/utils/dotProp/dotProp.js";
 
 describe("mutableSet", () => {
     it("returns the same object reference", () => {
