@@ -2,6 +2,8 @@
 export function toBoolean(value: unknown): boolean {
     if (typeof value === "boolean") {
         return value;
+    }else if (typeof value === "number") {
+        return value === 1;
     }
 
     switch (Object.prototype.toString.call(value)) {
