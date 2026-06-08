@@ -1,5 +1,11 @@
 # @webiny/stdlib
 
+## 0.0.7
+
+### Patch Changes
+
+- 5924242: Add nanoid-based ID generators: `generateId`, `generateAlphaNumericId`, `generateAlphaNumericLowerCaseId`, `generateAlphaId`, `generateAlphaLowerCaseId`, `generateAlphaUpperCaseId`. All accept an optional `size` parameter (default 21). Import from `@webiny/stdlib`.
+
 ## 0.0.6
 
 ### Patch Changes
