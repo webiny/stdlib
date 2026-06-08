@@ -30,6 +30,7 @@ The package is ESM-only and ships three subpath exports. Because each is a separ
 | `immutableGet` / `immutableSet` / `immutableDelete` / `mutableSet` / `mutableDelete` | Dot-notation get/set/delete on nested objects — [docs](src/common/utils/dotProp/README.md)  |
 | `toBoolean` / `isTruthy` / `isFalsy`                                                 | Semantic boolean coercion — [docs](src/common/utils/boolean/README.md)                      |
 | `uuid`                                                                               | RFC 4122 v4 UUID generator (native + fallback) — [docs](src/common/utils/uuid/README.md)    |
+| `mdbid`                                                                              | MongoDB-compatible ObjectId generator — [docs](src/common/utils/mdbid/README.md)            |
 
 ---
 
