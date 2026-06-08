@@ -1,5 +1,11 @@
 # @webiny/stdlib
 
+## 0.0.6
+
+### Patch Changes
+
+- 17a0aeb: Add `mdbid` utility that generates MongoDB-compatible ObjectId hex strings via `bson-objectid`. Import from `@webiny/stdlib` — no DI setup required.
+
 ## 0.0.5
 
 ### Patch Changes
