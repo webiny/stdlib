@@ -75,6 +75,7 @@ Contains:
 - `CacheError` — abstract base error for all cache implementations. Subclass it for implementation-specific errors.
 - `MemoryCacheFeature` — registers an in-memory `Cache` implementation in singleton scope.
 - `AsyncMemoryCacheFeature` — registers an in-memory `AsyncCache` implementation in singleton scope.
+- `generateId(size?)` — generates a URL-safe nanoid (default 21 chars). Also: `generateAlphaNumericId`, `generateAlphaNumericLowerCaseId`, `generateAlphaId`, `generateAlphaLowerCaseId`, `generateAlphaUpperCaseId` — each accepts an optional `size` parameter.
 
 ### `@webiny/stdlib/node`
 

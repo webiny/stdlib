@@ -20,17 +20,18 @@ The package is ESM-only and ships three subpath exports. Because each is a separ
 
 ## `@webiny/stdlib` — Common
 
-| Feature                                                                              | Description                                                                                 |
-| ------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------- |
-| `Result` / `ResultAsync`                                                             | Typed success/failure values — synchronous and async                                        |
-| `BaseError`                                                                          | Abstract base class for typed domain errors                                                 |
-| `Logger` / `ConsoleLogger` / `ConsoleLoggerFeature`                                  | Logging abstraction + console implementation — [docs](src/common/features/Logger/README.md) |
-| `Cache` / `MemoryCacheFeature`                                                       | Synchronous key-value cache — [docs](src/common/features/Cache/README.md)                   |
-| `AsyncCache` / `AsyncMemoryCacheFeature`                                             | Async key-value cache — [docs](src/common/features/Cache/README.md)                         |
-| `immutableGet` / `immutableSet` / `immutableDelete` / `mutableSet` / `mutableDelete` | Dot-notation get/set/delete on nested objects — [docs](src/common/utils/dotProp/README.md)  |
-| `toBoolean` / `isTruthy` / `isFalsy`                                                 | Semantic boolean coercion — [docs](src/common/utils/boolean/README.md)                      |
-| `uuid`                                                                               | RFC 4122 v4 UUID generator (native + fallback) — [docs](src/common/utils/uuid/README.md)    |
-| `mdbid`                                                                              | MongoDB-compatible ObjectId generator — [docs](src/common/utils/mdbid/README.md)            |
+| Feature                                                                              | Description                                                                                            |
+| ------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------ |
+| `Result` / `ResultAsync`                                                             | Typed success/failure values — synchronous and async                                                   |
+| `BaseError`                                                                          | Abstract base class for typed domain errors                                                            |
+| `Logger` / `ConsoleLogger` / `ConsoleLoggerFeature`                                  | Logging abstraction + console implementation — [docs](src/common/features/Logger/README.md)            |
+| `Cache` / `MemoryCacheFeature`                                                       | Synchronous key-value cache — [docs](src/common/features/Cache/README.md)                              |
+| `AsyncCache` / `AsyncMemoryCacheFeature`                                             | Async key-value cache — [docs](src/common/features/Cache/README.md)                                    |
+| `immutableGet` / `immutableSet` / `immutableDelete` / `mutableSet` / `mutableDelete` | Dot-notation get/set/delete on nested objects — [docs](src/common/utils/dotProp/README.md)             |
+| `toBoolean` / `isTruthy` / `isFalsy`                                                 | Semantic boolean coercion — [docs](src/common/utils/boolean/README.md)                                 |
+| `uuid`                                                                               | RFC 4122 v4 UUID generator (native + fallback) — [docs](src/common/utils/uuid/README.md)               |
+| `mdbid`                                                                              | MongoDB-compatible ObjectId generator — [docs](src/common/utils/mdbid/README.md)                       |
+| `generateId` / `generateAlphaNumericId` / `generateAlphaLowerCaseId` / ...           | Nanoid-based ID generators with configurable alphabets — [docs](src/common/utils/generateId/README.md) |
 
 ---
 
