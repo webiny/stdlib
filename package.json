@@ -25,6 +25,7 @@
   ],
   "dependencies": {
     "@webiny/di": "^1.0.1",
+    "bson-objectid": "^2.0.4",
     "dot-prop": "^10.1.0",
     "fast-glob": "^3.3.3",
     "pino": "^10.3.1",
