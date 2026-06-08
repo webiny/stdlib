@@ -1261,6 +1261,8 @@ __metadata:
     dot-prop: "npm:^10.1.0"
     fast-glob: "npm:^3.3.3"
     happy-dom: "npm:^20.10.1"
+    nanoid: "npm:^5.1.11"
+    nanoid-dictionary: "npm:^5.0.0"
     oxfmt: "npm:^0.53.0"
     oxlint: "npm:^1.68.0"
     pino: "npm:^10.3.1"
@@ -2215,12 +2217,28 @@ __metadata:
   languageName: node
   linkType: hard
 
+"nanoid-dictionary@npm:^5.0.0":
+  version: 5.0.0
+  resolution: "nanoid-dictionary@npm:5.0.0"
+  checksum: 10c0/b35de04523c0932b542254f28e4902e25f1fdfff3d46fc5a582f71594cc0cdaff2eb610a3f04f933da87c5c5f55301b7e9011b22329de3c98066ed601f5b4e2b
+  languageName: node
+  linkType: hard
+
 "nanoid@npm:^3.3.12":
   version: 3.3.12
   resolution: "nanoid@npm:3.3.12"
   bin:
     nanoid: bin/nanoid.cjs
   checksum: 10c0/ba142b7b39e11e80c16dd74b0365d407880c87c1cf7e1480956981ae940ee36060fa5b6f092cd1e315184dd19244c657bd017d03327bd3c62247d691c5e8edfb
+  languageName: node
+  linkType: hard
+
+"nanoid@npm:^5.1.11":
+  version: 5.1.11
+  resolution: "nanoid@npm:5.1.11"
+  bin:
+    nanoid: bin/nanoid.js
+  checksum: 10c0/91580d18c29263ac0e871734f0d86e7f906f523f974d3c30fc65354ccf387ccffd606c2a6c28acc2977a3950146347e790ce9e3f514133a48995af5ccdb308ce
   languageName: node
   linkType: hard
 
