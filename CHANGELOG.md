@@ -1,5 +1,11 @@
 # @webiny/stdlib
 
+## 0.0.8
+
+### Patch Changes
+
+- a77c5eb: Updated dependencies to their latest versions.
+
 ## 0.0.7
 
 ### Patch Changes
