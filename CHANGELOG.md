@@ -1,5 +1,11 @@
 # @webiny/stdlib
 
+## 0.0.9
+
+### Patch Changes
+
+- 2f17d08: Add `Env` abstraction for typed environment variable access with `getString`, `getNumber`, and `getBoolean` families (each with bare, default, and OrThrow variants). Node implementation (`ProcessEnvFeature`) reads from `process.env`; browser implementation (`BrowserEnvFeature`) accepts an injected variables object.
+
 ## 0.0.8
 
 ### Patch Changes
