@@ -11,7 +11,7 @@ class CompilerImpl implements CompilerAbstraction.Interface {
     }
 
     public compile(packageRelDir: string): void {
-        execFileSync(bin("tsgo"), ["-b", "--force", packageRelDir], {
+        execFileSync(bin("tsc"), ["-b", "--force", packageRelDir], {
             cwd: this.config.rootDir,
             stdio: "inherit"
         });
