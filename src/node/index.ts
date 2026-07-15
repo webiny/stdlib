@@ -51,6 +51,7 @@ export {
     type CreatePackageJsonFileToolParams,
     PackageJsonFile
 } from "./features/PackageJsonFileTool/index.js";
+export { ProcessEnvFeature } from "./features/ProcessEnv/index.js";
 export {
     HashFolderTool,
     HashFolderToolFeature,

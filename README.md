@@ -32,6 +32,7 @@ The package is ESM-only and ships three subpath exports. Because each is a separ
 | `uuid`                                                                               | RFC 4122 v4 UUID generator (native + fallback) — [docs](src/common/utils/uuid/README.md)               |
 | `mdbid`                                                                              | MongoDB-compatible ObjectId generator — [docs](src/common/utils/mdbid/README.md)                       |
 | `generateId` / `generateAlphaNumericId` / `generateAlphaLowerCaseId` / ...           | Nanoid-based ID generators with configurable alphabets — [docs](src/common/utils/generateId/README.md) |
+| `Env`                                                                                | Typed environment variable access (abstraction) — [docs](src/common/features/Env/README.md)            |
 
 ---
 
@@ -48,6 +49,7 @@ The package is ESM-only and ships three subpath exports. Because each is a separ
 | `ReadStreamFactory` / `ReadStreamFactoryFeature`     | Disposable `node:fs` read streams via `AsyncDisposable` — [docs](src/node/features/ReadStreamFactory/README.md)                     |
 | `PackageJsonFileTool` / `PackageJsonFileToolFeature` | Read, validate, mutate, and write `package.json` files — [docs](src/node/features/PackageJsonFileTool/README.md)                    |
 | `HashFolderTool` / `HashFolderToolFeature`           | Deterministic SHA-256 hash of a folder's contents — [docs](src/node/features/HashFolderTool/README.md)                              |
+| `ProcessEnvFeature`                                  | `Env` implementation backed by `process.env` — [docs](src/node/features/ProcessEnv/README.md)                                       |
 
 ---
 
@@ -56,6 +58,7 @@ The package is ESM-only and ships three subpath exports. Because each is a separ
 | Feature                    | Description                                                                                                       |
 | -------------------------- | ----------------------------------------------------------------------------------------------------------------- |
 | `LocalStorageCacheFeature` | `Cache` implementation backed by `window.localStorage` — [docs](src/browser/features/LocalStorageCache/README.md) |
+| `BrowserEnvFeature`        | `Env` implementation backed by an injected variables object — [docs](src/browser/features/BrowserEnv/README.md)   |
 
 ---
 

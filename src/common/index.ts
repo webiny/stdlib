@@ -12,6 +12,7 @@ export {
     AsyncMemoryCacheFeature
 } from "./features/Cache/index.js";
 export type { ICache, IAsyncCache } from "./features/Cache/index.js";
+export { Env } from "./features/Env/index.js";
 export { toBoolean, isTruthy, isFalsy } from "./utils/boolean/index.js";
 export {
     immutableDelete,
