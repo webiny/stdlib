@@ -1,3 +1,4 @@
+export { BrowserEnvFeature } from "./features/BrowserEnv/index.js";
 export {
     LocalStorageCacheFeature,
     createLocalStorageCache,
