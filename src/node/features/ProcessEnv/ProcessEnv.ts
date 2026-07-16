@@ -1,11 +1,21 @@
 import { Env as EnvAbstraction } from "~/common/features/Env/abstractions/Env.js";
 import { toBoolean } from "~/common/utils/boolean/index.js";
 
+export interface CreateProcessEnvParams {
+    variables?: Record<string, string | undefined>;
+}
+
 class ProcessEnvImpl implements EnvAbstraction.Interface {
+    private readonly variables: Record<string, string | undefined>;
+
+    public constructor(variables: Record<string, string | undefined>) {
+        this.variables = variables;
+    }
+
     getString(key: string): string | undefined;
     getString(key: string, defaultValue: string): string;
     getString(key: string, defaultValue?: string): string | undefined {
-        const value = process.env[key];
+        const value = this.variables[key];
         if (value === undefined) {
             return defaultValue;
         }
@@ -13,7 +23,7 @@ class ProcessEnvImpl implements EnvAbstraction.Interface {
     }
 
     getStringOrThrow(key: string): string {
-        const value = process.env[key];
+        const value = this.variables[key];
         if (value === undefined) {
             throw new Error(`Environment variable "${key}" is not set.`);
         }
@@ -23,7 +33,7 @@ class ProcessEnvImpl implements EnvAbstraction.Interface {
     getNumber(key: string): number | undefined;
     getNumber(key: string, defaultValue: number): number;
     getNumber(key: string, defaultValue?: number): number | undefined {
-        const raw = process.env[key];
+        const raw = this.variables[key];
         if (raw === undefined || raw === "") {
             return defaultValue;
         }
@@ -35,7 +45,7 @@ class ProcessEnvImpl implements EnvAbstraction.Interface {
     }
 
     getNumberOrThrow(key: string): number {
-        const raw = process.env[key];
+        const raw = this.variables[key];
         if (raw === undefined || raw === "") {
             throw new Error(`Environment variable "${key}" is not set.`);
         }
@@ -49,7 +59,7 @@ class ProcessEnvImpl implements EnvAbstraction.Interface {
     getBoolean(key: string): boolean | undefined;
     getBoolean(key: string, defaultValue: boolean): boolean;
     getBoolean(key: string, defaultValue?: boolean): boolean | undefined {
-        const raw = process.env[key];
+        const raw = this.variables[key];
         if (raw === undefined) {
             return defaultValue;
         }
@@ -57,7 +67,7 @@ class ProcessEnvImpl implements EnvAbstraction.Interface {
     }
 
     getBooleanOrThrow(key: string): boolean {
-        const raw = process.env[key];
+        const raw = this.variables[key];
         if (raw === undefined) {
             throw new Error(`Environment variable "${key}" is not set.`);
         }
@@ -65,7 +75,6 @@ class ProcessEnvImpl implements EnvAbstraction.Interface {
     }
 }
 
-export const ProcessEnv = EnvAbstraction.createImplementation({
-    implementation: ProcessEnvImpl,
-    dependencies: []
-});
+export function createProcessEnv(params?: CreateProcessEnvParams): EnvAbstraction.Interface {
+    return new ProcessEnvImpl(params?.variables ?? process.env);
+}

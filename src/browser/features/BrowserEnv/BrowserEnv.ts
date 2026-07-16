@@ -1,6 +1,10 @@
 import type { Env } from "~/common/features/Env/abstractions/Env.js";
 import { toBoolean } from "~/common/utils/boolean/index.js";
 
+export interface CreateBrowserEnvParams {
+    variables: Record<string, string>;
+}
+
 export class BrowserEnv implements Env.Interface {
     private readonly variables: Record<string, string>;
 
@@ -69,4 +73,8 @@ export class BrowserEnv implements Env.Interface {
         }
         return toBoolean(raw);
     }
+}
+
+export function createBrowserEnv(params: CreateBrowserEnvParams): Env.Interface {
+    return new BrowserEnv(params.variables);
 }
