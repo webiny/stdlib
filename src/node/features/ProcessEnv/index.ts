@@ -1,2 +1,2 @@
-export { ProcessEnvFeature } from "./feature.js";
-export { createProcessEnv } from "./ProcessEnv.js";
+export { ProcessEnvFeature, type ProcessEnvFeatureParams } from "./feature.js";
+export { createProcessEnv, type CreateProcessEnvParams } from "./ProcessEnv.js";
