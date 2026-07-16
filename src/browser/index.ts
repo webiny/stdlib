@@ -1,4 +1,8 @@
-export { BrowserEnvFeature } from "./features/BrowserEnv/index.js";
+export {
+    BrowserEnvFeature,
+    createBrowserEnv,
+    type CreateBrowserEnvParams
+} from "./features/BrowserEnv/index.js";
 export {
     LocalStorageCacheFeature,
     createLocalStorageCache,

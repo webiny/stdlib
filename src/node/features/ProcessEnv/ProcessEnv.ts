@@ -69,3 +69,7 @@ export const ProcessEnv = EnvAbstraction.createImplementation({
     implementation: ProcessEnvImpl,
     dependencies: []
 });
+
+export function createProcessEnv(): EnvAbstraction.Interface {
+    return new ProcessEnvImpl();
+}

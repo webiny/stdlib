@@ -17,3 +17,13 @@ BrowserEnvFeature.register(container, {
 });
 const env = container.resolve(Env);
 ```
+
+### Without DI
+
+```ts
+import { createBrowserEnv } from "@webiny/stdlib/browser";
+
+const env = createBrowserEnv({
+  variables: { API_URL: "https://api.example.com" }
+});
+```

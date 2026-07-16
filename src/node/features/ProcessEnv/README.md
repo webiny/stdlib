@@ -17,3 +17,12 @@ const env = container.resolve(Env);
 
 const port = env.getNumber("PORT", 3000);
 ```
+
+### Without DI
+
+```ts
+import { createProcessEnv } from "@webiny/stdlib/node";
+
+const env = createProcessEnv();
+const port = env.getNumber("PORT", 3000);
+```
