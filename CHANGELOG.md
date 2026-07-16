@@ -1,5 +1,11 @@
 # @webiny/stdlib
 
+## 0.0.10
+
+### Patch Changes
+
+- 93f9f83: Add `createProcessEnv()` and `createBrowserEnv()` factory functions for using Env implementations outside of DI.
+
 ## 0.0.9
 
 ### Patch Changes
