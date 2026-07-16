@@ -28,7 +28,7 @@
     "bson-objectid": "^2.0.4",
     "dot-prop": "^10.1.0",
     "fast-glob": "^3.3.3",
-    "nanoid": "^5.1.16",
+    "nanoid": "^6.0.0",
     "nanoid-dictionary": "^5.0.0",
     "pino": "^10.3.1",
     "pino-pretty": "^13.1.3",
