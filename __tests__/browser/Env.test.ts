@@ -6,13 +6,13 @@ import { ConsoleLoggerFeature } from "../../src/common/features/Logger/feature.j
 import { Env } from "../../src/common/features/Env/index.js";
 import { BrowserEnvFeature } from "../../src/browser/features/BrowserEnv/index.js";
 
-function makeContainer(vars?: Record<string, string>): Container {
+function makeContainer(vars: Record<string, string> = {}): Container {
     const container = new Container();
     container.registerInstance(ConsoleLoggerConfig, {
         getConfig: () => ({ logLevel: "error" as const })
     });
     ConsoleLoggerFeature.register(container);
-    BrowserEnvFeature.register(container, vars ? { variables: vars } : undefined);
+    BrowserEnvFeature.register(container, { variables: vars });
     return container;
 }
 
