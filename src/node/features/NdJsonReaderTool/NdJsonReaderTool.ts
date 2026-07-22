@@ -20,8 +20,12 @@ class NdJsonReaderToolImpl implements NdJsonReaderToolAbstraction.Interface {
         path: string,
         options?: NdJsonReaderOptions
     ): AsyncGenerator<NdJsonRow> {
-        await using rs = this.readStreamFactory.create(path);
-        yield* this.parseStream(rs.getStream(), options);
+        const rs = this.readStreamFactory.create(path);
+        try {
+            yield* this.parseStream(rs.getStream(), options);
+        } finally {
+            rs.destroy();
+        }
     }
 
     public async *parseStream(

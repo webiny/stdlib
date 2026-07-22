@@ -2,16 +2,18 @@ import { createAbstraction } from "~/common/index.js";
 import type { Readable } from "node:stream";
 import type { PathLike, ReadStreamOptions } from "node:fs";
 
-export interface IReadStream extends AsyncDisposable {
+export interface IReadStream {
     /** Returns the underlying Node.js Readable stream. */
     getStream(): Readable;
+    /** Destroys the underlying stream, releasing the file handle. */
+    destroy(): void;
 }
 
 export interface IReadStreamFactory {
     /**
-     * Creates a disposable read stream for the given path.
+     * Creates a read stream for the given path.
      * Mirrors node:fs createReadStream exactly — all native options are supported.
-     * Use `await using` to guarantee the stream is destroyed on scope exit.
+     * Call `destroy()` when done to release the file handle.
      */
     create(path: PathLike, options?: BufferEncoding | ReadStreamOptions): IReadStream;
 }

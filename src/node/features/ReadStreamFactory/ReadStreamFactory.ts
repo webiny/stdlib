@@ -10,7 +10,7 @@ class ReadStreamImpl implements ReadStreamFactoryAbstraction.Stream {
         return this.stream;
     }
 
-    public async [Symbol.asyncDispose](): Promise<void> {
+    public destroy(): void {
         this.stream.destroy();
     }
 }
