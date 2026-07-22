@@ -66,3 +66,12 @@ export {
     type HashFolderOptions,
     type HashFolderResult
 } from "./features/HashFolderTool/index.js";
+export {
+    WorkspaceTool,
+    WorkspaceToolFeature,
+    createWorkspaceTool,
+    listWorkspaces,
+    WorkspaceRootNotFoundError,
+    type WorkspaceInfo,
+    type ListWorkspacesParams
+} from "./features/WorkspaceTool/index.js";
