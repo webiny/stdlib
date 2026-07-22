@@ -1,6 +1,6 @@
 # ReadStreamFactory
 
-Creates disposable `node:fs` read streams that guarantee cleanup via the `AsyncDisposable` protocol. Use `await using` to ensure the underlying file handle is released on scope exit — including early `break` from an async generator loop or thrown errors.
+Creates `node:fs` read streams with explicit cleanup. Call `destroy()` to release the underlying file handle when done — including early `break` from an async generator loop or thrown errors (use try/finally).
 
 Node.js only — depends on `node:fs` and `node:stream`.
 
@@ -9,16 +9,18 @@ Node.js only — depends on `node:fs` and `node:stream`.
 ```ts
 interface IReadStreamFactory {
   /**
-   * Creates a disposable read stream for the given path.
+   * Creates a read stream for the given path.
    * Mirrors node:fs createReadStream exactly — all native options are supported.
-   * Use `await using` to guarantee the stream is destroyed on scope exit.
+   * Call `destroy()` when done to release the file handle.
    */
   create(path: PathLike, options?: BufferEncoding | ReadStreamOptions): IReadStream;
 }
 
-interface IReadStream extends AsyncDisposable {
+interface IReadStream {
   /** Returns the underlying Node.js Readable stream. */
   getStream(): Readable;
+  /** Destroys the underlying stream, releasing the file handle. */
+  destroy(): void;
 }
 ```
 
@@ -37,8 +39,12 @@ ReadStreamFactoryFeature.register(container);
 
 const factory = container.resolve(ReadStreamFactory);
 
-await using rs = factory.create("/path/to/file.bin");
-const stream = rs.getStream(); // node:stream Readable
+const rs = factory.create("/path/to/file.bin");
+try {
+  const stream = rs.getStream(); // node:stream Readable
+} finally {
+  rs.destroy();
+}
 ```
 
 ### Without DI
@@ -48,9 +54,12 @@ import { createReadStreamFactory } from "@webiny/stdlib/node";
 
 const factory = createReadStreamFactory();
 
-await using rs = factory.create("/path/to/file.bin", { start: 0, end: 1023 });
-for await (const chunk of rs.getStream()) {
-  // process chunk
+const rs = factory.create("/path/to/file.bin", { start: 0, end: 1023 });
+try {
+  for await (const chunk of rs.getStream()) {
+    // process chunk
+  }
+} finally {
+  rs.destroy();
 }
-// stream.destroy() called automatically here
 ```

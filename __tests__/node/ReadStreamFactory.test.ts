@@ -33,28 +33,29 @@ describe("ReadStreamFactory", () => {
         const filePath = join(tmpDir, "test.txt");
         writeFileSync(filePath, "hello world");
 
-        await using rs = factory.create(filePath);
-        const chunks: Buffer[] = [];
-        for await (const chunk of rs.getStream()) {
-            chunks.push(chunk as Buffer);
+        const rs = factory.create(filePath);
+        try {
+            const chunks: Buffer[] = [];
+            for await (const chunk of rs.getStream()) {
+                chunks.push(chunk as Buffer);
+            }
+            expect(Buffer.concat(chunks).toString()).toBe("hello world");
+        } finally {
+            rs.destroy();
         }
-        expect(Buffer.concat(chunks).toString()).toBe("hello world");
     });
 
-    it("destroys the stream on dispose", async () => {
+    it("destroys the stream on destroy()", async () => {
         const filePath = join(tmpDir, "test.txt");
         writeFileSync(filePath, "hello");
 
-        let capturedStream;
-        {
-            await using rs = factory.create(filePath);
-            capturedStream = rs.getStream();
-            // drain it so the stream ends naturally before dispose
-            const chunks: Buffer[] = [];
-            for await (const chunk of capturedStream) {
-                chunks.push(chunk as Buffer);
-            }
+        const rs = factory.create(filePath);
+        const capturedStream = rs.getStream();
+        const chunks: Buffer[] = [];
+        for await (const chunk of capturedStream) {
+            chunks.push(chunk as Buffer);
         }
+        rs.destroy();
         expect(capturedStream.destroyed).toBe(true);
     });
 
@@ -62,12 +63,16 @@ describe("ReadStreamFactory", () => {
         const filePath = join(tmpDir, "test.txt");
         writeFileSync(filePath, "hello world");
 
-        await using rs = factory.create(filePath, { start: 6, end: 10 });
-        const chunks: Buffer[] = [];
-        for await (const chunk of rs.getStream()) {
-            chunks.push(chunk as Buffer);
+        const rs = factory.create(filePath, { start: 6, end: 10 });
+        try {
+            const chunks: Buffer[] = [];
+            for await (const chunk of rs.getStream()) {
+                chunks.push(chunk as Buffer);
+            }
+            expect(Buffer.concat(chunks).toString()).toBe("world");
+        } finally {
+            rs.destroy();
         }
-        expect(Buffer.concat(chunks).toString()).toBe("world");
     });
 });
 
@@ -79,12 +84,16 @@ describe("createReadStreamFactory", () => {
             const filePath = join(dir, "direct.txt");
             writeFileSync(filePath, "direct");
             const f = createReadStreamFactory();
-            await using rs = f.create(filePath);
-            const chunks: Buffer[] = [];
-            for await (const chunk of rs.getStream()) {
-                chunks.push(chunk as Buffer);
+            const rs = f.create(filePath);
+            try {
+                const chunks: Buffer[] = [];
+                for await (const chunk of rs.getStream()) {
+                    chunks.push(chunk as Buffer);
+                }
+                expect(Buffer.concat(chunks).toString()).toBe("direct");
+            } finally {
+                rs.destroy();
             }
-            expect(Buffer.concat(chunks).toString()).toBe("direct");
         } finally {
             rmSync(dir, { recursive: true, force: true });
         }
