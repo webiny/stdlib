@@ -50,6 +50,7 @@ The package is ESM-only and ships three subpath exports. Because each is a separ
 | `PackageJsonFileTool` / `PackageJsonFileToolFeature` | Read, validate, mutate, and write `package.json` files — [docs](src/node/features/PackageJsonFileTool/README.md)                    |
 | `HashFolderTool` / `HashFolderToolFeature`           | Deterministic SHA-256 hash of a folder's contents — [docs](src/node/features/HashFolderTool/README.md)                              |
 | `ProcessEnvFeature`                                  | `Env` implementation backed by `process.env` — [docs](src/node/features/ProcessEnv/README.md)                                       |
+| `WorkspaceTool` / `WorkspaceToolFeature`             | Discover workspaces from root `package.json` (replaces `get-yarn-workspaces`) — [docs](src/node/features/WorkspaceTool/README.md)   |
 
 ---
 
