@@ -1,6 +1,6 @@
 {
   "name": "@webiny/stdlib",
-  "version": "0.0.11",
+  "version": "0.0.12",
   "type": "module",
   "description": "Standard library for Webiny — platform-agnostic, Node.js, and browser utilities",
   "license": "MIT",

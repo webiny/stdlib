@@ -1,5 +1,11 @@
 # @webiny/stdlib
 
+## 0.0.12
+
+### Patch Changes
+
+- 3b7c40e: Add WorkspaceTool for discovering workspaces from root package.json (drop-in replacement for get-yarn-workspaces)
+
 ## 0.0.11
 
 ### Patch Changes
