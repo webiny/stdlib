@@ -1,5 +1,11 @@
 # @webiny/stdlib
 
+## 0.0.11
+
+### Patch Changes
+
+- 809c44a: Replace `await using` / `AsyncDisposable` on `ReadStreamFactory` with explicit `destroy()` method for bundler compatibility
+
 ## 0.0.10
 
 ### Patch Changes
