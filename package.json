@@ -36,13 +36,13 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
-    "@changesets/cli": "^2.31.0",
-    "@types/node": "^25.9.5",
+    "@changesets/cli": "^2.31.1",
+    "@types/node": "^26.1.1",
     "@vitest/coverage-v8": "^4.1.10",
     "adio": "^3.0.1",
-    "happy-dom": "^20.10.6",
-    "oxfmt": "^0.58.0",
-    "oxlint": "^1.73.0",
+    "happy-dom": "^20.11.0",
+    "oxfmt": "^0.59.0",
+    "oxlint": "^1.74.0",
     "typescript": "^7.0.2",
     "vitest": "^4.1.10"
   },
