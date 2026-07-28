@@ -16,17 +16,27 @@
     "./browser": {
       "import": "./dist/browser/index.js",
       "types": "./dist/browser/index.d.ts"
+    },
+    "./mcp": {
+      "import": "./dist/mcp/index.js",
+      "types": "./dist/mcp/index.d.ts"
     }
   },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "bin": {
+    "stdlib-mcp": "./dist/mcp/cli.js"
+  },
   "files": [
-    "dist"
+    "dist",
+    "skills"
   ],
   "publishConfig": {
     "directory": "dist"
   },
   "dependencies": {
+    "@11ty/gray-matter": "^2.1.0",
+    "@modelcontextprotocol/sdk": "^1.29.0",
     "@webiny/di": "^1.0.2",
     "bson-objectid": "^2.0.4",
     "dot-prop": "^10.1.0",
@@ -62,7 +72,7 @@
     "lint": "oxlint --deny-warnings",
     "lint:fix": "oxlint --fix",
     "check:imports": "adio",
-    "typecheck": "tsc -p config/tsconfig.check.common.json && tsc -p config/tsconfig.check.node.json && tsc -p config/tsconfig.check.browser.json && tsc -p config/tsconfig.check.scripts.json",
+    "typecheck": "tsc -p config/tsconfig.check.common.json && tsc -p config/tsconfig.check.node.json && tsc -p config/tsconfig.check.browser.json && tsc -p config/tsconfig.check.scripts.json && tsc -p config/tsconfig.check.mcp.json",
     "full": "yarn check:imports && yarn clean && yarn format:fix && yarn lint:fix && yarn typecheck && yarn build && yarn test:coverage"
   },
   "packageManager": "yarn@4.17.1"

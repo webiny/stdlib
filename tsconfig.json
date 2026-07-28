@@ -32,6 +32,7 @@
   "references": [
     { "path": "./config/tsconfig.common.json" },
     { "path": "./config/tsconfig.node.json" },
-    { "path": "./config/tsconfig.browser.json" }
+    { "path": "./config/tsconfig.browser.json" },
+    { "path": "./config/tsconfig.mcp.json" }
   ]
 }

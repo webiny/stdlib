@@ -2,13 +2,13 @@
   "extends": "../tsconfig.json",
   "compilerOptions": {
     "composite": true,
-    "rootDir": "../src",
-    "outDir": "../dist",
+    "rootDir": "../src/mcp",
+    "outDir": "../dist/mcp",
     "module": "nodenext",
     "moduleResolution": "nodenext",
-    "lib": ["esnext", "dom"],
+    "types": ["node"],
     "paths": { "~/*": ["../src/*"] }
   },
-  "include": ["../src"],
-  "exclude": ["../src/node", "../src/browser", "../src/mcp"]
+  "include": ["../src/mcp"],
+  "references": [{ "path": "./tsconfig.common.json" }]
 }
