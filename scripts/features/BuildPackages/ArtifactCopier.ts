@@ -46,6 +46,7 @@ class ArtifactCopierImpl implements ArtifactCopierAbstraction.Interface {
             pkgJson.exports = rewriteExports(pkgJson.exports);
         }
         delete pkgJson.files;
+        delete pkgJson["publishConfig"];
 
         writeFileSync(join(distAbsDir, "package.json"), JSON.stringify(pkgJson, null, 2) + "\n");
     }

@@ -23,6 +23,9 @@
   "files": [
     "dist"
   ],
+  "publishConfig": {
+    "directory": "dist"
+  },
   "dependencies": {
     "@webiny/di": "^1.0.2",
     "bson-objectid": "^2.0.4",
