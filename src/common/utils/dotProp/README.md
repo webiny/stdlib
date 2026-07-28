@@ -1,3 +1,9 @@
+---
+name: dot-prop
+description: Immutable and mutable get/set/delete operations on nested objects via dot-notation paths.
+context: common
+---
+
 # dotProp
 
 Immutable and mutable operations on nested objects via dot-notation paths. Wraps the [`dot-prop`](https://github.com/deoxxa/dot-prop) package with explicit immutable/mutable variants and `structuredClone`-based deep cloning.

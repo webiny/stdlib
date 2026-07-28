@@ -1,3 +1,9 @@
+---
+name: hash-folder-tool
+description: Computes a deterministic SHA-256 hash of a folder's contents to detect changes.
+context: node
+---
+
 # HashFolderTool
 
 Computes a deterministic SHA-256 hash of a folder's contents. Walks the directory tree recursively, hashes each file individually, sorts entries by relative path for deterministic ordering, then produces a single combined hex digest. Use it to detect whether a folder's contents have changed — for example, to skip redundant builds when source files haven't been modified.

@@ -1,3 +1,9 @@
+---
+name: ndjson-reader-tool
+description: Parses NDJSON data from a file, a Readable stream, or an in-memory iterable, with checkpoint resume support.
+context: node
+---
+
 # NdJsonReaderTool
 
 Parses [NDJSON](https://ndjson.org/) (newline-delimited JSON) data from a file path, a Node.js `Readable` stream, or an in-memory iterable of lines. Handles malformed input where a single JSON value is split across multiple lines by attempting newline-join and concatenation strategies before discarding and moving on.

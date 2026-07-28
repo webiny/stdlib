@@ -1,3 +1,9 @@
+---
+name: utils
+description: Standalone utility functions exported from @webiny/stdlib — no DI container required.
+context: common
+---
+
 # Common Utils
 
 Standalone utility functions exported from `@webiny/stdlib`. No DI container required — import and call directly.

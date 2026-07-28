@@ -1,3 +1,9 @@
+---
+name: path-tool
+description: Injectable wrapper around node:path, plus package-relative file resolution via resolvePackageFile.
+context: node
+---
+
 # PathTool
 
 Wraps the four most-used `node:path` methods — `join`, `resolve`, `dirname`, and `basename` — behind the standard DI abstraction/implementation pattern. Also provides `resolvePackageFile` to turn a package-relative specifier into an absolute filesystem path via Node's module resolver.

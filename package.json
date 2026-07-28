@@ -16,17 +16,30 @@
     "./browser": {
       "import": "./dist/browser/index.js",
       "types": "./dist/browser/index.d.ts"
+    },
+    "./mcp": {
+      "import": "./dist/mcp/index.js",
+      "types": "./dist/mcp/index.d.ts"
     }
   },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "bin": {
+    "stdlib-mcp": "./dist/mcp/cli.js"
+  },
   "files": [
-    "dist"
+    "dist",
+    "skills"
   ],
+  "publishConfig": {
+    "directory": "dist"
+  },
   "dependencies": {
+    "@11ty/gray-matter": "^2.1.0",
+    "@modelcontextprotocol/sdk": "^1.29.0",
     "@webiny/di": "^1.0.2",
     "bson-objectid": "^2.0.4",
-    "dot-prop": "^10.1.0",
+    "dot-prop": "^10.2.0",
     "fast-glob": "^3.3.3",
     "nanoid": "^6.0.0",
     "nanoid-dictionary": "^5.0.0",
@@ -40,9 +53,9 @@
     "@types/node": "^26.1.1",
     "@vitest/coverage-v8": "^4.1.10",
     "adio": "^3.0.1",
-    "happy-dom": "^20.11.0",
-    "oxfmt": "^0.59.0",
-    "oxlint": "^1.74.0",
+    "happy-dom": "^20.11.1",
+    "oxfmt": "^0.60.0",
+    "oxlint": "^1.75.0",
     "typescript": "^7.0.2",
     "vitest": "^4.1.10"
   },
@@ -59,7 +72,7 @@
     "lint": "oxlint --deny-warnings",
     "lint:fix": "oxlint --fix",
     "check:imports": "adio",
-    "typecheck": "tsc -p config/tsconfig.check.common.json && tsc -p config/tsconfig.check.node.json && tsc -p config/tsconfig.check.browser.json && tsc -p config/tsconfig.check.scripts.json",
+    "typecheck": "tsc -p config/tsconfig.check.common.json && tsc -p config/tsconfig.check.node.json && tsc -p config/tsconfig.check.browser.json && tsc -p config/tsconfig.check.scripts.json && tsc -p config/tsconfig.check.mcp.json",
     "full": "yarn check:imports && yarn clean && yarn format:fix && yarn lint:fix && yarn typecheck && yarn build && yarn test:coverage"
   },
   "packageManager": "yarn@4.17.1"

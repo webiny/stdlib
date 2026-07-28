@@ -1,0 +1,4 @@
+{
+  "extends": ["./tsconfig.mcp.json", "./tsconfig.checkmode.json"],
+  "include": ["../src/mcp", "../__tests__/mcp"]
+}

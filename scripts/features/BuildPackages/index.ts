@@ -13,7 +13,8 @@ export function run(rootDir: string): void {
         slices: [
             "config/tsconfig.common.json",
             "config/tsconfig.node.json",
-            "config/tsconfig.browser.json"
+            "config/tsconfig.browser.json",
+            "config/tsconfig.mcp.json"
         ]
     });
     container.register(CleanerImpl).inSingletonScope();

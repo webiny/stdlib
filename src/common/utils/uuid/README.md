@@ -1,3 +1,9 @@
+---
+name: uuid
+description: Generates RFC 4122 v4 UUIDs, with a native crypto fallback for insecure browser contexts.
+context: common
+---
+
 # uuid
 
 Generates RFC 4122 v4 UUIDs. Uses the native `crypto.randomUUID()` when available (Node.js, secure browser contexts) and falls back to a manual implementation using `crypto.getRandomValues()` for insecure (HTTP) browser contexts. No external dependencies.

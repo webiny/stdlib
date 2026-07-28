@@ -1,3 +1,9 @@
+---
+name: read-stream-factory
+description: Creates node:fs read streams with explicit cleanup via destroy().
+context: node
+---
+
 # ReadStreamFactory
 
 Creates `node:fs` read streams with explicit cleanup. Call `destroy()` to release the underlying file handle when done — including early `break` from an async generator loop or thrown errors (use try/finally).

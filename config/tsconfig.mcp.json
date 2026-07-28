@@ -1,0 +1,14 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "composite": true,
+    "rootDir": "../src/mcp",
+    "outDir": "../dist/mcp",
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "types": ["node"],
+    "paths": { "~/*": ["../src/*"] }
+  },
+  "include": ["../src/mcp"],
+  "references": [{ "path": "./tsconfig.common.json" }]
+}

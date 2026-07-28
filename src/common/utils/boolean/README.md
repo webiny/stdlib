@@ -1,3 +1,9 @@
+---
+name: boolean
+description: Semantic boolean coercion for stringly-typed inputs such as environment variables and form values.
+context: common
+---
+
 # boolean
 
 Semantic boolean coercion with exact parity to the [`boolean`](https://www.npmjs.com/package/boolean) npm package. Converts environment variable strings, form values, and other stringly-typed inputs to `boolean` using a well-defined set of truthy tokens.

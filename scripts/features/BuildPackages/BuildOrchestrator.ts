@@ -4,7 +4,15 @@ import { Cleaner } from "./abstractions/Cleaner.ts";
 import { Compiler } from "./abstractions/Compiler.ts";
 import { ArtifactCopier } from "./abstractions/ArtifactCopier.ts";
 import { PathAliasRewriter } from "./abstractions/PathAliasRewriter.ts";
-import { join } from "node:path";
+import { join, dirname, relative } from "node:path";
+import {
+    readdirSync,
+    mkdirSync,
+    copyFileSync,
+    existsSync,
+    readFileSync,
+    writeFileSync
+} from "node:fs";
 
 class BuildOrchestratorImpl implements BuildOrchestratorAbstraction.Interface {
     private readonly config: ProjectConfig.Interface;
@@ -39,9 +47,43 @@ class BuildOrchestratorImpl implements BuildOrchestratorAbstraction.Interface {
 
         this.pathAliasRewriter.rewrite(distDir);
 
+        this.copyReadmes(rootDir);
+        this.ensureShebang(rootDir);
+
         this.artifactCopier.copyPackageJson(rootDir, distDir);
         this.artifactCopier.copyReadme(rootDir, distDir);
         this.artifactCopier.copyLicense(rootDir, distDir);
+    }
+
+    private copyReadmes(rootDir: string): void {
+        const srcDir = join(rootDir, "src");
+        const distDir = join(rootDir, "dist");
+        this.walkForReadmes(srcDir, srcDir, distDir);
+    }
+
+    private walkForReadmes(baseDir: string, dir: string, distDir: string): void {
+        for (const entry of readdirSync(dir, { withFileTypes: true })) {
+            const fullPath = join(dir, entry.name);
+            if (entry.isDirectory()) {
+                this.walkForReadmes(baseDir, fullPath, distDir);
+            } else if (entry.name === "README.md") {
+                const relPath = relative(baseDir, fullPath);
+                const destPath = join(distDir, relPath);
+                mkdirSync(dirname(destPath), { recursive: true });
+                copyFileSync(fullPath, destPath);
+            }
+        }
+    }
+
+    private ensureShebang(rootDir: string): void {
+        const cliPath = join(rootDir, "dist", "mcp", "cli.js");
+        if (!existsSync(cliPath)) {
+            return;
+        }
+        const content = readFileSync(cliPath, "utf-8");
+        if (!content.startsWith("#!")) {
+            writeFileSync(cliPath, "#!/usr/bin/env node\n" + content);
+        }
     }
 }
 

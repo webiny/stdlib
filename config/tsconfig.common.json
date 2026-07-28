@@ -10,5 +10,5 @@
     "paths": { "~/*": ["../src/*"] }
   },
   "include": ["../src"],
-  "exclude": ["../src/node", "../src/browser"]
+  "exclude": ["../src/node", "../src/browser", "../src/mcp"]
 }

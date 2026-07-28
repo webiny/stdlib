@@ -1,3 +1,9 @@
+---
+name: browser-env
+description: Browser implementation of the Env abstraction, backed by an injected Record<string, string> of variables.
+context: browser
+---
+
 # BrowserEnv
 
 Browser implementation of the `Env` abstraction, backed by an injected `Record<string, string>`. Pass variables at feature registration time; defaults to an empty object (all reads return `undefined` or the provided default).

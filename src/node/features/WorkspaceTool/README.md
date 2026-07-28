@@ -1,3 +1,9 @@
+---
+name: workspace-tool
+description: Discovers workspaces defined in the nearest root package.json.
+context: node
+---
+
 # WorkspaceTool
 
 Discovers workspaces defined in the nearest root `package.json`. Walks up from a given directory to find a `package.json` with a `workspaces` field, then resolves the glob patterns to return workspace metadata. Supports both flat array (`workspaces: ["packages/*"]`) and Yarn's object format (`workspaces: { packages: ["packages/*"] }`). Drop-in replacement for the `get-yarn-workspaces` package.

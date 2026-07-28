@@ -1,3 +1,9 @@
+---
+name: cache
+description: Synchronous and async key-value caches with a Result-based API that never throw.
+context: common
+---
+
 # Cache / AsyncCache
 
 Synchronous and async key-value caches with a `Result`-based API — they never throw. All operations return `Result<T, CacheError>` (sync) or `ResultAsync<T, CacheError>` (async), so callers handle errors explicitly.
