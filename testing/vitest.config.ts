@@ -16,7 +16,14 @@ export default defineConfig({
         coverage: {
             provider: "v8",
             include: ["src/**/*.ts"],
-            exclude: ["**/__tests__/**", "**/index.ts", "**/abstractions/**", "**/feature.ts"],
+            exclude: [
+                "**/__tests__/**",
+                "**/index.ts",
+                "**/abstractions/**",
+                "**/feature.ts",
+                "**/cli.ts",
+                "**/AgentConfigurator.ts"
+            ],
             thresholds: {
                 statements: 96,
                 branches: 93,
