@@ -1,1 +1,6 @@
-// MCP server barrel — populated as features are implemented.
+export {
+    SkillDiscovery,
+    SkillDiscoveryConfig,
+    type Skill
+} from "./features/Server/index.js";
+
