@@ -21,7 +21,7 @@ import { SkillDiscoveryConfig, McpServerFeature, McpServer } from "@webiny/stdli
 
 const container = new Container();
 container.registerInstance(SkillDiscoveryConfig, {
-    scanPaths: ["./skills", "./src"]
+  scanPaths: ["./skills", "./src"]
 });
 McpServerFeature.register(container);
 

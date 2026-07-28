@@ -3,10 +3,7 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import type { Transport } from "@modelcontextprotocol/sdk/shared/transport.js";
 import { z } from "zod";
 import { McpServer as McpServerAbstraction } from "./abstractions/McpServer.js";
-import {
-    SkillDiscovery,
-    type Skill
-} from "./abstractions/SkillDiscovery.js";
+import { SkillDiscovery, type Skill } from "./abstractions/SkillDiscovery.js";
 
 const CONTEXT_HEADINGS: Record<string, string> = {
     common: "Platform-agnostic utilities",
@@ -53,9 +50,7 @@ function buildCatalog(skills: Skill[]): string {
 }
 
 class McpServerImpl implements McpServerAbstraction.Interface {
-    public constructor(
-        private readonly skillDiscovery: SkillDiscovery.Interface
-    ) {}
+    public constructor(private readonly skillDiscovery: SkillDiscovery.Interface) {}
 
     public async start(): Promise<void> {
         const transport = new StdioServerTransport();
@@ -69,47 +64,55 @@ class McpServerImpl implements McpServerAbstraction.Interface {
             skillMap.set(skill.name, skill);
         }
 
-        const server = new SdkMcpServer(
-            { name: "stdlib", version: "1.0.0" }
+        const server = new SdkMcpServer({ name: "stdlib", version: "1.0.0" });
+
+        server.registerTool(
+            "list_stdlib_skills",
+            {
+                title: "List stdlib skills",
+                description:
+                    "Returns a catalog of all available @webiny/stdlib skills. Call this first when working with @webiny/stdlib, then call get_stdlib_skill to load a specific skill.",
+                annotations: { readOnlyHint: true }
+            },
+            () => ({
+                content: [{ type: "text" as const, text: buildCatalog(skills) }]
+            })
         );
 
-        server.registerTool("list_stdlib_skills", {
-            title: "List stdlib skills",
-            description:
-                "Returns a catalog of all available @webiny/stdlib skills. Call this first when working with @webiny/stdlib, then call get_stdlib_skill to load a specific skill.",
-            annotations: { readOnlyHint: true }
-        }, () => ({
-            content: [{ type: "text" as const, text: buildCatalog(skills) }]
-        }));
-
-        server.registerTool("get_stdlib_skill", {
-            title: "Get stdlib skill",
-            description:
-                "Loads full documentation for a specific @webiny/stdlib skill. Call list_stdlib_skills first to see available names.",
-            inputSchema: { topic: z.string().describe("Skill name from list_stdlib_skills") },
-            annotations: { readOnlyHint: true }
-        }, ({ topic }) => {
-            const skill = skillMap.get(topic);
-            if (!skill) {
-                const available = [...skillMap.keys()]
-                    .sort()
-                    .map(n => {
-                        const s = skillMap.get(n)!;
-                        return `- ${n} (${s.context})`;
-                    })
-                    .join("\n");
+        server.registerTool(
+            "get_stdlib_skill",
+            {
+                title: "Get stdlib skill",
+                description:
+                    "Loads full documentation for a specific @webiny/stdlib skill. Call list_stdlib_skills first to see available names.",
+                inputSchema: { topic: z.string().describe("Skill name from list_stdlib_skills") },
+                annotations: { readOnlyHint: true }
+            },
+            ({ topic }) => {
+                const skill = skillMap.get(topic);
+                if (!skill) {
+                    const available = [...skillMap.keys()]
+                        .sort()
+                        .map(n => {
+                            const s = skillMap.get(n)!;
+                            return `- ${n} (${s.context})`;
+                        })
+                        .join("\n");
+                    return {
+                        isError: true,
+                        content: [
+                            {
+                                type: "text" as const,
+                                text: `Skill "${topic}" not found. Available skills:\n${available}`
+                            }
+                        ]
+                    };
+                }
                 return {
-                    isError: true,
-                    content: [{
-                        type: "text" as const,
-                        text: `Skill "${topic}" not found. Available skills:\n${available}`
-                    }]
+                    content: [{ type: "text" as const, text: skill.body }]
                 };
             }
-            return {
-                content: [{ type: "text" as const, text: skill.body }]
-            };
-        });
+        );
 
         await server.connect(transport);
     }
