@@ -1,30 +1,24 @@
 import { copyFileSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { ArtifactCopier as ArtifactCopierAbstraction } from "./abstractions/ArtifactCopier.ts";
-
-interface PackageJsonExports {
-    [key: string]: string | PackageJsonExports;
-}
-
-interface PackageJson {
-    main?: string;
-    types?: string;
-    exports?: string | PackageJsonExports;
-    files?: string[];
-    [key: string]: unknown;
-}
+import type { PackageJson } from "type-fest";
 
 function stripDist(path: string): string {
     return path.startsWith("./dist/") ? `./${path.slice("./dist/".length)}` : path;
 }
 
-function rewriteExports(value: string | PackageJsonExports): string | PackageJsonExports {
+function rewriteExports(value: PackageJson.Exports): PackageJson.Exports {
+    if (value == null || Array.isArray(value)) {
+        return value;
+    }
     if (typeof value === "string") {
         return stripDist(value);
     }
-    const result: PackageJsonExports = {};
+    const result: PackageJson.ExportConditions = {};
     for (const [k, v] of Object.entries(value)) {
-        result[k] = rewriteExports(v);
+        if (v !== undefined) {
+            result[k] = rewriteExports(v);
+        }
     }
     return result;
 }
@@ -36,13 +30,13 @@ class ArtifactCopierImpl implements ArtifactCopierAbstraction.Interface {
             readFileSync(join(packageAbsDir, "package.json"), "utf8")
         ) as PackageJson;
 
-        if (pkgJson.main !== undefined) {
+        if (pkgJson.main) {
             pkgJson.main = stripDist(pkgJson.main);
         }
-        if (pkgJson.types !== undefined) {
+        if (pkgJson.types) {
             pkgJson.types = stripDist(pkgJson.types);
         }
-        if (pkgJson.exports !== undefined) {
+        if (pkgJson.exports) {
             pkgJson.exports = rewriteExports(pkgJson.exports);
         }
         delete pkgJson.files;
