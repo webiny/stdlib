@@ -1,3 +1,9 @@
+---
+name: env
+description: Typed access to environment variables, with platform-specific implementations for Node and browser.
+context: common
+---
+
 # Env
 
 Typed access to environment variables. The `Env` abstraction lives in `@webiny/stdlib` (common) and has platform-specific implementations: `ProcessEnv` (Node, backed by `process.env`) and `BrowserEnv` (browser, backed by an injected variables object).

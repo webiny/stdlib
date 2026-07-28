@@ -1,3 +1,9 @@
+---
+name: file-tool
+description: Read, write, copy, remove files. All paths must be absolute.
+context: node
+---
+
 # FileTool
 
 Reads, writes, copies, and removes files on the local filesystem. All paths must be absolute. Write operations automatically create missing parent directories. Methods without `OrThrow` log a warning and return `null` / `void` on failure; `OrThrow` variants throw.

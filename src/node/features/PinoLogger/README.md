@@ -1,3 +1,9 @@
+---
+name: pino-logger
+description: A pino-based implementation of the Logger abstraction from @webiny/stdlib.
+context: node
+---
+
 # PinoLogger
 
 A [pino](https://github.com/pinojs/pino)-based implementation of the `Logger` abstraction from `@webiny/stdlib`. Registers under the shared `Logger` DI token, so any tool that depends on `Logger` will receive a pino instance when `PinoLoggerFeature` is registered.

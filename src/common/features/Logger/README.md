@@ -1,3 +1,9 @@
+---
+name: logger
+description: Shared DI logging token, with a console-based implementation supporting log levels, prefix, and timestamps.
+context: common
+---
+
 # Logger / ConsoleLogger
 
 `Logger` is the shared DI token for logging across all packages. `ConsoleLoggerFeature` registers a `console`-based implementation that supports log levels, optional prefix, and optional timestamps. Any package that injects `Logger` works with any registered implementation — swap `ConsoleLogger` for `PinoLogger` from `@webiny/stdlib/node` without changing call sites.

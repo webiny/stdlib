@@ -1,3 +1,9 @@
+---
+name: mdbid
+description: Generates MongoDB-compatible ObjectId strings via bson-objectid.
+context: common
+---
+
 # mdbid
 
 Generates MongoDB-compatible ObjectId strings. Uses `bson-objectid` to produce 24-character, time-sortable, globally unique hex identifiers that match MongoDB's native ObjectId format.

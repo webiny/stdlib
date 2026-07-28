@@ -1,3 +1,9 @@
+---
+name: directory-tool
+description: Creates, reads, copies, removes, and globs directories on the local filesystem. All paths must be absolute.
+context: node
+---
+
 # DirectoryTool
 
 Creates, reads, copies, removes, and globs directories on the local filesystem. All paths must be absolute. `create` is idempotent — it calls `mkdirSync` with `recursive: true` and is safe to call on an existing path. Methods without `OrThrow` log a warning and return `null` / `void` on failure; `OrThrow` variants throw.

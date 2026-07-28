@@ -1,3 +1,9 @@
+---
+name: generate-id
+description: Nanoid-based ID generators with configurable alphabets and sizes.
+context: common
+---
+
 # generateId
 
 Nanoid-based ID generators with configurable alphabets and sizes. Uses `nanoid` (v5) and `nanoid-dictionary` under the hood. All generators default to 21 characters and accept an optional `size` parameter.

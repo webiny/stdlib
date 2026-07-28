@@ -1,3 +1,9 @@
+---
+name: mcp-server
+description: Exposes @webiny/stdlib feature documentation as MCP tools for AI agent discovery.
+context: guides
+---
+
 # MCP Server
 
 Exposes `@webiny/stdlib` feature documentation as MCP tools for AI agent discovery. Two tools: `list_stdlib_skills` returns a grouped catalog; `get_stdlib_skill` loads full documentation for a specific skill.

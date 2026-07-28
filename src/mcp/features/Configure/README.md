@@ -1,3 +1,9 @@
+---
+name: mcp-configure
+description: Interactive CLI that configures AI agents to use the stdlib MCP server.
+context: guides
+---
+
 # Configure
 
 Interactive CLI that configures AI agents to use the stdlib MCP server. Supports Claude Code, Cursor, Cline, GitHub Copilot, Windsurf, Kiro, and OpenCode.

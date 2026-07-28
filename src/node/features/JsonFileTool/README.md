@@ -1,3 +1,9 @@
+---
+name: json-file-tool
+description: Reads and writes JSON files on the local filesystem, with optional schema validation.
+context: node
+---
+
 # JsonFileTool
 
 Reads and writes JSON files on the local filesystem. Optionally validates the parsed value through a schema (any object with a `.parse(unknown): T` method — compatible with Zod, Valibot, and similar). Methods without `OrThrow` return `null` on failure; `OrThrow` variants throw.

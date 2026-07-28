@@ -1,3 +1,9 @@
+---
+name: package-json-file-tool
+description: Reads, validates, and writes package.json files with typed mutation helpers for dependency sections.
+context: node
+---
+
 # PackageJsonFileTool
 
 Reads, validates, and writes `package.json` files. `read` and `readOrThrow` return a `PackageJsonFile` value object that carries the file path and parsed data and exposes mutation helpers for all dependency sections. Root-level well-known fields are validated at runtime with Zod; unknown fields pass through unchanged. The parsed data is typed as `PackageJson` from [type-fest](https://github.com/sindresorhus/type-fest).

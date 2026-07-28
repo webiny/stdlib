@@ -1,3 +1,9 @@
+---
+name: local-storage-cache
+description: A Cache implementation backed by window.localStorage that returns Result instead of throwing.
+context: browser
+---
+
 # LocalStorageCache
 
 A `Cache` implementation backed by `window.localStorage`. All methods return `Result` — they never throw. When `localStorage` is unavailable (SSR, private-browsing restrictions), every operation returns a typed `LocalStorageUnavailableError` instead of crashing.

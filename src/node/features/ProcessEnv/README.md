@@ -1,3 +1,9 @@
+---
+name: process-env
+description: Node.js implementation of the Env abstraction, backed by process.env by default.
+context: node
+---
+
 # ProcessEnv
 
 Node.js implementation of the `Env` abstraction, backed by `process.env` by default. Accepts an optional `variables` record to override the source. Provides typed access to environment variables with `getString`, `getNumber`, and `getBoolean` families.
