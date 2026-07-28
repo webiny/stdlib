@@ -1,5 +1,11 @@
 # @webiny/stdlib
 
+## 0.0.13
+
+### Patch Changes
+
+- 3fb0ed7: feat: add MCP server for AI agent skill discovery (`stdlib-mcp serve` / `stdlib-mcp configure`)
+
 ## 0.0.12
 
 ### Patch Changes
