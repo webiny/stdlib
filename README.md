@@ -15,6 +15,7 @@ The package is ESM-only and ships three subpath exports. Because each is a separ
 | `@webiny/stdlib`         | Any         | Platform-agnostic utilities |
 | `@webiny/stdlib/node`    | Node.js     | Node.js-specific tools      |
 | `@webiny/stdlib/browser` | Browser     | Browser-specific tools      |
+| `@webiny/stdlib/mcp`     | Node.js     | MCP server + agent config   |
 
 ---
 
@@ -60,6 +61,28 @@ The package is ESM-only and ships three subpath exports. Because each is a separ
 | -------------------------- | ----------------------------------------------------------------------------------------------------------------- |
 | `LocalStorageCacheFeature` | `Cache` implementation backed by `window.localStorage` — [docs](src/browser/features/LocalStorageCache/README.md) |
 | `BrowserEnvFeature`        | `Env` implementation backed by an injected variables object — [docs](src/browser/features/BrowserEnv/README.md)   |
+
+---
+
+## `@webiny/stdlib/mcp` — MCP Server
+
+An [MCP](https://modelcontextprotocol.io) server that exposes `@webiny/stdlib` feature documentation as tools for AI agent discovery. Ships a CLI binary (`stdlib-mcp`) with two commands:
+
+```sh
+# Start the MCP server (stdio transport)
+npx -y @webiny/stdlib stdlib-mcp serve
+
+# Configure an AI agent (Claude Code, Cursor, Cline, Copilot, Windsurf, Kiro, OpenCode)
+npx -y @webiny/stdlib stdlib-mcp configure
+```
+
+The server provides two MCP tools: `list_stdlib_skills` (grouped catalog of all features) and `get_stdlib_skill` (full documentation for a specific skill). By default it scans `skills/` and `src/` (or `dist/`) for README.md and SKILL.md files with YAML front-matter.
+
+| Feature                                          | Description                                                                                     |
+| ------------------------------------------------ | ----------------------------------------------------------------------------------------------- |
+| `McpServer` / `McpServerFeature`                 | MCP server with stdio transport — [docs](src/mcp/features/Server/README.md)                     |
+| `SkillDiscovery` / `SkillDiscoveryConfig`        | Scans directories for skill files with front-matter — [docs](src/mcp/features/Server/README.md) |
+| `AgentConfigurator` / `AgentConfiguratorFeature` | Interactive CLI to configure AI agents — [docs](src/mcp/features/Configure/README.md)           |
 
 ---
 
