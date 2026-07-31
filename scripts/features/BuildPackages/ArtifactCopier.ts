@@ -39,6 +39,17 @@ class ArtifactCopierImpl implements ArtifactCopierAbstraction.Interface {
         if (pkgJson.exports) {
             pkgJson.exports = rewriteExports(pkgJson.exports);
         }
+        if (pkgJson.bin) {
+            if (typeof pkgJson.bin === "string") {
+                pkgJson.bin = stripDist(pkgJson.bin);
+            } else {
+                for (const [name, path] of Object.entries(pkgJson.bin)) {
+                    if (path) {
+                        pkgJson.bin[name] = stripDist(path);
+                    }
+                }
+            }
+        }
         delete pkgJson.files;
         delete pkgJson["publishConfig"];
 
