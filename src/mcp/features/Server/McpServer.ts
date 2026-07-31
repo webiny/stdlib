@@ -3,7 +3,7 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import type { Transport } from "@modelcontextprotocol/sdk/shared/transport.js";
 import { z } from "zod";
 import { McpServer as McpServerAbstraction } from "./abstractions/McpServer.js";
-import { SkillDiscovery, type Skill } from "./abstractions/SkillDiscovery.js";
+import { SkillDiscovery, type SkillEntry } from "./abstractions/SkillDiscovery.js";
 
 const CONTEXT_HEADINGS: Record<string, string> = {
     common: "Platform-agnostic utilities",
@@ -14,18 +14,18 @@ const CONTEXT_HEADINGS: Record<string, string> = {
 
 const CONTEXT_ORDER = ["common", "node", "browser", "guides"];
 
-function buildCatalog(skills: Skill[]): string {
-    if (skills.length === 0) {
+function buildCatalog(entries: SkillEntry[]): string {
+    if (entries.length === 0) {
         return "No skills found.";
     }
 
-    const groups = new Map<string, Skill[]>();
-    for (const skill of skills) {
-        const existing = groups.get(skill.context);
+    const groups = new Map<string, SkillEntry[]>();
+    for (const entry of entries) {
+        const existing = groups.get(entry.context);
         if (existing) {
-            existing.push(skill);
+            existing.push(entry);
         } else {
-            groups.set(skill.context, [skill]);
+            groups.set(entry.context, [entry]);
         }
     }
 
@@ -58,11 +58,8 @@ class McpServerImpl implements McpServerAbstraction.Interface {
     }
 
     public async startWithTransport(transport: Transport): Promise<void> {
-        const skills = this.skillDiscovery.discover();
-        const skillMap = new Map<string, Skill>();
-        for (const skill of skills) {
-            skillMap.set(skill.name, skill);
-        }
+        const entries = this.skillDiscovery.list();
+        const nameSet = new Set(entries.map(e => e.name));
 
         const server = new SdkMcpServer({ name: "stdlib", version: "1.0.0" });
 
@@ -75,7 +72,7 @@ class McpServerImpl implements McpServerAbstraction.Interface {
                 annotations: { readOnlyHint: true }
             },
             () => ({
-                content: [{ type: "text" as const, text: buildCatalog(skills) }]
+                content: [{ type: "text" as const, text: buildCatalog(entries) }]
             })
         );
 
@@ -89,13 +86,12 @@ class McpServerImpl implements McpServerAbstraction.Interface {
                 annotations: { readOnlyHint: true }
             },
             ({ topic }) => {
-                const skill = skillMap.get(topic);
-                if (!skill) {
-                    const available = [...skillMap.keys()]
+                if (!nameSet.has(topic)) {
+                    const available = [...nameSet]
                         .sort()
                         .map(n => {
-                            const s = skillMap.get(n)!;
-                            return `- ${n} (${s.context})`;
+                            const e = entries.find(e => e.name === n)!;
+                            return `- ${n} (${e.context})`;
                         })
                         .join("\n");
                     return {
@@ -108,8 +104,22 @@ class McpServerImpl implements McpServerAbstraction.Interface {
                         ]
                     };
                 }
+
+                const body = this.skillDiscovery.loadBody(topic);
+                if (body === null) {
+                    return {
+                        isError: true,
+                        content: [
+                            {
+                                type: "text" as const,
+                                text: `Skill "${topic}" exists but its content could not be loaded.`
+                            }
+                        ]
+                    };
+                }
+
                 return {
-                    content: [{ type: "text" as const, text: skill.body }]
+                    content: [{ type: "text" as const, text: body }]
                 };
             }
         );

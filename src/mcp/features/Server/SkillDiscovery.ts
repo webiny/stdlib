@@ -1,97 +1,63 @@
-import { readdirSync, readFileSync, existsSync } from "node:fs";
-import { join } from "node:path";
+import { readFileSync } from "node:fs";
+import { join, dirname } from "node:path";
 import matter from "@11ty/gray-matter";
 import {
     SkillDiscovery as SkillDiscoveryAbstraction,
-    type Skill
+    type SkillEntry
 } from "./abstractions/SkillDiscovery.js";
 import { SkillDiscoveryConfig } from "./abstractions/SkillDiscoveryConfig.js";
 
 class SkillDiscoveryImpl implements SkillDiscoveryAbstraction.Interface {
+    private entries: SkillEntry[] | null = null;
+    private entryMap: Map<string, SkillEntry> | null = null;
+
     public constructor(private readonly config: SkillDiscoveryConfig.Interface) {}
 
-    public discover(): Skill[] {
-        const seen = new Set<string>();
-        const skills: Skill[] = [];
-
-        for (const scanPath of this.config.scanPaths) {
-            if (!existsSync(scanPath)) {
-                continue;
-            }
-            this.walk(scanPath, seen, skills);
-        }
-
-        return skills;
+    public list(): SkillEntry[] {
+        this.ensureLoaded();
+        return this.entries!;
     }
 
-    private walk(dir: string, seen: Set<string>, skills: Skill[]): void {
-        let entries;
-        try {
-            entries = readdirSync(dir, { withFileTypes: true });
-        } catch {
-            return;
+    public loadBody(name: string): string | null {
+        this.ensureLoaded();
+        const entry = this.entryMap!.get(name);
+        if (!entry) {
+            return null;
         }
 
-        for (const entry of entries) {
-            const fullPath = join(dir, entry.name);
-            if (entry.isDirectory()) {
-                this.walk(fullPath, seen, skills);
-            } else if (entry.name === "README.md" || entry.name === "SKILL.md") {
-                this.tryParseSkill(fullPath, seen, skills);
-            }
-        }
-    }
+        const manifestDir = dirname(this.config.manifestPath);
+        const fullPath = join(manifestDir, entry.path);
 
-    private tryParseSkill(filePath: string, seen: Set<string>, skills: Skill[]): void {
         let raw: string;
         try {
-            raw = readFileSync(filePath, "utf-8");
+            raw = readFileSync(fullPath, "utf-8");
         } catch {
-            console.warn(`Skipping unreadable file: ${filePath}`);
+            return null;
+        }
+
+        if (matter.test(raw)) {
+            return matter(raw).content.trim();
+        }
+
+        return raw.trim();
+    }
+
+    private ensureLoaded(): void {
+        if (this.entries !== null) {
             return;
         }
 
-        if (!matter.test(raw)) {
-            return;
-        }
-
-        let parsed;
         try {
-            parsed = matter(raw);
+            const raw = readFileSync(this.config.manifestPath, "utf-8");
+            this.entries = JSON.parse(raw) as SkillEntry[];
         } catch {
-            console.warn(`Skipping ${filePath}: invalid YAML front-matter`);
-            return;
+            this.entries = [];
         }
 
-        const { name, description, context } = parsed.data as Record<string, unknown>;
-
-        if (typeof name !== "string" || name === "") {
-            console.warn(`Skipping ${filePath}: missing or empty "name" field`);
-            return;
+        this.entryMap = new Map();
+        for (const entry of this.entries) {
+            this.entryMap.set(entry.name, entry);
         }
-
-        if (typeof description !== "string" || description === "") {
-            console.warn(`Skipping ${filePath}: missing or empty "description" field`);
-            return;
-        }
-
-        if (context !== undefined && typeof context !== "string") {
-            console.warn(`Skipping ${filePath}: "context" must be a string`);
-            return;
-        }
-
-        // First-match-wins: earlier scanPaths take priority on name collision.
-        if (seen.has(name)) {
-            return;
-        }
-
-        seen.add(name);
-        skills.push({
-            name,
-            description,
-            context: typeof context === "string" ? context : "common",
-            body: parsed.content.trim()
-        });
     }
 }
 

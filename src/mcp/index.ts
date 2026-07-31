@@ -3,7 +3,7 @@ export {
     SkillDiscoveryConfig,
     McpServer,
     McpServerFeature,
-    type Skill
+    type SkillEntry
 } from "./features/Server/index.js";
 
 export {

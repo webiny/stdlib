@@ -13,6 +13,14 @@ import {
     readFileSync,
     writeFileSync
 } from "node:fs";
+import matter from "@11ty/gray-matter";
+
+interface SkillManifestEntry {
+    name: string;
+    description: string;
+    context: string;
+    path: string;
+}
 
 class BuildOrchestratorImpl implements BuildOrchestratorAbstraction.Interface {
     private readonly config: ProjectConfig.Interface;
@@ -48,6 +56,8 @@ class BuildOrchestratorImpl implements BuildOrchestratorAbstraction.Interface {
         this.pathAliasRewriter.rewrite(distDir);
 
         this.copyReadmes(rootDir);
+        this.copySkills(rootDir);
+        this.generateSkillManifest(rootDir);
         this.ensureShebang(rootDir);
 
         this.artifactCopier.copyPackageJson(rootDir, distDir);
@@ -58,21 +68,100 @@ class BuildOrchestratorImpl implements BuildOrchestratorAbstraction.Interface {
     private copyReadmes(rootDir: string): void {
         const srcDir = join(rootDir, "src");
         const distDir = join(rootDir, "dist");
-        this.walkForReadmes(srcDir, srcDir, distDir);
+        this.walkForFiles(srcDir, srcDir, distDir, "README.md");
     }
 
-    private walkForReadmes(baseDir: string, dir: string, distDir: string): void {
+    private copySkills(rootDir: string): void {
+        const skillsDir = join(rootDir, "skills");
+        if (!existsSync(skillsDir)) {
+            return;
+        }
+        const distSkillsDir = join(rootDir, "dist", "skills");
+        this.walkForFiles(skillsDir, skillsDir, distSkillsDir, "SKILL.md");
+    }
+
+    private walkForFiles(baseDir: string, dir: string, destBase: string, fileName: string): void {
         for (const entry of readdirSync(dir, { withFileTypes: true })) {
             const fullPath = join(dir, entry.name);
             if (entry.isDirectory()) {
-                this.walkForReadmes(baseDir, fullPath, distDir);
-            } else if (entry.name === "README.md") {
+                this.walkForFiles(baseDir, fullPath, destBase, fileName);
+            } else if (entry.name === fileName) {
                 const relPath = relative(baseDir, fullPath);
-                const destPath = join(distDir, relPath);
+                const destPath = join(destBase, relPath);
                 mkdirSync(dirname(destPath), { recursive: true });
                 copyFileSync(fullPath, destPath);
             }
         }
+    }
+
+    private generateSkillManifest(rootDir: string): void {
+        const distDir = join(rootDir, "dist");
+        const entries: SkillManifestEntry[] = [];
+
+        this.scanForSkillEntries(distDir, distDir, entries);
+
+        entries.sort((a, b) => a.name.localeCompare(b.name));
+        writeFileSync(join(distDir, "skills.json"), JSON.stringify(entries, null, 2) + "\n");
+    }
+
+    private scanForSkillEntries(baseDir: string, dir: string, entries: SkillManifestEntry[]): void {
+        let dirEntries;
+        try {
+            dirEntries = readdirSync(dir, { withFileTypes: true });
+        } catch {
+            return;
+        }
+
+        for (const entry of dirEntries) {
+            const fullPath = join(dir, entry.name);
+            if (entry.isDirectory()) {
+                if (entry.name === "node_modules" || entry.name.startsWith(".")) {
+                    continue;
+                }
+                this.scanForSkillEntries(baseDir, fullPath, entries);
+            } else if (entry.name === "README.md" || entry.name === "SKILL.md") {
+                this.tryExtractEntry(baseDir, fullPath, entries);
+            }
+        }
+    }
+
+    private tryExtractEntry(
+        baseDir: string,
+        filePath: string,
+        entries: SkillManifestEntry[]
+    ): void {
+        let raw: string;
+        try {
+            raw = readFileSync(filePath, "utf-8");
+        } catch {
+            return;
+        }
+
+        if (!matter.test(raw)) {
+            return;
+        }
+
+        let parsed;
+        try {
+            parsed = matter(raw);
+        } catch {
+            return;
+        }
+
+        const { name, description, context } = parsed.data as Record<string, unknown>;
+        if (typeof name !== "string" || name === "") {
+            return;
+        }
+        if (typeof description !== "string" || description === "") {
+            return;
+        }
+
+        entries.push({
+            name,
+            description,
+            context: typeof context === "string" ? context : "common",
+            path: relative(baseDir, filePath)
+        });
     }
 
     private ensureShebang(rootDir: string): void {

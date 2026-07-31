@@ -1,11 +1,7 @@
 import { createAbstraction } from "~/common/index.js";
 
-/**
- * Configuration for skill discovery — directories to scan for
- * README.md / SKILL.md files containing YAML front-matter.
- */
 export interface ISkillDiscoveryConfig {
-    scanPaths: string[];
+    manifestPath: string;
 }
 
 export const SkillDiscoveryConfig = createAbstraction<ISkillDiscoveryConfig>(
