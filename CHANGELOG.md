@@ -1,5 +1,11 @@
 # @webiny/stdlib
 
+## 0.0.16
+
+### Patch Changes
+
+- 477e31a: Add GlobTool to the available tools - replaces fast-glob
+
 ## 0.0.15
 
 ### Patch Changes
