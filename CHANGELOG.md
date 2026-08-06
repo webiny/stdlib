@@ -1,5 +1,11 @@
 # @webiny/stdlib
 
+## 0.0.17
+
+### Patch Changes
+
+- 64aa022: register GlobTool via DirectoryTool feature
+
 ## 0.0.16
 
 ### Patch Changes
