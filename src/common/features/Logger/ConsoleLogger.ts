@@ -98,3 +98,7 @@ export const ConsoleLogger = Logger.createImplementation({
     implementation: ConsoleLoggerImpl,
     dependencies: [[ConsoleLoggerConfig, { optional: true }]]
 });
+
+export const createConsoleLogger = (configProvider?: ConsoleLoggerConfig.Interface) => {
+    return new ConsoleLoggerImpl(configProvider);
+};

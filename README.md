@@ -52,6 +52,7 @@ The package is ESM-only and ships three subpath exports. Because each is a separ
 | `HashFolderTool` / `HashFolderToolFeature`           | Deterministic SHA-256 hash of a folder's contents — [docs](src/node/features/HashFolderTool/README.md)                              |
 | `ProcessEnvFeature`                                  | `Env` implementation backed by `process.env` — [docs](src/node/features/ProcessEnv/README.md)                                       |
 | `WorkspaceTool` / `WorkspaceToolFeature`             | Discover workspaces from root `package.json` (replaces `get-yarn-workspaces`) — [docs](src/node/features/WorkspaceTool/README.md)   |
+| `GlobTool` / `GlobToolFeature`                       | Find files and directories by glob pattern — [docs](src/node/features/GlobTool/README.md)                                           |
 
 ---
 

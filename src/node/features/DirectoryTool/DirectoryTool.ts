@@ -9,13 +9,16 @@ import {
     constants
 } from "node:fs";
 import { dirname } from "node:path";
-import fg from "fast-glob";
 import { DirectoryTool as DirectoryToolAbstraction } from "./abstractions/DirectoryTool.js";
 import type { GlobOptions } from "./abstractions/DirectoryTool.js";
-import { Logger, ConsoleLogger } from "~/common/index.js";
+import { Logger, ConsoleLogger } from "~/common/features/Logger/index.js";
+import { createGlobTool, GlobTool } from "../GlobTool/index.js";
 
 class DirectoryToolImpl implements DirectoryToolAbstraction.Interface {
-    public constructor(private readonly logger: Logger.Interface) {}
+    public constructor(
+        private readonly logger: Logger.Interface,
+        private readonly globTool: GlobTool.Interface
+    ) {}
 
     public exists(path: string): boolean {
         return existsSync(path);
@@ -77,7 +80,7 @@ class DirectoryToolImpl implements DirectoryToolAbstraction.Interface {
         if (!existsSync(cwd)) {
             return [];
         }
-        return fg.sync(pattern, {
+        return this.globTool.findAll(pattern, {
             cwd,
             dot: options?.dot,
             ignore: options?.ignore,
@@ -90,15 +93,19 @@ class DirectoryToolImpl implements DirectoryToolAbstraction.Interface {
 
 export const DirectoryTool = DirectoryToolAbstraction.createImplementation({
     implementation: DirectoryToolImpl,
-    dependencies: [Logger]
+    dependencies: [Logger, GlobTool]
 });
 
 export interface CreateDirectoryToolParams {
     logger?: Logger.Interface;
+    glob?: GlobTool.Interface;
 }
 
 export function createDirectoryTool(
     params?: CreateDirectoryToolParams
 ): DirectoryToolAbstraction.Interface {
-    return new DirectoryToolImpl(params?.logger ?? new ConsoleLogger());
+    return new DirectoryToolImpl(
+        params?.logger ?? new ConsoleLogger(),
+        params?.glob || createGlobTool()
+    );
 }
