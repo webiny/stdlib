@@ -8,7 +8,6 @@ import {
     DirectoryToolFeature,
     createDirectoryTool
 } from "../../src/node/features/DirectoryTool/index.js";
-import { GlobToolFeature } from "../../src/node/features/GlobTool/index.js";
 import { PinoLoggerConfig, PinoLoggerFeature } from "../../src/node/features/PinoLogger/index.js";
 
 function makeContainer(): Container {
@@ -17,7 +16,6 @@ function makeContainer(): Container {
         getConfig: () => ({ logLevel: "error" as const, transport: "json" as const })
     });
     PinoLoggerFeature.register(container);
-    GlobToolFeature.register(container);
     DirectoryToolFeature.register(container);
     return container;
 }
