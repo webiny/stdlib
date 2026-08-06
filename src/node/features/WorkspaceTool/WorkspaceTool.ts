@@ -1,12 +1,12 @@
 import { existsSync, readFileSync } from "node:fs";
 import { basename, dirname, join, resolve } from "node:path";
-import fg from "fast-glob";
 import {
     WorkspaceTool as WorkspaceToolAbstraction,
     type ListWorkspacesParams,
     type WorkspaceInfo
 } from "./abstractions/WorkspaceTool.js";
 import { WorkspaceRootNotFoundError } from "./abstractions/errors.js";
+import { createGlobTool } from "~/node/features/GlobTool/index.js";
 
 function getWorkspacePatterns(workspaces: unknown): string[] | null {
     if (Array.isArray(workspaces)) {
@@ -65,14 +65,19 @@ function readWorkspaceName(dir: string): string {
 }
 
 class WorkspaceToolImpl implements WorkspaceToolAbstraction.Interface {
+    private readonly glob;
+
+    public constructor() {
+        this.glob = createGlobTool();
+    }
+
     public list(params?: ListWorkspacesParams): WorkspaceInfo[] {
         const cwd = params?.cwd ?? process.cwd();
         const { root, patterns } = findWorkspaceRoot(cwd);
 
         const globPatterns = patterns.map(p => p.replace(/\\/g, "/"));
-        const matched = fg.sync(globPatterns, {
+        const matched = this.glob.findDirectories(globPatterns, {
             cwd: root,
-            onlyDirectories: true,
             absolute: true
         });
 

@@ -1,16 +1,17 @@
 export {
-    FileTool,
-    FileToolFeature,
-    createFileTool,
-    type CreateFileToolParams
-} from "./features/FileTool/index.js";
-export {
     DirectoryTool,
     DirectoryToolFeature,
     createDirectoryTool,
     type CreateDirectoryToolParams,
     type GlobOptions
 } from "./features/DirectoryTool/index.js";
+export {
+    FileTool,
+    FileToolFeature,
+    createFileTool,
+    type CreateFileToolParams
+} from "./features/FileTool/index.js";
+export { GlobTool, createGlobTool, GlobToolFeature } from "./features/GlobTool/index.js";
 export {
     JsonFileTool,
     JsonFileToolFeature,
