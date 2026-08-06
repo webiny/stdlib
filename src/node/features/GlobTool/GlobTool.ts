@@ -26,7 +26,12 @@ class GlobToolImpl implements Abstraction.Interface {
     }
 
     private stripTrailingSlashes(paths: string[]): string[] {
-        return paths.map(p => p.replace(/\/+$/, ""));
+        return paths.map(function (p) {
+            if (p.at(-1) !== "/") {
+                return p;
+            }
+            return p.slice(0, -1);
+        });
     }
 }
 
