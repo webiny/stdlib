@@ -90,14 +90,14 @@ describe("JsonFileTool", () => {
         it("throws when schema rejects the data", () => {
             const file = join(tmpDir, "data.json");
             writeFileSync(file, JSON.stringify({ count: 42 }));
-            const schema = makeSchema<{ name: string }>(_ => {
+            const schema = makeSchema<{ name: string }>(() => {
                 throw new Error("schema error");
             });
             expect(() => tool.readJson(file, { schema })).toThrow("schema error");
         });
 
         it("returns null (not schema error) when file is missing and schema is provided", () => {
-            const schema = makeSchema<{ name: string }>(_ => {
+            const schema = makeSchema<{ name: string }>(() => {
                 throw new Error("should not be called");
             });
             expect(tool.readJson(join(tmpDir, "missing.json"), { schema })).toBeNull();
@@ -131,7 +131,7 @@ describe("JsonFileTool", () => {
         it("throws when schema rejects the data", () => {
             const file = join(tmpDir, "data.json");
             writeFileSync(file, JSON.stringify({ wrong: true }));
-            const schema = makeSchema<{ count: number }>(_ => {
+            const schema = makeSchema<{ count: number }>(() => {
                 throw new Error("validation failed");
             });
             expect(() => tool.readJsonOrThrow(file, { schema })).toThrow("validation failed");
