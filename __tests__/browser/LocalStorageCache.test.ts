@@ -1,6 +1,7 @@
 // @vitest-environment happy-dom
 import { Container } from "@webiny/di";
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
+import { BrowserWindow as BrowserWindowImpl } from "../../src/browser/features/BrowserWindow/BrowserWindow.js";
 import { LocalStorageCache } from "../../src/browser/features/LocalStorageCache/LocalStorageCache.js";
 import { Cache } from "../../src/index.js";
 import {
@@ -11,6 +12,7 @@ import {
 
 function makeCache(): Cache.Interface {
     const container = new Container();
+    container.register(BrowserWindowImpl).inSingletonScope();
     container.register(LocalStorageCache).inSingletonScope();
     return container.resolve(Cache);
 }

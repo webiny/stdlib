@@ -1,6 +1,8 @@
 import { existsSync, readFileSync, writeFileSync, rmSync, copyFileSync } from "node:fs";
 import { dirname } from "node:path";
+import { Result } from "~/common/index.js";
 import { FileTool as FileToolAbstraction } from "./abstractions/FileTool.js";
+import { FileWriteError, FileCopyError } from "./errors.js";
 import { DirectoryTool } from "../DirectoryTool/abstractions/DirectoryTool.js";
 import { createDirectoryTool } from "../DirectoryTool/DirectoryTool.js";
 import { Logger, ConsoleLogger } from "~/common/index.js";
@@ -30,17 +32,31 @@ class FileToolImpl implements FileToolAbstraction.Interface {
         return readFileSync(path, "utf-8");
     }
 
-    public writeFile(path: string, content: string): void {
+    public writeFile(path: string, content: string): Result<void, FileWriteError> {
         try {
-            this.directoryTool.create(dirname(path));
+            const dirResult = this.directoryTool.create(dirname(path));
+            if (dirResult.isFail()) {
+                return Result.fail(
+                    new FileWriteError({
+                        message: dirResult.error.message,
+                        data: { path }
+                    })
+                );
+            }
             writeFileSync(path, content, "utf-8");
+            return Result.ok();
         } catch (error) {
-            this.logger.warn(`Failed to write file "${path}": ${error}`);
+            return Result.fail(
+                new FileWriteError({
+                    message: `Failed to write file "${path}": ${error}`,
+                    data: { path }
+                })
+            );
         }
     }
 
     public writeFileOrThrow(path: string, content: string): void {
-        this.directoryTool.create(dirname(path));
+        this.directoryTool.createOrThrow(dirname(path));
         writeFileSync(path, content, "utf-8");
     }
 
@@ -48,20 +64,42 @@ class FileToolImpl implements FileToolAbstraction.Interface {
         rmSync(path, { force: true });
     }
 
-    public copy(source: string, target: string): void {
+    public copy(source: string, target: string): Result<void, FileCopyError> {
         if (!existsSync(source)) {
-            this.logger.warn(`Source file not found: "${source}"`);
-            return;
+            return Result.fail(
+                new FileCopyError({
+                    message: `Source file not found: "${source}"`,
+                    data: { source, target }
+                })
+            );
         }
-        this.directoryTool.create(dirname(target));
-        copyFileSync(source, target);
+        try {
+            const dirResult = this.directoryTool.create(dirname(target));
+            if (dirResult.isFail()) {
+                return Result.fail(
+                    new FileCopyError({
+                        message: dirResult.error.message,
+                        data: { source, target }
+                    })
+                );
+            }
+            copyFileSync(source, target);
+            return Result.ok();
+        } catch (error) {
+            return Result.fail(
+                new FileCopyError({
+                    message: `Failed to copy file "${source}" to "${target}": ${error}`,
+                    data: { source, target }
+                })
+            );
+        }
     }
 
     public copyOrThrow(source: string, target: string): void {
         if (!existsSync(source)) {
             throw new Error(`Source file not found: "${source}"`);
         }
-        this.directoryTool.create(dirname(target));
+        this.directoryTool.createOrThrow(dirname(target));
         copyFileSync(source, target);
     }
 }

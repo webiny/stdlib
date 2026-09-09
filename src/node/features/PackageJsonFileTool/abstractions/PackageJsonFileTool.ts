@@ -1,5 +1,7 @@
 import { createAbstraction } from "~/common/index.js";
+import type { Result } from "~/common/index.js";
 import type { PackageJson } from "type-fest";
+import type { FileWriteError } from "../../FileTool/errors.js";
 import type { PackageJsonFile } from "../PackageJsonFile.js";
 
 export interface IPackageJsonFileTool {
@@ -18,14 +20,14 @@ export interface IPackageJsonFileTool {
 
     /**
      * Serialize `data` as formatted JSON and write it to `path`.
-     * Creates parent directories as needed. Logs a warning and returns without throwing on failure.
+     * Creates parent directories as needed.
      */
-    write(path: string, data: PackageJson): void;
+    write(path: string, data: PackageJson): Result<void, FileWriteError>;
     /**
      * Serialize `file.raw` as formatted JSON and write it to `file.path`.
-     * Creates parent directories as needed. Logs a warning and returns without throwing on failure.
+     * Creates parent directories as needed.
      */
-    write(file: PackageJsonFile.Interface): void;
+    write(file: PackageJsonFile.Interface): Result<void, FileWriteError>;
 
     /**
      * Serialize `data` as formatted JSON and write it to `path`.

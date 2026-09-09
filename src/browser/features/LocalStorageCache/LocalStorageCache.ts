@@ -1,5 +1,6 @@
 import { Result } from "~/common/index.js";
 import { Cache as CacheAbstraction } from "~/common/index.js";
+import { BrowserWindow } from "../BrowserWindow/abstractions/BrowserWindow.js";
 import {
     LocalStorageParseError,
     LocalStorageQuotaExceededError,
@@ -16,13 +17,12 @@ class LocalStorageCacheImpl implements CacheAbstraction.Interface {
 
     private readonly localStorage: Storage | null;
 
-    public constructor() {
-        this.localStorage =
-            typeof window !== "undefined" && window?.localStorage ? window.localStorage : null;
+    public constructor(private readonly browserWindow: BrowserWindow.Interface) {
+        this.localStorage = browserWindow.localStorage;
     }
 
-    private static fromPrefix(prefix: string): LocalStorageCacheImpl {
-        const instance = new LocalStorageCacheImpl();
+    private createPrefixed(prefix: string): LocalStorageCacheImpl {
+        const instance = new LocalStorageCacheImpl(this.browserWindow);
         instance.prefix = prefix;
         return instance;
     }
@@ -174,15 +174,17 @@ class LocalStorageCacheImpl implements CacheAbstraction.Interface {
 
     public byPrefix(prefix: string): CacheAbstraction.Interface {
         const combined = this.prefix ? `${this.prefix}.${prefix}` : prefix;
-        return LocalStorageCacheImpl.fromPrefix(combined);
+        return this.createPrefixed(combined);
     }
 }
 
 export const LocalStorageCache = CacheAbstraction.createImplementation({
     implementation: LocalStorageCacheImpl,
-    dependencies: []
+    dependencies: [BrowserWindow]
 });
 
-export function createLocalStorageCache(): CacheAbstraction.Interface {
-    return new LocalStorageCacheImpl();
+export function createLocalStorageCache(
+    browserWindow: BrowserWindow.Interface
+): CacheAbstraction.Interface {
+    return new LocalStorageCacheImpl(browserWindow);
 }

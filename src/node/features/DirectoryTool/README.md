@@ -6,7 +6,7 @@ context: node
 
 # DirectoryTool
 
-Creates, reads, copies, removes, and globs directories on the local filesystem. All paths must be absolute. `create` is idempotent — it calls `mkdirSync` with `recursive: true` and is safe to call on an existing path. Methods without `OrThrow` log a warning and return `null` / `void` on failure; `OrThrow` variants throw.
+Creates, reads, copies, removes, and globs directories on the local filesystem. All paths must be absolute. `create` is idempotent — it calls `mkdirSync` with `recursive: true` and is safe to call on an existing path. `create` returns a `Result` so the caller can handle failures; `createOrThrow` throws a `DirectoryCreateError` instead. Methods without `OrThrow` log a warning and return `null` / `void` on failure; `OrThrow` variants throw.
 
 ## Interface
 
@@ -14,8 +14,10 @@ Creates, reads, copies, removes, and globs directories on the local filesystem. 
 interface IDirectoryTool {
   /** Returns true if the directory exists. */
   exists(path: string): boolean;
-  /** Creates the directory (and any missing parents). Idempotent. */
-  create(path: string): void;
+  /** Creates the directory (and any missing parents). Returns a failure Result if the operation fails. */
+  create(path: string): Result<void, DirectoryCreateError>;
+  /** Creates the directory (and any missing parents). Throws if the operation fails. */
+  createOrThrow(path: string): void;
   /** Returns the names of entries in the directory. Returns null if it does not exist. */
   readDir(path: string): string[] | null;
   /** Returns the names of entries in the directory. Throws if it does not exist. */
@@ -43,6 +45,10 @@ interface GlobOptions {
 }
 ```
 
+## Errors
+
+- `DirectoryCreateError` — the directory could not be created (permissions, read-only filesystem, etc.). Data: `{ path: string }`.
+
 ## Usage
 
 ### With DI
@@ -56,7 +62,15 @@ PinoLoggerFeature.register(container);
 DirectoryToolFeature.register(container);
 
 const dir = container.resolve(DirectoryTool);
-dir.create("/tmp/my-output");
+
+// Result-based — caller decides how to handle failure
+const result = dir.create("/tmp/my-output");
+if (result.isFail()) {
+  console.error(result.error.message);
+}
+
+// Throwing variant
+dir.createOrThrow("/tmp/my-output");
 console.log(dir.readDirOrThrow("/tmp/my-output")); // []
 ```
 
@@ -66,7 +80,7 @@ console.log(dir.readDirOrThrow("/tmp/my-output")); // []
 import { createDirectoryTool } from "@webiny/stdlib/node";
 
 const dir = createDirectoryTool();
-dir.create("/tmp/my-output");
+dir.createOrThrow("/tmp/my-output");
 
 // list all .ts files recursively
 const files = dir.glob("/my/project/src", "**/*.ts");

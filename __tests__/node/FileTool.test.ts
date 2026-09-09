@@ -1,10 +1,12 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { existsSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, rmSync, writeFileSync, chmodSync } from "node:fs";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { Container } from "@webiny/di";
 import {
     FileTool,
+    FileWriteError,
+    FileCopyError,
     FileToolFeature,
     createFileTool
 } from "../../src/node/features/FileTool/index.js";
@@ -76,23 +78,42 @@ describe("FileTool", () => {
     });
 
     describe("writeFile", () => {
-        it("creates a file with the given content", () => {
+        it("returns ok and creates a file with the given content", () => {
             const file = join(tmpDir, "new.txt");
-            tool.writeFile(file, "written");
+            const result = tool.writeFile(file, "written");
+            expect(result.isOk()).toBe(true);
             expect(tool.readFile(file)).toBe("written");
         });
 
         it("creates parent directories as needed", () => {
             const file = join(tmpDir, "nested", "deep", "file.txt");
-            tool.writeFile(file, "deep content");
+            const result = tool.writeFile(file, "deep content");
+            expect(result.isOk()).toBe(true);
             expect(existsSync(file)).toBe(true);
         });
 
         it("overwrites existing content", () => {
             const file = join(tmpDir, "file.txt");
             writeFileSync(file, "old");
-            tool.writeFile(file, "new");
+            const result = tool.writeFile(file, "new");
+            expect(result.isOk()).toBe(true);
             expect(tool.readFile(file)).toBe("new");
+        });
+
+        it("returns a failure Result when parent directory cannot be created", () => {
+            const blocked = join(tmpDir, "blocked");
+            mkdirSync(blocked, { mode: 0o000 });
+            try {
+                const file = join(blocked, "child", "file.txt");
+                const result = tool.writeFile(file, "x");
+                expect(result.isFail()).toBe(true);
+                if (result.isFail()) {
+                    expect(result.error).toBeInstanceOf(FileWriteError);
+                    expect(result.error.data.path).toBe(file);
+                }
+            } finally {
+                chmodSync(blocked, 0o755);
+            }
         });
     });
 
@@ -101,6 +122,18 @@ describe("FileTool", () => {
             const file = join(tmpDir, "new.txt");
             tool.writeFileOrThrow(file, "content");
             expect(tool.readFile(file)).toBe("content");
+        });
+
+        it("throws when parent directory cannot be created", () => {
+            const blocked = join(tmpDir, "blocked");
+            mkdirSync(blocked, { mode: 0o000 });
+            try {
+                expect(() =>
+                    tool.writeFileOrThrow(join(blocked, "child", "file.txt"), "x")
+                ).toThrow();
+            } finally {
+                chmodSync(blocked, 0o755);
+            }
         });
     });
 
@@ -118,11 +151,12 @@ describe("FileTool", () => {
     });
 
     describe("copy", () => {
-        it("duplicates a file", () => {
+        it("returns ok and duplicates a file", () => {
             const src = join(tmpDir, "src.txt");
             const dest = join(tmpDir, "dest.txt");
             writeFileSync(src, "content");
-            tool.copy(src, dest);
+            const result = tool.copy(src, dest);
+            expect(result.isOk()).toBe(true);
             expect(tool.readFile(dest)).toBe("content");
         });
 
@@ -130,14 +164,34 @@ describe("FileTool", () => {
             const src = join(tmpDir, "src.txt");
             const dest = join(tmpDir, "nested", "dest.txt");
             writeFileSync(src, "content");
-            tool.copy(src, dest);
+            const result = tool.copy(src, dest);
+            expect(result.isOk()).toBe(true);
             expect(existsSync(dest)).toBe(true);
         });
 
-        it("does not throw when source is missing", () => {
-            expect(() =>
-                tool.copy(join(tmpDir, "missing.txt"), join(tmpDir, "dest.txt"))
-            ).not.toThrow();
+        it("returns a failure Result when source is missing", () => {
+            const result = tool.copy(join(tmpDir, "missing.txt"), join(tmpDir, "dest.txt"));
+            expect(result.isFail()).toBe(true);
+            if (result.isFail()) {
+                expect(result.error).toBeInstanceOf(FileCopyError);
+                expect(result.error.data.source).toBe(join(tmpDir, "missing.txt"));
+            }
+        });
+
+        it("returns a failure Result when destination directory cannot be created", () => {
+            const src = join(tmpDir, "src.txt");
+            writeFileSync(src, "content");
+            const blocked = join(tmpDir, "blocked");
+            mkdirSync(blocked, { mode: 0o000 });
+            try {
+                const result = tool.copy(src, join(blocked, "child", "dest.txt"));
+                expect(result.isFail()).toBe(true);
+                if (result.isFail()) {
+                    expect(result.error).toBeInstanceOf(FileCopyError);
+                }
+            } finally {
+                chmodSync(blocked, 0o755);
+            }
         });
     });
 
@@ -146,6 +200,18 @@ describe("FileTool", () => {
             expect(() =>
                 tool.copyOrThrow(join(tmpDir, "missing.txt"), join(tmpDir, "dest.txt"))
             ).toThrow();
+        });
+
+        it("throws when destination directory cannot be created", () => {
+            const src = join(tmpDir, "src.txt");
+            writeFileSync(src, "content");
+            const blocked = join(tmpDir, "blocked");
+            mkdirSync(blocked, { mode: 0o000 });
+            try {
+                expect(() => tool.copyOrThrow(src, join(blocked, "child", "dest.txt"))).toThrow();
+            } finally {
+                chmodSync(blocked, 0o755);
+            }
         });
     });
 });
@@ -165,7 +231,8 @@ describe("createFileTool", () => {
     it("creates a working tool without arguments", () => {
         const tool = createFileTool();
         const file = join(tmpDir, "factory.txt");
-        tool.writeFile(file, "hello");
+        const result = tool.writeFile(file, "hello");
+        expect(result.isOk()).toBe(true);
         expect(tool.readFile(file)).toBe("hello");
     });
 
@@ -190,7 +257,8 @@ describe("createFileTool", () => {
         const directoryTool = createDirectoryTool();
         const tool = createFileTool({ directoryTool });
         const file = join(tmpDir, "nested", "custom.txt");
-        tool.writeFile(file, "content");
+        const result = tool.writeFile(file, "content");
+        expect(result.isOk()).toBe(true);
         expect(tool.readFile(file)).toBe("content");
     });
 });

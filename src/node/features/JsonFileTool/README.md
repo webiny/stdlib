@@ -6,7 +6,7 @@ context: node
 
 # JsonFileTool
 
-Reads and writes JSON files on the local filesystem. Optionally validates the parsed value through a schema (any object with a `.parse(unknown): T` method — compatible with Zod, Valibot, and similar). Methods without `OrThrow` return `null` on failure; `OrThrow` variants throw.
+Reads and writes JSON files on the local filesystem. Optionally validates the parsed value through a schema (any object with a `.parse(unknown): T` method — compatible with Zod, Valibot, and similar). `readJson` returns `null` when the file is missing; `writeJson` returns a `Result` so the caller can handle failures. `OrThrow` variants throw.
 
 ## Interface
 
@@ -16,8 +16,8 @@ interface IJsonFileTool {
   readJson<T>(path: string, params?: ReadJsonParams<T>): T | null;
   /** Parses and returns the JSON file contents. Throws if missing, unparseable, or schema validation fails. */
   readJsonOrThrow<T>(path: string, params?: ReadJsonParams<T>): T;
-  /** Serialises data to JSON and writes it. Creates parent directories as needed. Logs on failure. */
-  writeJson(path: string, data: unknown): void;
+  /** Serialises data to JSON and writes it. Creates parent directories as needed. */
+  writeJson(path: string, data: unknown): Result<void, FileWriteError>;
   /** Serialises data to JSON and writes it. Creates parent directories as needed. Throws on failure. */
   writeJsonOrThrow(path: string, data: unknown): void;
 }

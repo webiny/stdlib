@@ -58,10 +58,11 @@ The package is ESM-only and ships three subpath exports. Because each is a separ
 
 ## `@webiny/stdlib/browser` — Browser
 
-| Feature                    | Description                                                                                                       |
-| -------------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| `LocalStorageCacheFeature` | `Cache` implementation backed by `window.localStorage` — [docs](src/browser/features/LocalStorageCache/README.md) |
-| `BrowserEnvFeature`        | `Env` implementation backed by an injected variables object — [docs](src/browser/features/BrowserEnv/README.md)   |
+| Feature                    | Description                                                                                                                            |
+| -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| `BrowserWindowFeature`     | Abstraction over the browser `window` object with real and null implementations — [docs](src/browser/features/BrowserWindow/README.md) |
+| `LocalStorageCacheFeature` | `Cache` implementation backed by `window.localStorage` — [docs](src/browser/features/LocalStorageCache/README.md)                      |
+| `BrowserEnvFeature`        | `Env` implementation backed by an injected variables object — [docs](src/browser/features/BrowserEnv/README.md)                        |
 
 ---
 

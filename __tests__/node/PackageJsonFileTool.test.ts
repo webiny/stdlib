@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { mkdirSync, rmSync, writeFileSync } from "node:fs";
+import { mkdirSync, rmSync, writeFileSync, chmodSync } from "node:fs";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { Container } from "@webiny/di";
@@ -9,7 +9,7 @@ import {
     PackageJsonFile,
     createPackageJsonFileTool
 } from "../../src/node/features/PackageJsonFileTool/index.js";
-import { FileToolFeature } from "../../src/node/features/FileTool/index.js";
+import { FileToolFeature, FileWriteError } from "../../src/node/features/FileTool/index.js";
 import { DirectoryToolFeature } from "../../src/node/features/DirectoryTool/index.js";
 import { PinoLoggerConfig, PinoLoggerFeature } from "../../src/node/features/PinoLogger/index.js";
 
@@ -105,9 +105,10 @@ describe("PackageJsonFileTool", () => {
     });
 
     describe("write(path, data)", () => {
-        it("writes formatted JSON to the given path", () => {
+        it("returns ok and writes formatted JSON to the given path", () => {
             const file = join(tmpDir, "package.json");
-            tool.write(file, { name: "written-pkg", version: "1.0.0" });
+            const result = tool.write(file, { name: "written-pkg", version: "1.0.0" });
+            expect(result.isOk()).toBe(true);
             expect(tool.readOrThrow(file).raw).toMatchObject({
                 name: "written-pkg",
                 version: "1.0.0"
@@ -116,13 +117,29 @@ describe("PackageJsonFileTool", () => {
 
         it("creates parent directories as needed", () => {
             const file = join(tmpDir, "nested", "dir", "package.json");
-            tool.write(file, { name: "nested-pkg" });
+            const result = tool.write(file, { name: "nested-pkg" });
+            expect(result.isOk()).toBe(true);
             expect(tool.readOrThrow(file).raw).toMatchObject({ name: "nested-pkg" });
+        });
+
+        it("returns a failure Result when parent directory cannot be created", () => {
+            const blocked = join(tmpDir, "blocked");
+            mkdirSync(blocked, { mode: 0o000 });
+            try {
+                const file = join(blocked, "child", "package.json");
+                const result = tool.write(file, { name: "fail" });
+                expect(result.isFail()).toBe(true);
+                if (result.isFail()) {
+                    expect(result.error).toBeInstanceOf(FileWriteError);
+                }
+            } finally {
+                chmodSync(blocked, 0o755);
+            }
         });
     });
 
     describe("write(file)", () => {
-        it("uses path and raw from the PackageJsonFile instance", () => {
+        it("returns ok and uses path and raw from the PackageJsonFile instance", () => {
             const filePath = join(tmpDir, "package.json");
             const pkgFile = tool.readOrThrow(
                 (() => {
@@ -131,7 +148,8 @@ describe("PackageJsonFileTool", () => {
                 })()
             );
             pkgFile.set("name", "mutated");
-            tool.write(pkgFile);
+            const result = tool.write(pkgFile);
+            expect(result.isOk()).toBe(true);
             expect(tool.readOrThrow(filePath).raw.name).toBe("mutated");
         });
 
@@ -144,7 +162,8 @@ describe("PackageJsonFileTool", () => {
             const pkgFile = tool.readOrThrow(filePath);
             pkgFile.setDependency("zod", "^4.0.0");
             pkgFile.removeDependency("lodash");
-            tool.write(pkgFile);
+            const result = tool.write(pkgFile);
+            expect(result.isOk()).toBe(true);
             const reloaded = tool.readOrThrow(filePath);
             expect(reloaded.getDependency("zod")).toBe("^4.0.0");
             expect(reloaded.getDependency("lodash")).toBeNull();

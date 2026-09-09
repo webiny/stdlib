@@ -1,8 +1,10 @@
 import { z } from "zod";
 import type { PackageJson } from "type-fest";
+import type { Result } from "~/common/index.js";
 import { PackageJsonFileTool as PackageJsonFileToolAbstraction } from "./abstractions/PackageJsonFileTool.js";
 import { PackageJsonFile } from "./PackageJsonFile.js";
 import { FileTool } from "../FileTool/abstractions/FileTool.js";
+import type { FileWriteError } from "../FileTool/errors.js";
 import { createFileTool } from "../FileTool/FileTool.js";
 
 const dependencyRecord = z.record(z.string(), z.string()).optional();
@@ -52,14 +54,16 @@ class PackageJsonFileToolImpl implements PackageJsonFileToolAbstraction.Interfac
         return new PackageJsonFile(path, raw);
     }
 
-    public write(path: string, data: PackageJson): void;
-    public write(file: PackageJsonFile.Interface): void;
-    public write(pathOrFile: string | PackageJsonFile.Interface, data?: PackageJson): void {
+    public write(path: string, data: PackageJson): Result<void, FileWriteError>;
+    public write(file: PackageJsonFile.Interface): Result<void, FileWriteError>;
+    public write(
+        pathOrFile: string | PackageJsonFile.Interface,
+        data?: PackageJson
+    ): Result<void, FileWriteError> {
         if (typeof pathOrFile === "string") {
-            this.fileTool.writeFile(pathOrFile, serialize(data!));
-        } else {
-            this.fileTool.writeFile(pathOrFile.path, serialize(pathOrFile.raw));
+            return this.fileTool.writeFile(pathOrFile, serialize(data!));
         }
+        return this.fileTool.writeFile(pathOrFile.path, serialize(pathOrFile.raw));
     }
 
     public writeOrThrow(path: string, data: PackageJson): void;

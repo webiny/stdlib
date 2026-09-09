@@ -1,4 +1,11 @@
 export {
+    BrowserWindow,
+    BrowserWindowFeature,
+    NullBrowserWindowFeature,
+    createBrowserWindow,
+    createNullBrowserWindow
+} from "./features/BrowserWindow/index.js";
+export {
     BrowserEnvFeature,
     createBrowserEnv,
     type CreateBrowserEnvParams

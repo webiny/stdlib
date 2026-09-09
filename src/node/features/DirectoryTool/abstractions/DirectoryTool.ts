@@ -1,4 +1,6 @@
 import { createAbstraction } from "~/common/index.js";
+import type { Result } from "~/common/index.js";
+import type { DirectoryCreateError } from "../errors.js";
 
 export interface GlobOptions {
     /** Include dotfiles (default: false). */
@@ -15,7 +17,10 @@ export interface GlobOptions {
 
 export interface IDirectoryTool {
     exists(path: string): boolean;
-    create(path: string): void;
+    /** Creates the directory (and parents). Returns a failure Result if the operation fails. */
+    create(path: string): Result<void, DirectoryCreateError>;
+    /** Creates the directory (and parents). Throws if the operation fails. */
+    createOrThrow(path: string): void;
     readDir(path: string): string[] | null;
     readDirOrThrow(path: string): string[];
     remove(path: string): void;

@@ -1,8 +1,10 @@
+import type { Result } from "~/common/index.js";
 import {
     JsonFileTool as JsonFileToolAbstraction,
     type ReadJsonParams
 } from "./abstractions/JsonFileTool.js";
 import { FileTool } from "../FileTool/abstractions/FileTool.js";
+import type { FileWriteError } from "../FileTool/errors.js";
 import { createFileTool } from "../FileTool/FileTool.js";
 
 class JsonFileToolImpl implements JsonFileToolAbstraction.Interface {
@@ -29,8 +31,8 @@ class JsonFileToolImpl implements JsonFileToolAbstraction.Interface {
         return parsed as T;
     }
 
-    public writeJson(path: string, data: unknown): void {
-        this.fileTool.writeFile(path, JSON.stringify(data, null, 2));
+    public writeJson(path: string, data: unknown): Result<void, FileWriteError> {
+        return this.fileTool.writeFile(path, JSON.stringify(data, null, 2));
     }
 
     public writeJsonOrThrow(path: string, data: unknown): void {
