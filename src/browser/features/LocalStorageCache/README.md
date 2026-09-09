@@ -8,6 +8,8 @@ context: browser
 
 A `Cache` implementation backed by `window.localStorage`. All methods return `Result` — they never throw. When `localStorage` is unavailable (SSR, private-browsing restrictions), every operation returns a typed `LocalStorageUnavailableError` instead of crashing.
 
+Depends on `BrowserWindow` for access to `localStorage` — register `BrowserWindowFeature` (or `NullBrowserWindowFeature`) before `LocalStorageCacheFeature`.
+
 ## Interface
 
 Implements `Cache.Interface` from `@webiny/stdlib`. See the `@webiny/stdlib` [Cache feature](../../../features/Cache/README.md) for the full `ICache` interface.
@@ -33,9 +35,10 @@ class LocalStorageParseError extends CacheError<{ key: string }> {
 ```ts
 import { Container } from "@webiny/di";
 import { Cache } from "@webiny/stdlib";
-import { LocalStorageCacheFeature } from "@webiny/stdlib/browser";
+import { BrowserWindowFeature, LocalStorageCacheFeature } from "@webiny/stdlib/browser";
 
 const container = new Container();
+BrowserWindowFeature.register(container);
 LocalStorageCacheFeature.register(container);
 
 const cache = container.resolve(Cache);
@@ -53,4 +56,13 @@ if (getResult.isOk()) {
 // Scoped cache — keys stored as "user.<key>"
 const userCache = cache.byPrefix("user");
 userCache.set("name", "Alice");
+```
+
+### Without DI
+
+```ts
+import { createBrowserWindow, createLocalStorageCache } from "@webiny/stdlib/browser";
+
+const cache = createLocalStorageCache(createBrowserWindow());
+cache.set("theme", "dark");
 ```

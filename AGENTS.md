@@ -83,16 +83,16 @@ Import from `@webiny/stdlib/node`. Node.js-specific. May use `node:fs`, `node:pa
 
 Current features (each has a `README.md` in its feature folder):
 
-- `FileTool` — read, write, copy, remove files
-- `DirectoryTool` — create, read, remove, copy directories; `glob(cwd, pattern, options?)` lists files matching a fast-glob pattern relative to `cwd`. Returns `[]` when `cwd` does not exist. `GlobOptions`: `dot`, `ignore`, `deep`, `absolute`, `onlyFiles`.
-- `JsonFileTool` — read and write JSON files; optionally validates the parsed value with any schema object that has a `.parse(unknown): T` method (Zod-compatible)
+- `FileTool` — read, write, copy, remove files. `writeFile` returns `Result<void, FileWriteError>`, `copy` returns `Result<void, FileCopyError>`. `writeFileOrThrow`/`copyOrThrow` throw instead. `readFile` returns `string | null`. `FileWriteError` data: `{ path }`. `FileCopyError` data: `{ source, target }`.
+- `DirectoryTool` — create, read, remove, copy directories; `glob(cwd, pattern, options?)` lists files matching a fast-glob pattern relative to `cwd`. Returns `[]` when `cwd` does not exist. `GlobOptions`: `dot`, `ignore`, `deep`, `absolute`, `onlyFiles`. `create` returns `Result<void, DirectoryCreateError>`; `createOrThrow` throws instead. `DirectoryCreateError` data: `{ path }`.
+- `JsonFileTool` — read and write JSON files; optionally validates the parsed value with any schema object that has a `.parse(unknown): T` method (Zod-compatible). `writeJson` returns `Result<void, FileWriteError>`; `writeJsonOrThrow` throws instead.
 - `PathTool` — injectable wrapper around `node:path` (`join`, `resolve`, `dirname`, `basename`). Also provides `resolvePackageFile(specifier)` to resolve a package-relative file specifier (e.g. `@webiny/cli/files/references.json`) to an absolute filesystem path from `process.cwd()`; throws `PackageNotFoundError` when the package cannot be found.
 - `PinoLoggerConfig` — optional config abstraction (token `"Node/PinoLoggerConfig"`). `Config` type has: `logLevel`, `transport` — both optional. Default behaviour (no config): `logLevel: "info"`, `transport: "pretty"`.
 - `PinoLogger` — pino-based Logger implementation. Registered under the `Logger` abstraction from `@webiny/stdlib`. Optional `PinoLoggerConfig` dependency.
 - `PinoLoggerFeature` — registers `PinoLogger` in singleton scope.
 - `NdJsonReaderTool` — parses NDJSON from a file path, a `Readable` stream, or an in-memory line iterable. Handles multi-line JSON via a `LineAccumulator` that tries newline-join and concatenation before discarding. `parseFile` uses `ReadStreamFactory` for guaranteed stream cleanup. Every yielded row is `{ data, line }` where `line` is the 1-based physical line number; pass `{ fromLine }` to any parse method to skip lines and resume from a checkpoint.
 - `ReadStreamFactory` — creates `node:fs` read streams with explicit cleanup. `create(path, options?)` returns an `IReadStream` with `getStream()` and `destroy()`. Call `destroy()` in a finally block to release the file handle on scope exit (including early generator break or thrown errors). DI token: `"Node/ReadStreamFactory"`.
-- `PackageJsonFileTool` — reads, validates, and writes `package.json` files. `read`/`readOrThrow` return a `PackageJsonFile` value object with `readonly path`, `readonly raw` (typed as `PackageJson` from type-fest), and mutation helpers for `dependencies`, `devDependencies`, `peerDependencies`, and `resolutions`. Write methods accept either `(path, data)` or `(file)` — the latter uses the file's own path. Root-level well-known fields are validated with Zod (`.passthrough()` lets unknown fields through).
+- `PackageJsonFileTool` — reads, validates, and writes `package.json` files. `read`/`readOrThrow` return a `PackageJsonFile` value object with `readonly path`, `readonly raw` (typed as `PackageJson` from type-fest), and mutation helpers for `dependencies`, `devDependencies`, `peerDependencies`, and `resolutions`. `write` returns `Result<void, FileWriteError>`; `writeOrThrow` throws instead. Write methods accept either `(path, data)` or `(file)` — the latter uses the file's own path. Root-level well-known fields are validated with Zod (`.passthrough()` lets unknown fields through).
 
 Note: The `Logger` abstraction lives in `@webiny/stdlib`, not `@webiny/stdlib/node`. Both `ConsoleLogger` and `PinoLogger` register under the same `Logger` token.
 
@@ -104,12 +104,11 @@ If a tool/service works in both environments (e.g. a plain `fetch` call with no 
 
 Contains:
 
-- `LocalStorageCacheFeature` — registers a `Cache` implementation backed by `window.localStorage`. Captures a reference to `localStorage` at construction time (or `null` if unavailable). All methods return `Result.fail(LocalStorageUnavailableError)` when `localStorage` is absent rather than throwing.
+- `BrowserWindow` — abstraction over the browser `window` object (token `"Browser/BrowserWindow"`). Interface: `readonly localStorage: Storage | null`. Real implementation (`BrowserWindowFeature`) captures from the global `window` at construction time; null implementation (`NullBrowserWindowFeature`) returns `null` for all APIs (useful for SSR or testing). Factory functions: `createBrowserWindow()`, `createNullBrowserWindow()`.
+- `LocalStorageCacheFeature` — registers a `Cache` implementation backed by `window.localStorage`. Takes `BrowserWindow` as a DI dependency to obtain the `localStorage` reference. All methods return `Result.fail(LocalStorageUnavailableError)` when `localStorage` is absent rather than throwing.
 - `LocalStorageUnavailableError` — `localStorage` is not present in the current environment.
 - `LocalStorageQuotaExceededError` — `setItem` threw a storage quota error. Data: `{ key: string, valueSize: number }`.
 - `LocalStorageParseError` — `JSON.parse` failed on a stored value. Data: `{ key: string }`.
-
-The captured-reference pattern (`this.localStorage = window?.localStorage ?? null`) is intentional: it enables future refactoring to inject an alternative storage backend without changing the constructor signature.
 
 ---
 

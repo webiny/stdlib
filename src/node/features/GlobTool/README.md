@@ -12,12 +12,12 @@ Finds files and directories matching glob patterns using [tinyglobby](https://gi
 
 ```ts
 interface IGlobTool {
-  /** Finds all items matching the pattern. Pass GlobOptions to control behavior. */
-  findAll(patterns: string | string[], options?: GlobOptions): string[];
+  /** Finds all items matching the pattern. */
+  findAll(patterns: string | string[], options?: GlobTool.AllOptions): string[];
   /** Finds only files matching the pattern. */
-  findFiles(patterns: string | string[], options?: FilesOptions): string[];
+  findFiles(patterns: string | string[], options?: GlobTool.FilesOptions): string[];
   /** Finds only directories matching the pattern. */
-  findDirectories(patterns: string | string[], options?: DirectoriesOptions): string[];
+  findDirectories(patterns: string | string[], options?: GlobTool.DirectoriesOptions): string[];
 }
 ```
 
