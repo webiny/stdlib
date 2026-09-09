@@ -23,6 +23,7 @@ jobs:
       - run: yarn install --immutable
       - uses: changesets/action@c8bada60c408975afd1a20b3db81d6eee6789308 # v1
         with:
+          title: "chore: release"
           publish: yarn release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
