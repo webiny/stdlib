@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { mkdirSync, readFileSync, rmSync, writeFileSync, chmodSync } from "node:fs";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { Container } from "@webiny/di";
@@ -9,7 +9,11 @@ import {
     createJsonFileTool,
     type JsonSchema
 } from "../../src/node/features/JsonFileTool/index.js";
-import { FileTool, FileToolFeature } from "../../src/node/features/FileTool/index.js";
+import {
+    FileTool,
+    FileWriteError,
+    FileToolFeature
+} from "../../src/node/features/FileTool/index.js";
 import { DirectoryToolFeature } from "../../src/node/features/DirectoryTool/index.js";
 import { PinoLoggerConfig, PinoLoggerFeature } from "../../src/node/features/PinoLogger/index.js";
 
@@ -86,14 +90,14 @@ describe("JsonFileTool", () => {
         it("throws when schema rejects the data", () => {
             const file = join(tmpDir, "data.json");
             writeFileSync(file, JSON.stringify({ count: 42 }));
-            const schema = makeSchema<{ name: string }>(_ => {
+            const schema = makeSchema<{ name: string }>(() => {
                 throw new Error("schema error");
             });
             expect(() => tool.readJson(file, { schema })).toThrow("schema error");
         });
 
         it("returns null (not schema error) when file is missing and schema is provided", () => {
-            const schema = makeSchema<{ name: string }>(_ => {
+            const schema = makeSchema<{ name: string }>(() => {
                 throw new Error("should not be called");
             });
             expect(tool.readJson(join(tmpDir, "missing.json"), { schema })).toBeNull();
@@ -127,7 +131,7 @@ describe("JsonFileTool", () => {
         it("throws when schema rejects the data", () => {
             const file = join(tmpDir, "data.json");
             writeFileSync(file, JSON.stringify({ wrong: true }));
-            const schema = makeSchema<{ count: number }>(_ => {
+            const schema = makeSchema<{ count: number }>(() => {
                 throw new Error("validation failed");
             });
             expect(() => tool.readJsonOrThrow(file, { schema })).toThrow("validation failed");
@@ -135,30 +139,49 @@ describe("JsonFileTool", () => {
     });
 
     describe("writeJson", () => {
-        it("writes JSON with 2-space indentation", () => {
+        it("returns ok and writes JSON with 2-space indentation", () => {
             const file = join(tmpDir, "out.json");
-            tool.writeJson(file, { key: "value" });
+            const result = tool.writeJson(file, { key: "value" });
+            expect(result.isOk()).toBe(true);
             expect(readFileSync(file, "utf-8")).toBe(JSON.stringify({ key: "value" }, null, 2));
         });
 
         it("creates parent directories as needed", () => {
             const file = join(tmpDir, "nested", "deep", "out.json");
-            tool.writeJson(file, { ok: true });
+            const result = tool.writeJson(file, { ok: true });
+            expect(result.isOk()).toBe(true);
             expect(tool.readJson(file)).toEqual({ ok: true });
         });
 
         it("overwrites existing content", () => {
             const file = join(tmpDir, "out.json");
             writeFileSync(file, JSON.stringify({ old: true }));
-            tool.writeJson(file, { new: true });
+            const result = tool.writeJson(file, { new: true });
+            expect(result.isOk()).toBe(true);
             expect(tool.readJson(file)).toEqual({ new: true });
         });
 
         it("round-trips data written with readJson", () => {
             const file = join(tmpDir, "rt.json");
             const data = { a: 1, b: ["x", "y"], c: { nested: true } };
-            tool.writeJson(file, data);
+            const result = tool.writeJson(file, data);
+            expect(result.isOk()).toBe(true);
             expect(tool.readJson(file)).toEqual(data);
+        });
+
+        it("returns a failure Result when parent directory cannot be created", () => {
+            const blocked = join(tmpDir, "blocked");
+            mkdirSync(blocked, { mode: 0o000 });
+            try {
+                const file = join(blocked, "child", "out.json");
+                const result = tool.writeJson(file, { fail: true });
+                expect(result.isFail()).toBe(true);
+                if (result.isFail()) {
+                    expect(result.error).toBeInstanceOf(FileWriteError);
+                }
+            } finally {
+                chmodSync(blocked, 0o755);
+            }
         });
     });
 

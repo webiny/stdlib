@@ -1,10 +1,11 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { existsSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, rmSync, writeFileSync, chmodSync } from "node:fs";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { Container } from "@webiny/di";
 import {
     DirectoryTool,
+    DirectoryCreateError,
     DirectoryToolFeature,
     createDirectoryTool
 } from "../../src/node/features/DirectoryTool/index.js";
@@ -45,21 +46,58 @@ describe("DirectoryTool", () => {
     });
 
     describe("create", () => {
-        it("creates a new directory", () => {
+        it("creates a new directory and returns ok", () => {
             const dir = join(tmpDir, "new-dir");
-            tool.create(dir);
+            const result = tool.create(dir);
+            expect(result.isOk()).toBe(true);
             expect(existsSync(dir)).toBe(true);
         });
 
         it("creates nested directories", () => {
             const dir = join(tmpDir, "a", "b", "c");
-            tool.create(dir);
+            const result = tool.create(dir);
+            expect(result.isOk()).toBe(true);
             expect(existsSync(dir)).toBe(true);
         });
 
         it("is idempotent on existing directories", () => {
-            tool.create(tmpDir);
-            expect(() => tool.create(tmpDir)).not.toThrow();
+            const result = tool.create(tmpDir);
+            expect(result.isOk()).toBe(true);
+        });
+
+        it("returns a failure Result when creation is impossible", () => {
+            const blocked = join(tmpDir, "blocked");
+            mkdirSync(blocked, { mode: 0o000 });
+            try {
+                const result = tool.create(join(blocked, "child", "deep"));
+                expect(result.isFail()).toBe(true);
+                if (result.isFail()) {
+                    expect(result.error).toBeInstanceOf(DirectoryCreateError);
+                    expect(result.error.data.path).toBe(join(blocked, "child", "deep"));
+                }
+            } finally {
+                chmodSync(blocked, 0o755);
+            }
+        });
+    });
+
+    describe("createOrThrow", () => {
+        it("creates a new directory without throwing", () => {
+            const dir = join(tmpDir, "new-dir-throw");
+            tool.createOrThrow(dir);
+            expect(existsSync(dir)).toBe(true);
+        });
+
+        it("throws DirectoryCreateError when creation is impossible", () => {
+            const blocked = join(tmpDir, "blocked");
+            mkdirSync(blocked, { mode: 0o000 });
+            try {
+                expect(() => tool.createOrThrow(join(blocked, "child", "deep"))).toThrow(
+                    DirectoryCreateError
+                );
+            } finally {
+                chmodSync(blocked, 0o755);
+            }
         });
     });
 
@@ -115,11 +153,39 @@ describe("DirectoryTool", () => {
         it("does not throw when source is missing", () => {
             expect(() => tool.copy(join(tmpDir, "missing"), join(tmpDir, "dest"))).not.toThrow();
         });
+
+        it("does not throw when target directory cannot be created", () => {
+            const src = join(tmpDir, "src");
+            mkdirSync(src, { recursive: true });
+            writeFileSync(join(src, "file.txt"), "content");
+            const blocked = join(tmpDir, "blocked");
+            mkdirSync(blocked, { mode: 0o000 });
+            try {
+                expect(() => tool.copy(src, join(blocked, "child", "dest"))).not.toThrow();
+            } finally {
+                chmodSync(blocked, 0o755);
+            }
+        });
     });
 
     describe("copyOrThrow", () => {
         it("throws when source is missing", () => {
             expect(() => tool.copyOrThrow(join(tmpDir, "missing"), join(tmpDir, "dest"))).toThrow();
+        });
+
+        it("throws when target directory cannot be created", () => {
+            const src = join(tmpDir, "src");
+            mkdirSync(src, { recursive: true });
+            writeFileSync(join(src, "file.txt"), "content");
+            const blocked = join(tmpDir, "blocked");
+            mkdirSync(blocked, { mode: 0o000 });
+            try {
+                expect(() => tool.copyOrThrow(src, join(blocked, "child", "dest"))).toThrow(
+                    DirectoryCreateError
+                );
+            } finally {
+                chmodSync(blocked, 0o755);
+            }
         });
     });
 
@@ -198,7 +264,8 @@ describe("createDirectoryTool", () => {
     it("creates a working tool without arguments", () => {
         const tool = createDirectoryTool();
         const dir = join(tmpDir, "factory-dir");
-        tool.create(dir);
+        const result = tool.create(dir);
+        expect(result.isOk()).toBe(true);
         expect(existsSync(dir)).toBe(true);
     });
 

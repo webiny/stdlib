@@ -1,5 +1,6 @@
 export {
     DirectoryTool,
+    DirectoryCreateError,
     DirectoryToolFeature,
     createDirectoryTool,
     type CreateDirectoryToolParams,
@@ -7,6 +8,8 @@ export {
 } from "./features/DirectoryTool/index.js";
 export {
     FileTool,
+    FileWriteError,
+    FileCopyError,
     FileToolFeature,
     createFileTool,
     type CreateFileToolParams

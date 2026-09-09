@@ -9,8 +9,10 @@ import {
     constants
 } from "node:fs";
 import { dirname } from "node:path";
+import { Result } from "~/common/index.js";
 import { DirectoryTool as DirectoryToolAbstraction } from "./abstractions/DirectoryTool.js";
 import type { GlobOptions } from "./abstractions/DirectoryTool.js";
+import { DirectoryCreateError } from "./errors.js";
 import { Logger, ConsoleLogger } from "~/common/features/Logger/index.js";
 import { createGlobTool, GlobTool } from "../GlobTool/index.js";
 
@@ -24,7 +26,7 @@ class DirectoryToolImpl implements DirectoryToolAbstraction.Interface {
         return existsSync(path);
     }
 
-    public create(path: string): void {
+    public create(path: string): Result<void, DirectoryCreateError> {
         try {
             if (existsSync(path)) {
                 try {
@@ -32,11 +34,24 @@ class DirectoryToolImpl implements DirectoryToolAbstraction.Interface {
                 } catch {
                     chmodSync(path, 0o755);
                 }
-                return;
+                return Result.ok();
             }
             mkdirSync(path, { recursive: true, mode: 0o755 });
+            return Result.ok();
         } catch (error) {
-            this.logger.warn(`Failed to create directory "${path}": ${error}`);
+            return Result.fail(
+                new DirectoryCreateError({
+                    message: `Failed to create directory "${path}": ${error}`,
+                    data: { path }
+                })
+            );
+        }
+    }
+
+    public createOrThrow(path: string): void {
+        const result = this.create(path);
+        if (result.isFail()) {
+            throw result.error;
         }
     }
 
@@ -64,7 +79,11 @@ class DirectoryToolImpl implements DirectoryToolAbstraction.Interface {
             this.logger.warn(`Source directory not found: "${source}"`);
             return;
         }
-        this.create(dirname(target));
+        const dirResult = this.create(dirname(target));
+        if (dirResult.isFail()) {
+            this.logger.warn(dirResult.error.message);
+            return;
+        }
         cpSync(source, target, { recursive: true });
     }
 
@@ -72,7 +91,7 @@ class DirectoryToolImpl implements DirectoryToolAbstraction.Interface {
         if (!existsSync(source)) {
             throw new Error(`Source directory not found: "${source}"`);
         }
-        this.create(dirname(target));
+        this.createOrThrow(dirname(target));
         cpSync(source, target, { recursive: true });
     }
 

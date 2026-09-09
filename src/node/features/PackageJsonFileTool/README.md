@@ -26,11 +26,11 @@ interface IPackageJsonFileTool {
   readOrThrow(path: string): PackageJsonFile.Interface;
 
   /** Serialize and write to `path`. Creates parent directories as needed. */
-  write(path: string, data: PackageJson): void;
+  write(path: string, data: PackageJson): Result<void, FileWriteError>;
   /** Serialize the file's own path and data back to disk. */
-  write(file: PackageJsonFile.Interface): void;
+  write(file: PackageJsonFile.Interface): Result<void, FileWriteError>;
 
-  /** Like `write`, but throws on failure instead of logging. */
+  /** Like `write`, but throws on failure. */
   writeOrThrow(path: string, data: PackageJson): void;
   writeOrThrow(file: PackageJsonFile.Interface): void;
 }
