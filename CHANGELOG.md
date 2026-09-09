@@ -1,5 +1,11 @@
 # @webiny/stdlib
 
+## 0.0.18
+
+### Patch Changes
+
+- f2b1bf6: Add BrowserWindow abstraction to decouple browser features from the global `window` object, with real and null implementations. Replace silent `void` returns with `Result` pattern across `DirectoryTool.create`, `FileTool.writeFile`/`copy`, `JsonFileTool.writeJson`, and `PackageJsonFileTool.write`. Add `createOrThrow` to DirectoryTool. New typed errors: `DirectoryCreateError`, `FileWriteError`, `FileCopyError`.
+
 ## 0.0.17
 
 ### Patch Changes
