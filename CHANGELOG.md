@@ -1,5 +1,11 @@
 # @webiny/stdlib
 
+## 0.0.19
+
+### Patch Changes
+
+- d95bac3: Update dependencies and dev dependencies to latest versions.
+
 ## 0.0.18
 
 ### Patch Changes
