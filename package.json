@@ -37,7 +37,7 @@
   "dependencies": {
     "@11ty/gray-matter": "^3.0.0",
     "@modelcontextprotocol/sdk": "^1.32.1",
-    "@webiny/di": "^1.1.0",
+    "@webiny/di": "^2.0.0",
     "bson-objectid": "^2.0.4",
     "dot-prop": "^10.2.0",
     "nanoid": "^6.0.2",
