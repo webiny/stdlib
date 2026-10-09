@@ -1,5 +1,11 @@
 # @webiny/stdlib
 
+## 0.0.20
+
+### Patch Changes
+
+- 99f43e1: Update dependencies to latest versions: `@modelcontextprotocol/sdk` 1.32.1, `nanoid` 6.0.2, `pino` 10.4.0, `pino-pretty` 13.2.0. Dev tooling bumped (`vite`, `vitest`, `oxlint`, `oxfmt`, `@types/node`) and Yarn 4.18.1.
+
 ## 0.0.19
 
 ### Patch Changes
